@@ -94,7 +94,7 @@ namespace si
 			typedef boost::mpl::deque<cn, si> card_move_data_def;
 			typedef boost::mpl::deque<cn, read_out_data> si_card5_get_data_def;
 			typedef boost::mpl::deque<cn, bn, read_out_data> si_card_multiblock_get_data_def;
-			typedef boost::mpl::deque<cn, si, bn, t, tss, mem> transmit_record_data_def;
+			typedef boost::mpl::deque<cn, si, td, t, tss, mem> transmit_record_data_def;
 
 			typedef fixed_command<ACK::value, no_data, true> ack;
 			typedef fixed_command<NAK::value, no_data, true> nak;

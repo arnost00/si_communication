@@ -384,14 +384,14 @@ namespace si
          <bits_description, typename boost::enable_if<typename boost::is_base_of<has_bit_size, bits_description>::type>::type>
          : public boost::mpl::integral_c<unsigned, bits_description::bit_size::value>
       {};
-      template<typename bits_description, typename enabled = void> struct get_description_length
+      template<typename bits_description, typename enabled = typename boost::mpl::empty<bits_description>::type> struct get_description_length
          : public boost::mpl::integral_c<unsigned
          , get_description_item_length<typename boost::mpl::front<bits_description>::type>::value 
          + get_description_length<typename boost::mpl::pop_front<bits_description>::type>::value >
       {
       };
       template<typename bits_description> struct get_description_length
-         <bits_description, typename boost::enable_if<typename boost::mpl::empty<bits_description>::type>::type>
+         <bits_description, boost::mpl::true_>
          : public boost::mpl::integral_c<unsigned, 0>
       {
       };
@@ -432,7 +432,7 @@ namespace si
    {
       
 		typedef typename bit_array_internal::normalize_description<description_tt>::type description_type;
-		typedef typename bit_array_internal::get_description_length<description_type>::type description_size_type;
+      typedef typename boost::mpl::integral_c<std::size_t, (bit_array_internal::get_description_length<description_type>::value >> 3)>  description_size_type;
       typedef typename T type;
       typedef typename T parameter_type;
 
