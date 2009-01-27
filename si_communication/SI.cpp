@@ -51,10 +51,7 @@ template<typename command_type>void send_to_channel(typename command_type::point
 {
    channel.write_command(command);
 }
-void write_out(const char* msg)
-{
-	std::cout << msg << std::endl;
-}
+
 typedef boost::shared_ptr<std::fstream> ofstream_pointer;
 
 void out_time_duration(std::ostream &fs, boost::posix_time::time_duration &duration, bool enable_ms = false)
@@ -78,17 +75,29 @@ void out_time_duration(std::ostream &fs, boost::posix_time::time_duration &durat
 }
 void punch_arrived(si::extended::responses::transmit_record::pointer record_msg)
 {
-//	std::cout << (unsigned)record_msg->get<si::extended::tss>().value << std::endl;
 	std::cout << "record arrived: " << record_msg->get<si::extended::si>().value << " ";
 	out_time_duration(std::cout, boost::posix_time::millisec(1000*(record_msg->get<si::extended::t>().value) + (record_msg->get<si::extended::tss>().value*1000/256)), true);
 	std::cout << std::endl;
 
 }
+void punch_read(ofstream_pointer of, si::extended::responses::transmit_record::pointer record)
+{
+	std::fstream &fs = *of.get();
+
+    fs << std::setfill(' ') << std::setw(8) << record->get<si::extended::si>().value;
+	fs << ':' << ' ';
+	out_time_duration(fs, boost::posix_time::millisec(1000*(record->get<si::extended::t>().value) 
+		+ (record->get<si::extended::tss>().value*1000/256)), true);
+	fs << std::endl << std::flush;
+
+	punch_arrived(record);
+
+}
 void chip_read(ofstream_pointer of, si::card_record::pointer record)
 {
 	typedef boost::tuples::element<si::card_record::PUNCH_RECORDS, si::card_record>::type punches_container;
-   std::size_t punches_count;
-	std::fstream &fs = (*of.get());
+	std::size_t punches_count;
+	std::fstream &fs = *of.get();
 
 	fs << std::setfill(' ') << std::setw(8) << record->get<si::card_record::CARD_ID>();
 	fs << ':' << ' ';
@@ -115,24 +124,7 @@ void chip_read(ofstream_pointer of, si::card_record::pointer record)
 	}
 	fs << std::endl << std::flush;
 }
-void register_responses_expectations(si::channel_io_serial_port::pointer siport
-									 /*, si::chip_readout &chip_readout
-									 , si::chip_readout::callback_chip_read &chip_read_cb*/)
-{
-/*	boost::bind(&si::chip_readout::start, &chip_readout, siport
-		, si::control_sequence_base<>::callback_type()
-		, si::control_sequence_base<>::callback_type()
-		, chip_read_cb);*/
-	siport->set_protocol(si::channel_protocol_interface::pointer(new si::channel_protocol<si::protocols::extended>()));
 
-	si::response_interface::pointer read_responses = si::response<>::create(si::response<
-		boost::mpl::deque<si::extended::responses::transmit_record>
-		, si::response_live_control::permanent>::reactions_type
-		(boost::bind(&punch_arrived, _1)));
-
-	siport->register_response_expectation(read_responses);
-
-}
 int _tmain(int argc, _TCHAR* argv[])
 {
 	boost::program_options::options_description desc("Allowed options");
@@ -186,19 +178,29 @@ int _tmain(int argc, _TCHAR* argv[])
    si::chip_readout chip_readout;
    try
    {
-	   siport->open(vm["device"].as<std::string>());
-      std::cout << (siport->is_open()? "port opened": "port closed") << std::endl;
+		siport->open(vm["device"].as<std::string>());
+		std::cout << (siport->is_open()? "port opened": "port closed") << std::endl;
 
-	   if(output_file)
-		   chip_read_cb = boost::bind(&chip_read, output_file, _1);
-/*	   startup_sequence.start(siport
+		if(output_file)
+			chip_read_cb = boost::bind(&chip_read, output_file, _1);
+	   startup_sequence.start(siport
 		   , boost::bind(&si::chip_readout::start, &chip_readout, siport
 		   , si::control_sequence_base<>::callback_type()
 		   , si::control_sequence_base<>::callback_type()
 		   , chip_read_cb));/* /
 		   , boost::bind(&register_responses_expectations, siport
 			, boost::ref(chip_readout), boost::ref(chip_read_cb)));/**/
-	   register_responses_expectations(siport);
+/*/----------------------
+		siport->set_protocol(si::channel_protocol_interface::pointer(new si::channel_protocol<si::protocols::extended>()));
+
+		si::response_interface::pointer read_responses = si::response<>::create(si::response<
+			boost::mpl::deque<si::extended::responses::transmit_record>
+			, si::response_live_control::permanent>::reactions_type
+			(boost::bind(&punch_read, output_file, _1)));
+
+		siport->register_response_expectation(read_responses);
+//-----------------------*/
+      
    }
    catch(...)
    {
