@@ -61,7 +61,7 @@ namespace si
          punch_3bytes_type punch;
 			for(i = 0; 0 < records_count; i++, records_count--)
 			{
-				if(i < 31)
+				if(i < 30)
 				{
 					if(0 == (i % 5))
 						current_record++;
@@ -72,7 +72,7 @@ namespace si
 				}
 				else
 				{
-					one_byte.read_data(max_size, punch_base + (0x10 * (i - 31)));
+					one_byte.read_data(max_size, punch_base + (0x10 * (i - 30)));
 					readout.get<card_record::PUNCH_RECORDS>()[i] = punch_record(one_byte.value, boost::posix_time::time_duration(boost::posix_time::not_a_date_time));
 				}
 			}
@@ -98,7 +98,7 @@ namespace si
 			{
 				if(param == boost::mpl::first<boost::mpl::front<card_types>::type>::type::value)
 				{
-					return card_reader<boost::mpl::second<boost::mpl::front<card_types>::type>::type>::read(readout, data);
+					return card_reader<typename boost::mpl::second<boost::mpl::front<card_types>::type>::type>::read(readout, data);
 				}
 				return card_type_getter<boost::mpl::pop_front<card_types>::type>::read(param, readout,data);
 			}
@@ -106,17 +106,17 @@ namespace si
 			{
 				if(param == boost::mpl::first<boost::mpl::front<card_types>::type>::type::value)
 				{
-					return card_reader<boost::mpl::second<boost::mpl::front<card_types>::type>::type>::get_blocks_needed(blocks, data);
+					return card_reader<typename boost::mpl::second<boost::mpl::front<card_types>::type>::type>::get_blocks_needed(blocks, data);
 				}
 				return card_type_getter<boost::mpl::pop_front<card_types>::type>::get_blocks_needed(param, blocks,data);
 			}
 			static inline std::string& get_type_description(si::byte param, extended::si::value_type& data)
 			{
-				if(param == boost::mpl::first<boost::mpl::front<card_types>::type>::type::value)
+				if(param == boost::mpl::first<typename boost::mpl::front<card_types>::type>::type::value)
 				{
 					return card_reader<boost::mpl::second<boost::mpl::front<card_types>::type>::type>::get_type_description(data);
 				}
-				return card_type_getter<boost::mpl::pop_front<card_types>::type>::get_type_description(param, data);
+				return card_type_getter<typename boost::mpl::pop_front<card_types>::type>::get_type_description(param, data);
 			}
 /*			typedef typename boost::mpl::front<card_types>::type checked_type;
 			typedef typename boost::mpl::if_c<boost::mpl::second<checked_type>::type::value == serie
