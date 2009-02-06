@@ -5,6 +5,7 @@
 
 namespace si
 {
+    /*
    template <typename protocol_tt> struct channel_protocol_static: public channel_protocol_interface
    {
       virtual void encode_command(command_interface::pointer command, std::size_t &size, data_type& result)
@@ -19,6 +20,7 @@ namespace si
       typedef std::vector<byte> unprocessed_input_type;
       unprocessed_input_type unprocessed_input;
    };
+*/
 /*
    struct channel_protocol_base: public channel_protocol_interface
    {

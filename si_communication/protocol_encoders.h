@@ -323,7 +323,6 @@ template<> struct protocol_encoder<protocols::extended>
    template<typename iterator> static bool detect_command(std::size_t& size, iterator &it, channel_protocol_interface::callback_type callback)
    {
       std::size_t processed_size = 0;
-      bool command_processed = false;
       while(processed_size < size)
       {
          switch(*it)
@@ -390,7 +389,7 @@ template<typename protocols_tt = protocols::supported_set, class enabled = void>
       }
       else
       {
-         by_protocol<typename boost::mpl::pop_front<protocols_tt>::type>::find_encoder(id - 1, command, size, it);
+         by_protocol<typename boost::mpl::pop_front<protocols_tt>::type>::find_encoder(protocol_id - 1, command, size, it);
       }
    }
    template <typename iterator> static void encode(protocols::id<>::value_type protocol_id, byte command, std::size_t size, iterator it)

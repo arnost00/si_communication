@@ -41,22 +41,29 @@ namespace si
 
       template<typename protocols::id<>::value_type id, typename protocols = supported_set> struct find_protocol
       {
+         typedef typename protocols::template id<>::value_type id_type;
          typedef typename boost::mpl::if_<typename boost::mpl::empty<protocols>::type
             , void
-            , typename boost::mpl::if_c<typename protocols::id<>::value_type(0) == id
+            , typename boost::mpl::if_c< (id == 0)
                , typename boost::mpl::front<protocols>::type 
                , typename find_protocol<id - 1, typename boost::mpl::pop_front<protocols>::type >::type >::type >::type type;
-         BOOST_MPL_ASSERT_MSG((typename boost::is_same<type, void>::value), SUPPORTED_SET_DOESN_T_CONTAIN_PROTOCOL_ID, (types<typename boost::mpl::integral_c<typename protocols::id<>::value_type, id>::type, protocols>) );
+//         BOOST_MPL_ASSERT_MSG((typename boost::is_same<type, void>::value), SUPPORTED_SET_DOESN_T_CONTAIN_PROTOCOL_ID, (types<typename boost::mpl::integral_c<id_type, id>::type, protocols>) );
       };
       template<typename protocol, typename protocols_tt = supported_set> struct less_or_equeal_protocol
       {
-         template<typename checked_set = protocols_tt, typename supported_subset_part = boost::mpl::deque<> > struct create_supported_subset
+         template<typename checked_set = protocols_tt
+                                         , typename supported_subset_part = boost::mpl::deque<>
+                                         , typename matched = typename boost::is_same<typename boost::mpl::front<checked_set>::type, protocol>::type > struct create_supported_subset
          {
             BOOST_MPL_ASSERT_MSG(!boost::mpl::empty<checked_set>::value, SUPPORTED_SET_DOESN_T_CONTAIN_PROTOCOL, (types<protocol, checked_set, supported_subset_part>));
 
-            typedef typename boost::mpl::if_<typename boost::is_same<typename boost::mpl::front<checked_set>::type, protocol>::type
-               , typename boost::mpl::push_back<supported_subset_part, protocol>
-               , typename create_supported_subset<typename boost::mpl::pop_front<checked_set>::type, typename boost::mpl::push_front<supported_subset_part, typename boost::mpl::front<checked_set>::type>::type> >::type::type type;
+            typedef typename boost::mpl::push_back<supported_subset_part, protocol>::type type;
+         };
+         template<typename checked_set, typename supported_subset_part>struct create_supported_subset<checked_set, supported_subset_part, boost::false_type>
+         {
+            BOOST_MPL_ASSERT_MSG(!boost::mpl::empty<checked_set>::value, SUPPORTED_SET_DOESN_T_CONTAIN_PROTOCOL, (types<protocol, checked_set, supported_subset_part>));
+
+            typedef typename create_supported_subset<typename boost::mpl::pop_front<checked_set>::type, typename boost::mpl::push_front<supported_subset_part, typename boost::mpl::front<checked_set>::type>::type>::type type;
          };
          typedef typename create_supported_subset<>::type supported_subset;
 

@@ -1,6 +1,9 @@
 // SI.cpp : Defines the entry point for the console application.
 //
 
+#define _GLIBCPP_USE_WCHAR_T 1
+#define _GLIBCXX_USE_WCHAR_T 1
+
 #include <boost/asio.hpp>
 #include <boost/asio/serial_port.hpp>
 #include <boost/bind.hpp>
@@ -21,6 +24,7 @@
 #include "chip_readout.h"
 #include <boost/mpl/list_c.hpp>
 #include <iostream>
+#include <string>
 
 #include <boost/tuple/tuple.hpp>
 #include "tuple_type.h"
@@ -54,7 +58,7 @@ template<typename command_type>void send_to_channel(typename command_type::point
 
 typedef boost::shared_ptr<std::fstream> ofstream_pointer;
 
-void out_time_duration(std::ostream &fs, boost::posix_time::time_duration &duration, bool enable_ms = false)
+void out_time_duration(std::ostream &fs, boost::posix_time::time_duration const& duration, const bool enable_ms = false)
 {
 	if(duration.is_not_a_date_time())
 	{
@@ -187,9 +191,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		   , boost::bind(&si::chip_readout::start, &chip_readout, siport
 		   , si::control_sequence_base<>::callback_type()
 		   , si::control_sequence_base<>::callback_type()
-		   , chip_read_cb));/* /
-		   , boost::bind(&register_responses_expectations, siport
-			, boost::ref(chip_readout), boost::ref(chip_read_cb)));/**/
+		   , chip_read_cb));
 /*/----------------------
 		siport->set_protocol(si::channel_protocol_interface::pointer(new si::channel_protocol<si::protocols::extended>()));
 

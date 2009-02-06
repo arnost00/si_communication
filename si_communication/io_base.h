@@ -59,7 +59,7 @@ namespace si
 			, public bases<typename boost::mpl::pop_front<bases_tt>::type>
 		{
 			typedef typename boost::mpl::front<bases_tt>::type item_base_type;
-			typedef typename bases<typename boost::mpl::pop_front<bases_tt>::type> remaining_bases_type;
+                        typedef typename si::io_base<void, void>::bases<typename boost::mpl::pop_front<bases_tt>::type> remaining_bases_type;
 			bases(service_wrapper service)
 				: item_base_type(service)
 				, remaining_bases_type(service)

@@ -22,8 +22,8 @@ namespace si
 		typedef boost::shared_ptr<boost::asio::deadline_timer> timer_pointer;
 
       channel_input(service_pointer service_)
-         : service(service_)
-         , input_size(0)
+         : input_size(0)
+         , service(service_)
       {
 			if(!service)
 			{
