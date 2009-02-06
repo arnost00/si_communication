@@ -69,7 +69,7 @@ namespace si
          punch_3bytes_type punch;
 			for(unsigned i = 0; 0 < records_count; i++, records_count--)
 			{
-				if(i < 31)
+				if(i < 30)
 				{
 					if(0 == (i % 5))
 						current_record++;
@@ -80,7 +80,7 @@ namespace si
 				}
 				else
 				{
-					one_byte.read_data(max_size, item = punch_base + (0x10 * (i - 31)));
+					one_byte.read_data(max_size, item = punch_base + (0x10 * (i - 30)));
 					readout.get<card_record::PUNCH_RECORDS>()[i] = punch_record(one_byte.value, boost::posix_time::time_duration(boost::posix_time::not_a_date_time));
 				}
 			}
