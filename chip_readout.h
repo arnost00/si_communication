@@ -21,18 +21,19 @@ namespace si
 		{
 			chip_read_cb = chip_read_cb_;
 
-			control_sequence_base::start(port, success_cb, failure_cb);
+			control_sequence_base<channel_io_serial_port>::start(port, success_cb, failure_cb);
 
-			read_responses = si::response<>::create(si::response<
+			si::response<
 					boost::mpl::deque<extended::responses::si_card5_inserted
 						, extended::responses::si_card6_inserted
 						, extended::responses::si_card8_inserted
 						, extended::responses::si_card_removed>
 					, response_live_control::permanent>::reactions_type
-				(boost::bind(&chip_readout::si_card5_inserted, this, _1)
+				reaction(boost::bind(&chip_readout::si_card5_inserted, this, _1)
 				, boost::bind(&chip_readout::si_card6_inserted, this, _1)
 				, boost::bind(&chip_readout::si_card8_inserted, this, _1)
-				, boost::bind(&chip_readout::si_card_removed, this, _1)));
+				, boost::bind(&chip_readout::si_card_removed, this, _1));
+			read_responses = si::response<>::create(reaction);
 
 			channel->register_response_expectation(read_responses);
 
@@ -51,13 +52,15 @@ namespace si
 		void si_card5_inserted(extended::responses::si_card5_inserted::pointer response)
 		{
 			std::cout << "card 5 inserted, no: " << response->get<extended::si>().value << std::endl;
-			channel->register_response_expectation(
-				si::response<>::create(si::response<boost::mpl::deque<extended::responses::si_card5_get
+
+			si::response<boost::mpl::deque<extended::responses::si_card5_get
 					, extended::responses::si_card_removed
 					, extended::responses::nak> >::reactions_type
-				(boost::bind(&chip_readout::si_card5_read, this, _1)
+				reaction(boost::bind(&chip_readout::si_card5_read, this, _1)
 				, boost::bind(&chip_readout::si_card_removed_during_readout, this, _1)
-				, boost::bind(&chip_readout::nak, this, _1)))
+				, boost::bind(&chip_readout::nak, this, _1));
+			channel->register_response_expectation(
+				si::response<>::create(reaction)
 				, boost::posix_time::seconds(2)
 				, boost::bind(&chip_readout::si_card5_read_timeout, this));
 			make_pointer<extended::commands::si_card5_get> read_card5;
@@ -85,13 +88,14 @@ namespace si
 		{
 			std::cout << card_reader<card_8_family>::get_type_description(response->get<extended::si>().value) << " inserted, no: " 
 				<< card_reader<card_8_family>::get_id(response->get<extended::si>().value) << std::endl;
-			channel->register_response_expectation(
-				si::response<>::create(si::response<boost::mpl::deque<extended::responses::si_card8_get
+			si::response<boost::mpl::deque<extended::responses::si_card8_get
 					, extended::responses::si_card_removed
 					, extended::responses::nak> >::reactions_type
-				(boost::bind(&chip_readout::si_card8_read, this, _1, make_pointer<blocks_read<extended::responses::si_card8_get> >())
+				reaction(boost::bind(&chip_readout::si_card8_read, this, _1, make_pointer<blocks_read<extended::responses::si_card8_get> >())
 				, boost::bind(&chip_readout::si_card_removed_during_readout, this, _1)
-				, boost::bind(&chip_readout::nak, this, _1)))
+				, boost::bind(&chip_readout::nak, this, _1));
+
+			channel->register_response_expectation(si::response<>::create(reaction)
 				, boost::posix_time::seconds(2)
 				, boost::bind(&chip_readout::si_card8_read_timeout, this));
 			make_pointer<extended::commands::si_card8_get> read_card8;
@@ -123,13 +127,14 @@ namespace si
 				stdout_card_record(*readout.get());
 				return;
 			}
-			channel->register_response_expectation(
-				si::response<>::create(si::response<boost::mpl::deque<extended::responses::si_card8_get
+			si::response<boost::mpl::deque<extended::responses::si_card8_get
 					, extended::responses::si_card_removed
 					, extended::responses::nak> >::reactions_type
-				(boost::bind(&chip_readout::si_card8_read, this, _1, blocks)
+				reaction(boost::bind(&chip_readout::si_card8_read, this, _1, blocks)
 				, boost::bind(&chip_readout::si_card_removed_during_readout, this, _1)
-				, boost::bind(&chip_readout::nak, this, _1)))
+				, boost::bind(&chip_readout::nak, this, _1));
+
+			channel->register_response_expectation(si::response<>::create(reaction)
 				, boost::posix_time::seconds(2)
 				, boost::bind(&chip_readout::si_card8_read_timeout, this));
 			make_pointer<extended::commands::si_card8_get> read_card8;
@@ -144,13 +149,14 @@ namespace si
 		void si_card6_inserted(extended::responses::si_card6_inserted::pointer response)
 		{
 			std::cout << "card 6 inserted, no: " << response->get<extended::si>().value << std::endl;
-			channel->register_response_expectation(
-				si::response<>::create(si::response<boost::mpl::deque<extended::responses::si_card6_get
+			si::response<boost::mpl::deque<extended::responses::si_card6_get
 					, extended::responses::si_card_removed
 					, extended::responses::nak> >::reactions_type
-				(boost::bind(&chip_readout::si_card6_read, this, _1, make_pointer<blocks_read<extended::responses::si_card6_get> >())
+				reaction(boost::bind(&chip_readout::si_card6_read, this, _1, make_pointer<blocks_read<extended::responses::si_card6_get> >())
 				, boost::bind(&chip_readout::si_card_removed_during_readout, this, _1)
-				, boost::bind(&chip_readout::nak, this, _1)))
+				, boost::bind(&chip_readout::nak, this, _1));
+
+			channel->register_response_expectation(si::response<>::create(reaction)
 				, boost::posix_time::seconds(2)
 				, boost::bind(&chip_readout::si_card6_read_timeout, this));
 			make_pointer<extended::commands::si_card6_get> read_card6;
@@ -181,13 +187,14 @@ namespace si
 				stdout_card_record(*readout.get());
 				return;
 			}
-			channel->register_response_expectation(
-				si::response<>::create(si::response<boost::mpl::deque<extended::responses::si_card6_get
+			si::response<boost::mpl::deque<extended::responses::si_card6_get
 					, extended::responses::si_card_removed
 					, extended::responses::nak> >::reactions_type
-				(boost::bind(&chip_readout::si_card6_read, this, _1, blocks)
+				reaction(boost::bind(&chip_readout::si_card6_read, this, _1, blocks)
 				, boost::bind(&chip_readout::si_card_removed_during_readout, this, _1)
-				, boost::bind(&chip_readout::nak, this, _1)))
+				, boost::bind(&chip_readout::nak, this, _1));
+
+			channel->register_response_expectation(si::response<>::create(reaction)
 				, boost::posix_time::seconds(2)
 				, boost::bind(&chip_readout::si_card6_read_timeout, this));
 			make_pointer<extended::commands::si_card6_get> read_card6;

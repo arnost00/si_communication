@@ -18,7 +18,7 @@ namespace si
 			, callback_type success_cb = callback_type()
 			, callback_type failure_cb = callback_type())
 		{
-			control_sequence_base::start(channel, success_cb, failure_cb);
+                        control_sequence_base<channel_io_serial_port>::start(channel, success_cb, failure_cb);
 
 			channel->set_option(boost::asio::serial_port_base::baud_rate(38400));
 			channel->set_option(boost::asio::serial_port_base::stop_bits(boost::asio::serial_port_base::stop_bits::one));
@@ -30,10 +30,11 @@ namespace si
 			extended::commands::set_ms_mode::pointer set_ms_mode(new extended::commands::set_ms_mode);
 			set_ms_mode->get<extended::m_s>().value = extended::m_s::master;
 
+			si::response<boost::mpl::deque<extended::responses::set_ms_mode, extended::responses::nak> >::reactions_type
+				reaction(boost::bind(&startup_sequence::response_set_ms_hi_speed, this, _1)
+				, boost::bind(&startup_sequence::nck_set_ms_hi_speed, this, _1));
 			channel->register_response_expectation(
-				si::response<>::create(si::response<boost::mpl::deque<extended::responses::set_ms_mode, extended::responses::nak> >::reactions_type
-				(boost::bind(&startup_sequence::response_set_ms_hi_speed, this, _1)
-				, boost::bind(&startup_sequence::nck_set_ms_hi_speed, this, _1)))
+				si::response<>::create(reaction)
 				, boost::posix_time::millisec(100)
 				, boost::bind(&startup_sequence::timeout_set_ms_hi_speed, this));
 
@@ -69,10 +70,11 @@ namespace si
 			basic::commands::set_ms_mode::pointer set_ms_mode(new basic::commands::set_ms_mode);
 			set_ms_mode->get<basic::m_s>().value = basic::m_s::master;
 
+			si::response<boost::mpl::deque<basic::responses::set_ms_mode, basic::responses::nak> >::reactions_type
+				reaction(boost::bind(&startup_sequence::response_set_ms_lo_speed_basic, this, _1)
+				, boost::bind(&startup_sequence::nck_set_ms_lo_speed_basic, this, _1));
 			channel->register_response_expectation(
-				si::response<>::create(si::response<boost::mpl::deque<basic::responses::set_ms_mode, basic::responses::nak> >::reactions_type
-				(boost::bind(&startup_sequence::response_set_ms_lo_speed_basic, this, _1)
-				, boost::bind(&startup_sequence::nck_set_ms_lo_speed_basic, this, _1)))
+				si::response<>::create(reaction)
 				, boost::posix_time::millisec(100)
 				, boost::bind(&startup_sequence::timeout_set_ms_lo_speed_basic, this));
 
@@ -86,10 +88,11 @@ namespace si
 			basic::commands::set_ms_mode::pointer set_ms_mode(new basic::commands::set_ms_mode);
 			set_ms_mode->get<basic::m_s>().value = basic::m_s::master;
 
+			si::response<boost::mpl::deque<basic::responses::set_ms_mode, basic::responses::nak> >::reactions_type
+				reaction(boost::bind(&startup_sequence::response_set_ms_hi_speed_basic, this, _1)
+				, boost::bind(&startup_sequence::nck_set_ms_hi_speed_basic, this, _1));
 			channel->register_response_expectation(
-				si::response<>::create(si::response<boost::mpl::deque<basic::responses::set_ms_mode, basic::responses::nak> >::reactions_type
-				(boost::bind(&startup_sequence::response_set_ms_hi_speed_basic, this, _1)
-				, boost::bind(&startup_sequence::nck_set_ms_hi_speed_basic, this, _1)))
+				si::response<>::create(reaction)
 				, boost::posix_time::millisec(100)
 				, boost::bind(&startup_sequence::timeout_set_ms_hi_speed_basic, this));
 
@@ -113,10 +116,11 @@ namespace si
 			extended::commands::set_ms_mode::pointer set_ms_mode(new extended::commands::set_ms_mode);
 			set_ms_mode->get<extended::m_s>().value = extended::m_s::master;
 
+			si::response<boost::mpl::deque<extended::responses::set_ms_mode, extended::responses::nak> >::reactions_type
+				reaction(boost::bind(&startup_sequence::response_set_ms_lo_speed, this, _1)
+				, boost::bind(&startup_sequence::nck_set_ms_lo_speed, this, _1));
 			channel->register_response_expectation(
-				si::response<>::create(si::response<boost::mpl::deque<extended::responses::set_ms_mode, extended::responses::nak> >::reactions_type
-				(boost::bind(&startup_sequence::response_set_ms_lo_speed, this, _1)
-				, boost::bind(&startup_sequence::nck_set_ms_lo_speed, this, _1)))
+				si::response<>::create(reaction)
 				, boost::posix_time::millisec(500)
 				, boost::bind(&startup_sequence::timeout_set_ms_lo_speed, this));
 

@@ -36,7 +36,7 @@ namespace si
       typedef first type;
    };
 
-   typedef append_sequences<boost::mpl::deque<>, typename boost::mpl::list_c<byte, 0x80, 0x05> >::type polynom_type;
+   typedef append_sequences<boost::mpl::deque<>, boost::mpl::list_c<byte, 0x80, 0x05> >::type polynom_type;
 
       template <typename command_tt> struct select_protocol_by_command
    {
@@ -64,17 +64,17 @@ namespace si
    };
 
    template<typename first, typename second, typename result = boost::mpl::deque<>, unsigned rest_size = boost::mpl::size<first>::value>
-      struct xor
+      struct meta_xor
    {
-      typedef typename xor<typename boost::mpl::pop_front<first>::type
+      typedef typename meta_xor<typename boost::mpl::pop_front<first>::type
                   , typename boost::mpl::pop_front<second>::type
                   , typename boost::mpl::push_back<result
-                        , byte_type<boost::mpl::front<first>::type::value 
+                        , byte_type< boost::mpl::front<first>::type::value
                                     ^ boost::mpl::front<second>::type::value> >::type >::type type;
    };
 
    template<typename first, typename second, typename result>
-      struct xor<first, second, result, 0>
+      struct meta_xor<first, second, result, 0>
    {
       BOOST_MPL_ASSERT_MSG(boost::mpl::size<first>::value == boost::mpl::size<second>::value, EQUAL_LENGTH_SEQUENCES_REQUIRED_FOR_XOR, (first, second));
       typedef result type;
@@ -87,7 +87,7 @@ namespace si
    template<typename value, typename flag_tt = boost::mpl::false_, typename shifted_value = boost::mpl::deque<>, unsigned size = boost::mpl::size<value>::value> 
       struct shift_left
    {
-      typedef typename shift_left<typename boost::mpl::pop_back<value>::type
+      typedef typename si::shift_left<typename boost::mpl::pop_back<value>::type
          , typename boost::mpl::bool_<(boost::mpl::back<value>::type::value >> ((8 * sizeof(typename boost::mpl::back<value>::type::value_type))-1))>
          , typename boost::mpl::push_front<shifted_value
          , typename inc_if_flag<typename shift_left_integral_c<typename boost::mpl::back<value>::type>::type , flag_tt>::type>::type> type_base;
@@ -100,12 +100,21 @@ namespace si
       typedef shifted_value type;
       typedef flag_tt flag;
    };
-   template<typename value_tt, typename add_tt, unsigned counter = 16> struct si_crc16_count_cycle 
+   template<typename value, typename flag> struct xor_if_flag
+   {
+       typedef value type;
+   };
+   template<typename value> struct xor_if_flag<value, boost::mpl::true_>
+   {
+        typename meta_xor<value, polynom_type>::type type;
+   };
+   template<typename value_tt, typename add_tt, unsigned counter = 16> struct si_crc16_count_cycle
    {
       typedef shift_left<value_tt> shifted_value;
-      typedef  shift_left<add_tt> shifted_add;
+      typedef shift_left<add_tt> shifted_add;
       typedef typename inc_seqence_if_flag<typename shifted_value::type, typename shifted_add::flag>::type modified_value;
-      typedef typename boost::mpl::if_<typename shifted_value::flag, typename xor<modified_value, polynom_type>, modified_value>::type::type recounted_value;
+//      typedef typename boost::mpl::if_<typename shifted_value::flag, typename meta_xor<modified_value, polynom_type>::type, modified_value::type>::type recounted_value;
+      typedef typename xor_if_flag<modified_value, polynom_type>::type recounted_value;
       typedef typename si_crc16_count_cycle<typename recounted_value::type, typename shifted_add::type, counter-1>::type type;
    };
    template<typename value_tt, typename add_tt> struct si_crc16_count_cycle<value_tt, add_tt, 0>
@@ -140,11 +149,11 @@ namespace si
    template<typename data_tt> struct si_crc16 
    {
       BOOST_STATIC_CONSTANT(bool, are_data_shorter_than_two = boost::mpl::size<data_tt>::value < 2);
-      typedef typename boost::mpl::if_c<are_data_shorter_than_two
+      typedef typename boost::mpl::if_<boost::mpl::bool_<are_data_shorter_than_two>
          , boost::mpl::deque<typename byte_type<0x00>::type, typename byte_type<0x00>::type>
          , typename boost::mpl::if_c<(boost::mpl::size<data_tt>::value >> 1 << 1 == boost::mpl::size<data_tt>::value)
-         , typename si_crc16_internal<typename boost::mpl::push_back<typename boost::mpl::push_back<data_tt, si::byte_type<0x00>::type>::type, si::byte_type<0x00>::type>::type >
-         , typename si_crc16_internal<typename boost::mpl::push_back<data_tt, si::byte_type<0x00>::type >::type > >::type
+         , typename si_crc16_internal<typename boost::mpl::push_back<typename boost::mpl::push_back<data_tt, si::byte_type<0x00>::type>::type, si::byte_type<0x00>::type>::type >::type
+         , typename si_crc16_internal<typename boost::mpl::push_back<data_tt, si::byte_type<0x00>::type >::type >::type >::type
       >::type::type type;
    };
 

@@ -6,7 +6,7 @@ namespace si
 {
 	struct punch_record
 	{
-		punch_record(unsigned __int16 control_number_, boost::posix_time::time_duration &punch_time_)
+		punch_record(unsigned __int16 control_number_, boost::posix_time::time_duration const& punch_time_)
 			: control_number(control_number_)
 			, punch_time(punch_time_)
 		{}

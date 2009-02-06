@@ -46,7 +46,7 @@ namespace si
 		{
 			typedef T type;
 		};
-      template<typename target = boost::mpl::deque<>, typename source = command_type_tt, typename enabled = void> struct responses_tuple_template
+      template<typename target = boost::mpl::deque<>, typename source = command_type_tt, typename enabled_rtt = void> struct responses_tuple_template
       {
          typedef boost::shared_ptr<typename boost::mpl::front<source>::type> command_pointer;
          typedef boost::function<void(command_pointer)> reaction_type;
@@ -61,12 +61,11 @@ namespace si
       };
 
       typedef typename boostext::tuple_type<typename responses_tuple_template<>::type>::type reactions_type;
-
 		response(reactions_type &reactions_)
          : reactions(reactions_)
       {
       }
-      template<typename commands_sequence = command_type, unsigned offset = 0, typename empty = typename boost::mpl::empty<commands_sequence>::type> struct sequence_checker
+	  template<typename commands_sequence = command_type, unsigned offset = 0, bool empty = boost::mpl::empty<commands_sequence>::value> struct sequence_checker
       {
          typedef typename boost::mpl::front<commands_sequence>::type command_type;
          static bool check_input_command(command_interface::id_type command_id
@@ -80,10 +79,10 @@ namespace si
                if(command_type::code == command_id)
                   if(command_type::can_accept_data_static(size, data))
                   {
-                     command_type::pointer actual_command(new command_type());
+                     typename command_type::pointer actual_command(new command_type());
                      if(actual_command->accept_data(size, data))
                      {
-                        reactions.get<offset>()(actual_command);
+                        reactions.template get<offset>()(actual_command);
                         removal_policy.called();
                         return true;
                      }
@@ -93,7 +92,7 @@ namespace si
          }
       };
       template<typename commands_sequence
-         , unsigned offset> struct sequence_checker<commands_sequence, offset, boost::mpl::true_ >
+		 , unsigned offset> struct sequence_checker<commands_sequence, offset, true >
       {
          typedef typename boost::mpl::front<commands_sequence>::type command_type;
          inline static bool check_input_command(command_interface::id_type command_id
@@ -106,6 +105,7 @@ namespace si
             return false;
          }
       };
+      virtual ~response(){}
       virtual bool check_input_command(command_interface::id_type command_id
          , std::size_t size
          , command_interface::data_type data
@@ -117,10 +117,12 @@ namespace si
       {
          return removal_policy.check();
       }
-		template<typename param_type> inline static typename response_interface::pointer create(param_type &param)
-      {
-			typedef boost::tuples::element<boost::tuples::length<param_type>::value - 1, param_type>::type::type response_type;
-         return response_interface::pointer(new response_type(param));
+        template<typename param_type> inline static typename response_interface::pointer create(param_type &param)
+	  {\
+
+		typedef typename boost::tuples::element<boost::tuples::length<param_type>::value - 1, param_type>::type::type response_type;
+//		BOOST_MPL_ASSERT_MSG(false, PARAM_TYPE_MSG, (types<boost::tuple<int, int> , response_type>));
+		return response_interface::pointer(new response_type(param));
       }
    protected:
       removal_policy_tt removal_policy; 

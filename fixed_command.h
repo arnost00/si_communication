@@ -11,7 +11,7 @@
 namespace si
 {
    template<byte command_tt
-      , typename parameters_tt = boost::deque<>
+      , typename parameters_tt = boost::mpl::deque<>
       , bool control_sequence_tt = false
          > struct fixed_command
       : public boostext::tuple_type<typename create_parameter_sequence<parameters_tt>::type>::type
@@ -35,7 +35,9 @@ namespace si
 
       template<typename parameter_tt> typename parameter_tt::type & get()
       {
-         return *(typename parameter_tt::type*)&parameters_tuple_type::get<boostext::sequence_position<typename parameter_tt::parameter_type, command_parameters_type>::value>();
+//          static typename parameter_tt::type tmp;
+//          return tmp = parameters_tuple_type::template get<0>();
+         return *(typename parameter_tt::type*)&parameters_tuple_type::template get<boostext::sequence_position<typename parameter_tt::parameter_type, command_parameters_type>::value>();
       }
 
       virtual id_type get_id(protocols::id<>::value_type protocol = protocols::id<>::value)
