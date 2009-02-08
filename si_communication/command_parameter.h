@@ -137,16 +137,19 @@ namespace si
 		}
 	};
 
-	template <unsigned size_tt, typename T, typename implementation_candidates = unsigned_integers> struct unsigned_integral_parameter
+	template <unsigned size_tt, typename T/*, typename implementation_candidates = unsigned_integers*/> struct unsigned_integral_parameter
 		: public parameter
-		, public byte_part<size_tt - 1, value_holder<typename decide_integer_size<size_tt, implementation_candidates>::type> >
+		, public byte_part<size_tt - 1, value_holder<typename decide_integer_size<size_tt, unsigned_integers>::type> >
 	{
 		typedef T type;
 		typedef T parameter_type;
-		typedef unsigned_integral_parameter<size_tt, T, implementation_candidates> this_type;
+		typedef unsigned_integral_parameter<size_tt, T/*, implementation_candidates*/> this_type;
+		typedef typename decide_integer_size<size_tt, unsigned_integers>::type decided_type;
 		typedef byte_part<size_tt - 1
-			, value_holder<typename decide_integer_size<size_tt, implementation_candidates>::type> > byte_parts;
+			, value_holder<decided_type> > byte_parts;
 
+//		typedef unsigned_integers implementation_candidates;
+		 
 		template <unsigned ordinal> struct byte: public parameter
 		{
 		 BOOST_MPL_ASSERT_MSG(ordinal < size_tt, REQUESTED_PART_IS_OUT_OF_RANGE, (types<typename boost::mpl::integral_c<unsigned, ordinal>, typename boost::mpl::integral_c<unsigned, size_tt> >));
@@ -304,12 +307,12 @@ namespace si
          return true;
       }         
    };
-   template <typename T, typename implementation_candidates> struct unsigned_integral_parameter<0, T, implementation_candidates>
+   template <typename T> struct unsigned_integral_parameter<0, T>
       : public parameter
    {
       typedef T type;
       typedef T parameter_type;
-      typedef unsigned_integral_parameter<0, T, implementation_candidates> this_type;
+      typedef unsigned_integral_parameter<0, T> this_type;
 
       static inline std::size_t get_size()
       {
@@ -554,6 +557,77 @@ namespace si
          return true;
       } 
    };
+
+	template<typename description_tt
+		, typename T
+		>struct parameters_array
+		: public boostext::tuple_type<typename create_parameter_sequence<description_tt>::type >::type
+		, public parameter
+	{
+		typedef typename bit_array_internal::normalize_description<description_tt>::type description_type;
+		typedef typename boostext::tuple_type<typename create_parameter_sequence<description_tt>::type >::type base_tuple_type;
+		typedef T type;
+		typedef T parameter_type;
+
+		typedef typename create_parameter_sequence<description_tt>::type parameters_type;
+
+		template<typename parameter_tt> typename boost::tuples::element<boostext::sequence_position<typename parameter_tt::parameter_type, parameters_type>::value, base_tuple_type>::type & get()
+		{
+			return base_tuple_type::template get<boostext::sequence_position<typename parameter_tt::parameter_type, bit_parameters_type>::value>();
+		}
+
+
+		template<typename description, bool empty = boost::mpl::empty<description>::value> struct data_writer
+		{
+			typedef typename boost::mpl::front<description>::type current_part;
+
+			template<typename that_type, typename iterator_t>static inline void write_data(that_type *that, std::size_t &size, iterator_t &it, unsigned &bit_offset)
+			{
+				item_data_writer<current_part>::write_data(that, size, it, bit_offset);
+				return data_writer<typename boost::mpl::pop_front<description>::type>::write_data(that, size, it, bit_offset);
+			}
+			 template<typename that_type, typename iterator_t>static inline bool read_data(that_type *that, std::size_t &size, iterator_t &it, unsigned &bit_offset)
+			{
+				item_data_writer<current_part>::read_data(that, size, it, bit_offset);
+				return data_writer<typename boost::mpl::pop_front<description>::type>::read_data(that, size, it, bit_offset);
+			}
+		};
+		template<typename description> struct data_writer<description
+		 , true >
+		{
+			template<typename that_type, typename iterator_t>static inline void write_data(that_type *that, std::size_t &size, iterator_t &it)
+			{
+				return;
+			}         
+			template<typename that_type, typename iterator_t>static inline bool read_data(that_type *that, std::size_t &size, iterator_t &it)
+			{
+				return true;
+			}
+		};
+
+      static inline std::size_t get_size()
+      {
+		  return description_size_type::value;
+      }
+      template<typename iterator_t> static inline bool can_read_data(std::size_t &size, iterator_t &it)
+      {
+         return true;
+      }
+      template<typename iterator_t>static inline std::size_t get_read_data_size(std::size_t size, iterator_t & it)
+      {
+         return get_size();
+      }
+      template<typename iterator_t>inline void write_data(std::size_t &size, iterator_t &it )
+      {
+         data_writer<description_type>::write_data(this, size, it);
+      }         
+      template<typename iterator_t>inline bool read_data(std::size_t &size, iterator_t &it)
+      {
+         data_writer<description_type>::read_data(this, size, it);
+         return true;
+      } 
+   };
+
 
    template<typename parameters_tt, typename that_type, bool empty = boost::mpl::empty<parameters_tt>::value> struct parameters_size_counter
    {
