@@ -576,6 +576,29 @@ namespace si
 			return base_tuple_type::template get<boostext::sequence_position<typename parameter_tt::parameter_type, bit_parameters_type>::value>();
 		}
 
+		template<typename description_part, typename enabled = void> struct item_data_writer 
+		{
+			template<typename that_type, typename iterator_t>static inline void write_data(that_type *that, std::size_t &size, iterator_t &it)
+			{
+				it++;
+			}         
+			template<typename that_type, typename iterator_t>static inline void read_data(that_type *that, std::size_t &size, iterator_t &it)
+			{
+				it++;
+			}         
+		};
+		template<typename description_part> struct item_data_writer<description_part, typename boost::enable_if<typename boost::is_base_of<has_bit_rw, description_part>::type>::type>
+		{
+			template<typename that_type, typename iterator_t>static inline void write_data(that_type *that, std::size_t &size, iterator_t &it)
+			{
+				description_part::write_data(&that->get<typename description_part::parameter_type>(), size, it);
+			}         
+			template<typename that_type, typename iterator_t>static inline void read_data(that_type *that, std::size_t &size, iterator_t &it)
+			{
+				description_part::read_data(&that->get<typename description_part::parameter_type>(), size, it);
+			}         
+		};
+
 
 		template<typename description, bool empty = boost::mpl::empty<description>::value> struct data_writer
 		{
