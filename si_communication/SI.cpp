@@ -49,7 +49,7 @@ struct handshake: public si::unsigned_integral_parameter<1, handshake>{};
 struct auto_send_out: public si::unsigned_integral_parameter<1, auto_send_out>{};
 struct extended_protocol: public si::unsigned_integral_parameter<1, extended_protocol>{};
 
-struct cpc: public si::bit_array<boost::mpl::deque<read_si_after_punch::bits_range<0>, si::don_t_care, si::don_t_care, access_with_password_only::bits_range<0>, si::don_t_care, handshake::bits_range<0>, auto_send_out::bits_range<0>, extended_protocol::bits_range<0> >, cpc>{};
+struct cpc: public si::bit_array<boost::mpl::deque<read_si_after_punch::bits_range<0>, si::don_t_care<2>, access_with_password_only::bits_range<0>, si::don_t_care<>, handshake::bits_range<0>, auto_send_out::bits_range<0>, extended_protocol::bits_range<0> >, cpc>{};
 
 template<typename command_type>void send_to_channel(typename command_type::pointer command, si::channel_output &channel)
 {
