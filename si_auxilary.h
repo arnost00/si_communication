@@ -18,9 +18,16 @@
 
 namespace si
 {
-   struct parameter{};
-   struct multiparameter{};
-   struct don_t_care{};
+	struct parameter{};
+	struct multiparameter{};
+   	struct has_bit_size{};
+	struct has_bit_rw: public has_bit_size{};
+
+	template<std::size_t size_tp= 1> struct don_t_care: public has_bit_size
+	{
+		typedef boost::mpl::integral_c<std::size_t, size_tp> bit_size;
+		typedef boost::mpl::integral_c<std::size_t, size_tp> size;
+	};
 
    template<typename t> struct parameter_t: public parameter{typedef t parameter_type;};
 

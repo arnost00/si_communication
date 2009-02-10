@@ -64,7 +64,7 @@ namespace si
 		struct day_of_week: public unsigned_integral_parameter<1, day_of_week>{};
 		struct week_counter: public unsigned_integral_parameter<1, week_counter>{};
 
-		typedef boost::mpl::deque<don_t_care, don_t_care
+		typedef boost::mpl::deque<don_t_care<2>
 			, day_of_week::bits_range<1,0>
 			, week_counter::bits_range<2,0>
 			, am_pm::bits_range<0>
