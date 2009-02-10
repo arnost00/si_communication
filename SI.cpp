@@ -192,7 +192,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		   , si::control_sequence_base<>::callback_type()
 		   , si::control_sequence_base<>::callback_type()
 		   , chip_read_cb));
-/*/----------------------
+/*///----------------------
 		siport->set_protocol(si::channel_protocol_interface::pointer(new si::channel_protocol<si::protocols::extended>()));
 
 		si::response_interface::pointer read_responses = si::response<>::create(si::response<

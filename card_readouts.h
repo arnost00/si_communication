@@ -34,6 +34,12 @@ namespace si
 		struct week_counter: public unsigned_integral_parameter<1, week_counter>{};
 		struct card5_id_part: public unsigned_integral_parameter<1, card5_id_part>{};
 		struct card5_serie_part: public unsigned_integral_parameter<2, card5_serie_part>{};
+		struct sub_second: public unsigned_integral_parameter<1, sub_second>{};
+		struct si_station_id: public unsigned_integral_parameter<3, si_station_id>{};
+		struct punch_year: public unsigned_integral_parameter<1, punch_year>{};
+		struct punch_month: public unsigned_integral_parameter<1, punch_month>{};
+		struct punch_day: public unsigned_integral_parameter<1, punch_day>{};
+		struct punch_sub_second: public unsigned_integral_parameter<1, punch_sub_second>{};
 
 		typedef boost::mpl::deque<typename control_number::bits_range<7,0> > punch_1byte_def;
 		typedef boost::mpl::deque<typename control_number::bits_range<7,0>, typename time_12h::bits_range<15,0> > punch_3bytes_def;
@@ -43,11 +49,22 @@ namespace si
 			, typename am_pm::bits_range<0>
 			, typename control_number::bits_range<7,0>
 			, typename time_12h::bits_range<15,0> > punch_4bytes_def;
+
+		typedef boost::mpl::deque<typename control_number::bits_range<7,0>
+			, typename si_station_id::bits_range<17,0>
+			, typename punch_year::bits_range<3,0>
+			, typename punch_month::bits_range<3,0>
+			, typename punch_day::bits_range<4,0>
+			, typename am_pm::bits_range<0>
+			, typename time_12h::bits_range<15,0>
+			, typename punch_sub_second::bits_range<7,0> > punch_8bytes_def;
+
 		typedef boost::mpl::deque<card5_id_part, card5_serie_part> card5_id_def;
 
 		template<typename T> struct punch_1byte_type: public bit_array<punch_1byte_def, T>{};
 		template<typename T> struct punch_3bytes_type: public bit_array<punch_3bytes_def, T>{};
 		template<typename T> struct punch_4bytes_type: public bit_array<punch_4bytes_def, T>{};
+		template<typename T> struct punch_8bytes_type: public bit_array<punch_8bytes_def, T>{};
 
 		struct card5_id_type: public bit_array<card5_id_def, card5_id_type>{};
 
@@ -94,13 +111,18 @@ namespace si
 			card_5_header.read_data(max_size, data_item);
 			readout.get<card_record::CARD_ID>() = card_5_header.get<card_id>() + (1 == card_5_header.get<card_serie>()? 0: 100000 * card_5_header.get<card_serie>());
 
-			readout.get<card_record::START_NO>() = card_5_header.get<card_id>();
+			readout.get<card_record::START_NO>() = card_5_header.get<start_no>();
 			readout.get<card_record::START_TIME>() = card_reader<>::get_duration(card_5_header.get<start_time>());
 			readout.get<card_record::FINISH_TIME>() = card_reader<>::get_duration(card_5_header.get<finish_time>());
 			readout.get<card_record::CHECK_TIME>() = card_reader<>::get_duration(card_5_header.get<check_time>());
 			readout.get<card_record::CLEAR_TIME>() = boost::posix_time::not_a_date_time;
 			std::size_t records_count = card_5_header.get<record_counter>() - 1;
 
+			if(0 == records_count)
+			{
+				readout.get<card_record::PUNCH_RECORDS>().clear();
+				return true;
+			}
 
 			readout.get<card_record::PUNCH_RECORDS>().resize(records_count);
 			iterator punch_base = datablock + 0x20;
@@ -159,7 +181,23 @@ namespace si
 			, boost::mpl::pair<byte_type<0x04>, card_p>
 			, boost::mpl::pair<byte_type<0x06>, card_t>
 		> known_card_types;
-      template<typename card_types = known_card_types, bool enabled = boost::mpl::empty<card_types>::value>struct card_type_getter
+		template<typename iterator>static bool read_header(card_record &readout, iterator datablock, std::size_t &punch_count)
+		{
+			card_8_header_type card_8_header;
+			std::size_t max_size = 128;
+			
+			card_8_header.read_data(max_size, datablock);
+			readout.get<card_record::CARD_ID>() = card_8_header.get<card_id>();
+
+			readout.get<card_record::START_TIME>() = card_reader<>::get_duration(card_8_header.get<start_time>().get<time_12h>());
+			readout.get<card_record::FINISH_TIME>() = card_reader<>::get_duration(card_8_header.get<finish_time>().get<time_12h>());
+			readout.get<card_record::CHECK_TIME>() = card_reader<>::get_duration(card_8_header.get<check_time>().get<time_12h>());
+			readout.get<card_record::CLEAR_TIME>() = boost::posix_time::not_a_date_time;
+			punch_count = card_8_header.get<record_counter>();
+			return true;
+		}
+		
+		template<typename card_types = known_card_types, bool enabled = boost::mpl::empty<card_types>::value>struct card_type_getter
 		{
          BOOST_MPL_ASSERT_MSG(!boost::mpl::empty<card_types>::value, NOT_A_SEQUENCE, (types<card_types>));
 			static inline bool read(si::byte param, card_record &readout, blocks_read<extended::responses::si_card8_get>& data)
@@ -186,11 +224,6 @@ namespace si
 				}
 				return card_type_getter<typename boost::mpl::pop_front<card_types>::type>::get_type_description(param, data);
 			}
-/*			typedef typename boost::mpl::front<card_types>::type checked_type;
-			typedef typename boost::mpl::if_c<boost::mpl::second<checked_type>::type::value == serie
-				, typename boost::mpl::second<checked_type>
-				, card_type_getter<typename boost::mpl::pop_front<card_types>::type, serie> >::type::type type;
-				*/
 		};
 		template<typename card_types>struct card_type_getter<card_types
 			, true>
@@ -275,7 +308,7 @@ namespace si
 			return card_type_getter<>::get_blocks_needed(card_serie, blocks, data);
 		}
 	};
-	template<> struct card_reader<card_8>: public card_reader<>
+	template<> struct card_reader<card_8>: public card_reader<card_8_family>
 	{
 		template <typename iterator> static si::byte get_punches_count(iterator datablock)
 		{
@@ -288,47 +321,42 @@ namespace si
 
 			return one_byte.value;
 		}
-		static inline bool read(card_record &readout, blocks_read<extended::responses::si_card8_get>& data)
+		static bool read(card_record &readout, blocks_read<extended::responses::si_card8_get>& data)
 		{
-			two_bytes_type two_bytes;
-			three_bytes_type three_bytes;
-			one_byte_type one_byte;
-
 			typedef boost::tuples::element<extended::responses::si_card8_get::element<extended::responses::read_out_data>::type::value
 				, extended::responses::si_card8_get>::type::iterator iterator;
 			iterator datablock = data[0]->get<extended::responses::read_out_data>().begin();
-			iterator item;
 
 			std::size_t max_size = 128;
+			std::size_t records_count;
 
-			three_bytes.read_data(max_size, item = datablock + 0x19);
-			one_byte.read_data(max_size, item = datablock + 0x18);
-			readout.get<card_record::CARD_ID>() = three_bytes.value;
-			two_bytes.read_data(max_size, item = datablock + 0x0E);
-			readout.get<card_record::START_TIME>() = card_reader<>::get_duration(two_bytes.value);
-			two_bytes.read_data(max_size, item = datablock + 0x12);
-			readout.get<card_record::FINISH_TIME>() = card_reader<>::get_duration(two_bytes.value);
-			two_bytes.read_data(max_size, item = datablock + 0x0A);
-			readout.get<card_record::CHECK_TIME>() = card_reader<>::get_duration(two_bytes.value);
-			readout.get<card_record::CLEAR_TIME>() = boost::posix_time::not_a_date_time;
-			one_byte.read_data(max_size, item = datablock + 0x16);
-			unsigned records_count = one_byte.value;
-			readout.get<card_record::PUNCH_RECORDS>().resize(records_count);
-
+			read_header(readout, datablock, records_count);
 			if(0 == records_count)
+			{
+				readout.get<card_record::PUNCH_RECORDS>().clear();
 				return true;
+			}
+
+			readout.get<card_record::PUNCH_RECORDS>().resize(records_count);
 
 			datablock = data[1]->get<extended::responses::read_out_data>().begin();
 
 			iterator current_record = datablock + 0x08;
-			for(unsigned i = 0; 0 < records_count; i++, records_count--)
+			max_size = 0x80 - 0x08;
+
+			punch_type punch;
+
+			for(std::size_t i = 0; 0 < records_count; i++, records_count--)
 			{
-				current_record++;
-				one_byte.read_data(max_size, current_record);
-				two_bytes.read_data(max_size, current_record);
-				readout.get<card_record::PUNCH_RECORDS>()[i] = punch_record(one_byte.value
-					, card_reader<>::get_duration(two_bytes.value));
-			}
+				if(18 == i)
+				{
+					datablock = data[1]->get<extended::responses::read_out_data>().begin();
+					max_size = 128;
+				}
+				punch.read_data(max_size, datablock);
+				readout.get<card_record::PUNCH_RECORDS>()[i] = punch_record(punch.get<control_number>()
+					, card_reader<>::get_duration(punch.get<time_12h>()));
+			}			
 			return true;
 		}
 		static inline bool get_blocks_needed(needed_blocks_container &blocks, extended::responses::si_card8_get& data)
@@ -347,9 +375,93 @@ namespace si
 			return unsupported_card_type;
 		}
 	};
+	template<> struct card_reader<card_9>: public card_reader<card_8_family>
+	{
+		template <typename iterator> static si::byte get_punches_count(iterator datablock)
+		{
+			std::size_t max_size = 128;
+			one_byte_type one_byte;
+			iterator item;
+
+			one_byte.read_data(max_size, item = datablock + 0x16);
+			return one_byte.value;
+		}
+		static bool read(card_record &readout, blocks_read<extended::responses::si_card8_get>& data)
+		{
+			typedef boost::tuples::element<extended::responses::si_card8_get::element<extended::responses::read_out_data>::type::value
+				, extended::responses::si_card8_get>::type::iterator iterator;
+			iterator datablock = data[0]->get<extended::responses::read_out_data>().begin();
+
+			std::size_t max_size = 128;
+			std::size_t records_count;
+
+			read_header(readout, datablock, records_count);
+			if(0 == records_count)
+			{
+				readout.get<card_record::PUNCH_RECORDS>().clear();
+				return true;
+			}
+
+			readout.get<card_record::PUNCH_RECORDS>().resize(records_count);
+
+			datablock = data[0]->get<extended::responses::read_out_data>().begin();
+
+			datablock += 0x38;
+			max_size = 0x80 - 0x38;
+
+			punch_type punch;
+
+			for(std::size_t i = 0; 0 < records_count; i++, records_count--)
+			{
+				if(18 == i)
+				{
+					datablock = data[1]->get<extended::responses::read_out_data>().begin();
+					max_size = 128;
+				}
+				punch.read_data(max_size, datablock);
+				readout.get<card_record::PUNCH_RECORDS>()[i] = punch_record(punch.get<control_number>()
+					, card_reader<>::get_duration(punch.get<time_12h>()));
+			}			
+			return true;
+		}
+		static inline bool get_blocks_needed(needed_blocks_container &blocks, extended::responses::si_card8_get& data)
+		{
+			si::byte punches_count(get_punches_count(data.get<extended::responses::read_out_data>().begin()));
+			blocks.insert(0);
+			if(19 < punches_count)
+			{
+				blocks.insert(1);
+			}
+			return true;
+		}
+		static std::string& get_type_description(extended::si::value_type& data)
+		{
+			static std::string unsupported_card_type("card 9");
+			return unsupported_card_type;
+		}
+	};
+
 	template<> struct card_reader<card_6>: public card_reader<>
 	{
+		struct start_no: public unsigned_integral_parameter<4, start_no>{};
+		struct type_identifier: public unsigned_integral_parameter<4, type_identifier>{};
+		struct start_time: public punch_4bytes_type<start_time>{};
+		struct finish_time: public punch_4bytes_type<finish_time>{};
+		struct check_time: public punch_4bytes_type<check_time>{};
+		struct clear_time: public punch_4bytes_type<clear_time>{};
+		struct last_visited_control: public unsigned_integral_parameter<2, last_visited_control>{};
+		struct record_counter: public unsigned_integral_parameter<1, record_counter>{};
+		struct next_record: public unsigned_integral_parameter<1, next_record>{};
+		struct card_id: public unsigned_integral_parameter<4, card_id>{};
+		struct last_punch: public punch_4bytes_type<last_punch>{};
 		struct punch_type: public punch_4bytes_type<punch_type>{};
+
+		typedef boost::mpl::deque<don_t_care<8>, don_t_care<2>
+			, card_id, don_t_care<2>, last_visited_control, record_counter, next_record
+			, finish_time, start_time, check_time, clear_time, start_no
+			> card_6_header_def;
+
+		struct card_6_header_type: public parameters_array<card_6_header_def, card_6_header_type>{};
 
 		static unsigned __int32 get_id(extended::responses::si_card6_get& data)
 		{
@@ -376,21 +488,36 @@ namespace si
 			one_byte.read_data(max_size, item = datablock + 0x12);
 			return one_byte.value;
 		}
-		static inline bool read(card_record &readout, blocks_read<extended::responses::si_card6_get>& data)
+		static bool read(card_record &readout, blocks_read<extended::responses::si_card6_get>& data)
 		{
 			static const unsigned sectors[] = {6, 7, 2, 3, 4, 5};
-
-			two_bytes_type two_bytes;
-			four_bytes_type four_bytes;
-			one_byte_type one_byte;
 
 			typedef boost::tuples::element<extended::responses::si_card6_get::element<extended::responses::read_out_data>::type::value
 				, extended::responses::si_card6_get>::type::iterator iterator;
 			iterator datablock = data[0]->get<extended::responses::read_out_data>().begin();
-			iterator item;
+
+			card_6_header_type card_6_header;
 
 			std::size_t max_size = 128;
 
+			card_6_header.read_data(max_size, datablock);
+			readout.get<card_record::CARD_ID>() = card_6_header.get<card_id>();
+			readout.get<card_record::START_NO>() = card_6_header.get<start_no>();
+			readout.get<card_record::START_TIME>() = card_reader<>::get_duration(card_6_header.get<start_time>().get<time_12h>());
+			readout.get<card_record::FINISH_TIME>() = card_reader<>::get_duration(card_6_header.get<finish_time>().get<time_12h>());
+			readout.get<card_record::CHECK_TIME>() = card_reader<>::get_duration(card_6_header.get<check_time>().get<time_12h>());
+			readout.get<card_record::CLEAR_TIME>() = card_reader<>::get_duration(card_6_header.get<check_time>().get<time_12h>());
+			std::size_t records_count = card_6_header.get<record_counter>();
+
+			if(0 == records_count)
+			{
+				readout.get<card_record::PUNCH_RECORDS>().clear();
+				return true;
+			}
+
+			readout.get<card_record::PUNCH_RECORDS>().resize(records_count);
+
+/*
 			four_bytes.read_data(max_size, item = datablock + 0x0A);
 			readout.get<card_record::CARD_ID>() = four_bytes.value;
 			four_bytes.read_data(max_size, item = datablock + 0x18);
@@ -409,8 +536,9 @@ namespace si
 
 			if(0 == records_count)
 				return true;
-
+*/
 			datablock = data[6]->get<extended::responses::read_out_data>().begin();
+			max_size = 128;
 
 			iterator punch_base = datablock;
 			iterator current_record = punch_base;
@@ -448,7 +576,7 @@ namespace si
 			return true;
 		}
 	};
-	template<> struct card_reader<card_p>: public card_reader<>
+	template<> struct card_reader<card_p>: public card_reader<card_8_family>
 	{
 		template <typename iterator> static si::byte get_punches_count(iterator datablock)
 		{
@@ -460,9 +588,43 @@ namespace si
 			one_byte.read_data(max_size, item = datablock + 0x18);
 			return one_byte.value;
 		}
-		static inline bool read(card_record &readout, blocks_read<extended::responses::si_card8_get>& data)
+		static bool read(card_record &readout, blocks_read<extended::responses::si_card8_get>& data)
 		{
-			return false;
+			typedef boost::tuples::element<extended::responses::si_card8_get::element<extended::responses::read_out_data>::type::value
+				, extended::responses::si_card8_get>::type::iterator iterator;
+			iterator datablock = data[0]->get<extended::responses::read_out_data>().begin();
+
+			std::size_t max_size = 128;
+			std::size_t records_count;
+
+			read_header(readout, datablock, records_count);
+			if(0 == records_count)
+			{
+				readout.get<card_record::PUNCH_RECORDS>().clear();
+				return true;
+			}
+
+			readout.get<card_record::PUNCH_RECORDS>().resize(records_count);
+
+			datablock = data[1]->get<extended::responses::read_out_data>().begin();
+
+			iterator current_record = datablock + 0x30;
+			max_size = 0x80 - 0x30;
+
+			punch_type punch;
+
+			for(std::size_t i = 0; 0 < records_count; i++, records_count--)
+			{
+				if(18 == i)
+				{
+					datablock = data[1]->get<extended::responses::read_out_data>().begin();
+					max_size = 128;
+				}
+				punch.read_data(max_size, datablock);
+				readout.get<card_record::PUNCH_RECORDS>()[i] = punch_record(punch.get<control_number>()
+					, card_reader<>::get_duration(punch.get<time_12h>()));
+			}			
+			return true;
 		}
 		static inline bool get_blocks_needed(needed_blocks_container &blocks, extended::responses::si_card8_get& data)
 		{
@@ -480,8 +642,10 @@ namespace si
 			return card_type;
 		}
 	};
-	template<> struct card_reader<card_t>: public card_reader<>
+	template<> struct card_reader<card_t>: public card_reader<card_8_family>
 	{
+		struct punch_type: public punch_8bytes_type<punch_type>{};
+
 		template <typename iterator> static si::byte get_punches_count(iterator datablock)
 		{
 			std::size_t max_size = 128;
@@ -491,59 +655,23 @@ namespace si
 			one_byte.read_data(max_size, item = datablock + 0x18);
 			return one_byte.value;
 		}
-		static inline bool read(card_record &readout, blocks_read<extended::responses::si_card8_get>& data)
-		{
-			return false;
-		}
-		static inline bool get_blocks_needed(needed_blocks_container &blocks, extended::responses::si_card8_get& data)
-		{
-			si::byte punches_count(get_punches_count(data.get<extended::responses::read_out_data>().begin()));
-			blocks.insert(0);
-			if(19 < punches_count)
-			{
-				blocks.insert(1);
-			}
-			return true;
-		}
-		static std::string& get_type_description(extended::si::value_type& data)
-		{
-			static std::string card_type("card t");
-			return card_type;
-		}
-	};
-	template<> struct card_reader<card_9>: public card_reader<card_8_family>
-	{
-		template <typename iterator> static si::byte get_punches_count(iterator datablock)
-		{
-			std::size_t max_size = 128;
-			one_byte_type one_byte;
-			iterator item;
-
-			one_byte.read_data(max_size, item = datablock + 0x16);
-			return one_byte.value;
-		}
-		static inline bool read(card_record &readout, blocks_read<extended::responses::si_card8_get>& data)
+		static bool read(card_record &readout, blocks_read<extended::responses::si_card8_get>& data)
 		{
 			typedef boost::tuples::element<extended::responses::si_card8_get::element<extended::responses::read_out_data>::type::value
 				, extended::responses::si_card8_get>::type::iterator iterator;
 			iterator datablock = data[0]->get<extended::responses::read_out_data>().begin();
 
-			card_8_header_type card_8_header;
 			std::size_t max_size = 128;
-			
-			card_8_header.read_data(max_size, datablock);
-			readout.get<card_record::CARD_ID>() = card_8_header.get<card_id>();
+			std::size_t records_count;
 
-			readout.get<card_record::START_TIME>() = card_reader<>::get_duration(card_8_header.get<start_time>().get<time_12h>());
-			readout.get<card_record::FINISH_TIME>() = card_reader<>::get_duration(card_8_header.get<finish_time>().get<time_12h>());
-			readout.get<card_record::CHECK_TIME>() = card_reader<>::get_duration(card_8_header.get<check_time>().get<time_12h>());
-			readout.get<card_record::CLEAR_TIME>() = boost::posix_time::not_a_date_time;
-			std::size_t records_count = card_8_header.get<record_counter>();
+			read_header(readout, datablock, records_count);
+			if(0 == records_count)
+			{
+				readout.get<card_record::PUNCH_RECORDS>().clear();
+				return true;
+			}
 
 			readout.get<card_record::PUNCH_RECORDS>().resize(records_count);
-
-			if(0 == records_count)
-				return true;
 
 			datablock = data[0]->get<extended::responses::read_out_data>().begin();
 
@@ -554,7 +682,7 @@ namespace si
 
 			for(std::size_t i = 0; 0 < records_count; i++, records_count--)
 			{
-				if(18 == i)
+				if(9 == i)
 				{
 					datablock = data[1]->get<extended::responses::read_out_data>().begin();
 					max_size = 128;
@@ -577,8 +705,8 @@ namespace si
 		}
 		static std::string& get_type_description(extended::si::value_type& data)
 		{
-			static std::string unsupported_card_type("card 9");
-			return unsupported_card_type;
+			static std::string card_type("card t");
+			return card_type;
 		}
 	};
 }//namespace si
