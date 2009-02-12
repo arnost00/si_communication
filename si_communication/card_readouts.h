@@ -513,26 +513,6 @@ namespace si
 
 			readout.get<card_record::PUNCH_RECORDS>().resize(records_count);
 
-/*
-			four_bytes.read_data(max_size, item = datablock + 0x0A);
-			readout.get<card_record::CARD_ID>() = four_bytes.value;
-			four_bytes.read_data(max_size, item = datablock + 0x18);
-			readout.get<card_record::START_NO>() = four_bytes.value;
-			two_bytes.read_data(max_size, item = datablock + 0x1A);
-			readout.get<card_record::START_TIME>() = card_reader<>::get_duration(two_bytes.value);
-			two_bytes.read_data(max_size, item = datablock + 0x16);
-			readout.get<card_record::FINISH_TIME>() = card_reader<>::get_duration(two_bytes.value);
-			two_bytes.read_data(max_size, item = datablock + 0x1E);
-			readout.get<card_record::CHECK_TIME>() = card_reader<>::get_duration(two_bytes.value);
-			two_bytes.read_data(max_size, item = datablock + 0x22);
-			readout.get<card_record::CLEAR_TIME>() = card_reader<>::get_duration(two_bytes.value);
-			one_byte.read_data(max_size, item = datablock + 0x12);
-			unsigned records_count = one_byte.value;
-			readout.get<card_record::PUNCH_RECORDS>().resize(records_count);
-
-			if(0 == records_count)
-				return true;
-*/
 			datablock = data[6]->get<extended::responses::read_out_data>().begin();
 			max_size = 128;
 
