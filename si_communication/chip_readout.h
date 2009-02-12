@@ -86,7 +86,7 @@ namespace si
 		}
 		void si_card8_inserted(extended::responses::si_card8_inserted::pointer response)
 		{
-			std::cout << card_reader<card_8_family>::get_type_description(response->get<extended::si>().value) << " inserted, no: " 
+			std::cout << card_reader<card_8_family>::get_type_description(response->get<extended::si>()) << " inserted, no: " 
 				<< card_reader<card_8_family>::get_id(response->get<extended::si>().value) << std::endl;
 			si::response<boost::mpl::deque<extended::responses::si_card8_get
 					, extended::responses::si_card_removed
