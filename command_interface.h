@@ -21,7 +21,7 @@ namespace si
 //      virtual void write(writer_type writer, protocols::id<>::value_type protocol) = 0;
       virtual std::size_t get_size(protocols::id<>::value_type protocol = protocols::id<>::value) = 0;
       virtual bool is_control_sequence() = 0;
-      virtual bool can_accept_data(std::size_t size, data_type data) = 0;
+//      virtual bool can_accept_data(std::size_t size, data_type data) = 0;
       virtual bool accept_data(std::size_t size, data_type data) = 0;
       virtual ~command_interface(){}
 

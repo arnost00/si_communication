@@ -77,7 +77,7 @@ namespace si
          {
             if(command_type::control_sequence == control_sequence)
                if(command_type::code == command_id)
-                  if(command_type::can_accept_data_static(size, data))
+//                  if(command_type::can_accept_data_static(size, data))
                   {
                      typename command_type::pointer actual_command(new command_type());
                      if(actual_command->accept_data(size, data))
@@ -85,7 +85,7 @@ namespace si
                         reactions.template get<offset>()(actual_command);
                         removal_policy.called();
                         return true;
-                     }
+	                 }
                   }
             return sequence_checker< typename boost::mpl::pop_front<commands_sequence>::type, offset + 1>
                ::check_input_command(command_id, size, data, control_sequence, reactions, removal_policy);
