@@ -562,7 +562,7 @@ namespace si
 		: public boostext::tuple_type<typename create_parameter_sequence<description_tt>::type >::type
 		, public parameter
 	{
-		typedef typename description_tt description_type;
+		typedef description_tt description_type;
 		typedef typename boostext::tuple_type<typename create_parameter_sequence<description_tt>::type >::type base_tuple_type;
 		typedef T type;
 		typedef T parameter_type;
