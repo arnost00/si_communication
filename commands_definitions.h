@@ -11,6 +11,13 @@ namespace si
 	struct basic
 	{	
 		typedef boost::integral_constant<byte, 0x70> set_ms_mode_code;
+		typedef boost::integral_constant<byte, 0x66> si_card6_inserted_code;
+		typedef boost::integral_constant<byte, 0x30> si_card5_set_card_number;
+		typedef boost::integral_constant<byte, 0x31> si_card5_get_code;
+		typedef boost::integral_constant<byte, 0x61> si_card6_get_code;
+		typedef boost::integral_constant<byte, 0x53> get_punch_2_code;
+		typedef boost::integral_constant<byte, 0x54> time_send;
+
 		struct m_s: public unsigned_integral_parameter<1, m_s>
 		{
 			BOOST_STATIC_CONSTANT(si::byte, master = 0x4D);
