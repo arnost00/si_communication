@@ -41,7 +41,7 @@ namespace si
 		struct punch_day: public unsigned_integral_parameter<1, punch_day>{};
 		struct punch_sub_second: public unsigned_integral_parameter<1, punch_sub_second>{};
 
-		typedef boost::mpl::deque<typename control_number::bits_range<7,0> > punch_1byte_def;
+                typedef boost::mpl::deque<control_number::template bits_range<7, 0> > punch_1byte_def;
 		typedef boost::mpl::deque<typename control_number::bits_range<7,0>, typename time_12h::bits_range<15,0> > punch_3bytes_def;
 		typedef boost::mpl::deque<typename control_number::bits_range<9,8>
 			, typename day_of_week::bits_range<1,0>
