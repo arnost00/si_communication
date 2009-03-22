@@ -14,7 +14,7 @@ namespace si
 		, typename parameters_tt = boost::mpl::deque<>
 		, bool control_sequence_tt = false
 		> struct fixed_command
-		: public parameters_array<parameters_tt, fixed_command<command_tt, parameters_tt, control_sequence_tt> >//boostext::tuple_type<typename create_parameter_sequence<parameters_tt>::type>::type
+                : public parameters_array<parameters_tt, fixed_command<command_tt, parameters_tt, control_sequence_tt> >
 		, public command_interface
 	{
 		BOOST_STATIC_CONSTANT(byte, code = command_tt);
@@ -23,8 +23,9 @@ namespace si
 
 		typedef parameters_tt command_template_type;
 		typedef typename create_parameter_sequence<parameters_tt>::type command_parameters_type;
-		typedef typename boostext::tuple_type<typename create_parameter_sequence<parameters_tt>::type>::type parameters_tuple_type;
+//		typedef typename boostext::tuple_type<typename create_parameter_sequence<parameters_tt>::type>::type parameters_tuple_type;
 
+                typedef parameters_array<parameters_tt, fixed_command<command_tt, parameters_tt, control_sequence_tt> > param_array_type;
 		typedef boost::shared_ptr<fixed_command> pointer;
 
 		typedef fixed_command this_type;
@@ -63,7 +64,7 @@ namespace si
 
 			boost::add_pointer<data_type::element_type>::type it = data.get();
 //			return raw_data_reader<this_type>::read_data(this, size, it);
-			return read_data(size, it);
+                        return param_array_type::read_data(size, it);
 		}
 /*		virtual bool can_accept_data(std::size_t size, data_type data)
 		{
