@@ -20,8 +20,9 @@ namespace si
 {
 	struct parameter{};
 	struct multiparameter{};
-   	struct has_bit_size{};
+	struct has_bit_size{};
 	struct has_bit_rw: public has_bit_size{};
+	struct has_byte_size{};
 
 	template<std::size_t size_tp= 1> struct don_t_care: public has_bit_size
 	{
