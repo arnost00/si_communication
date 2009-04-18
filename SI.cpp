@@ -1,6 +1,9 @@
 // SI.cpp : Defines the entry point for the console application.
 //
 
+
+//#define _GLIBCXX_USE_WCHAR_T
+
 #include <boost/asio.hpp>
 #include <boost/asio/serial_port.hpp>
 #include <boost/bind.hpp>
