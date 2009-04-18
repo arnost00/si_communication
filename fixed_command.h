@@ -63,7 +63,9 @@ namespace si
 		{
 
 			boost::add_pointer<data_type::element_type>::type it = data.get();
-			return raw_data_reader<this_type>::read_data(this, size, it);//			return read_data(size, it);		}
+			return raw_data_reader<this_type>::read_data(this, size, it);
+		//			return read_data(size, it);		
+		}
 /*		virtual bool can_accept_data(std::size_t size, data_type data)
 		{
 			boost::add_pointer<data_type::element_type>::type it = data.get();
