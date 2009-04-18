@@ -41,23 +41,7 @@ namespace si
 		struct punch_day: public unsigned_integral_parameter<1, punch_day>{};
 		struct punch_sub_second: public unsigned_integral_parameter<1, punch_sub_second>{};
 
-		typedef boost::mpl::deque<typename control_number::template bits_range<7,0> > punch_1byte_def;
-		typedef boost::mpl::deque<typename control_number::template bits_range<7,0>, typename time_12h::template bits_range<15,0> > punch_3bytes_def;
-		typedef boost::mpl::deque<typename control_number::template bits_range<9,8>
-			, typename day_of_week::template bits_range<1,0>
-			, typename week_counter::template bits_range<2,0>
-			, typename am_pm::template bits_range<0>
-			, typename control_number::template bits_range<7,0>
-			, typename time_12h::template bits_range<15,0> > punch_4bytes_def;
-		typedef boost::mpl::deque<typename control_number::template bits_range<7,0>
-			, typename si_station_id::template bits_range<17,0>
-			, typename punch_year::template bits_range<3,0>
-			, typename punch_month::template bits_range<3,0>
-			, typename punch_day::template bits_range<4,0>
-			, typename am_pm::template bits_range<0>
-			, typename time_12h::template bits_range<15,0>
-			, typename punch_sub_second::template bits_range<7,0> > punch_8bytes_def;
-
+		typedef boost::mpl::deque<typename control_number::template bits_range<7,0> > punch_1byte_def;		typedef boost::mpl::deque<typename control_number::template bits_range<7,0>, typename time_12h::template bits_range<15,0> > punch_3bytes_def;		typedef boost::mpl::deque<typename control_number::template bits_range<9,8>			, typename day_of_week::template bits_range<1,0>			, typename week_counter::template bits_range<2,0>			, typename am_pm::template bits_range<0>			, typename control_number::template bits_range<7,0>			, typename time_12h::template bits_range<15,0> > punch_4bytes_def;		typedef boost::mpl::deque<typename control_number::template bits_range<7,0>			, typename si_station_id::template bits_range<17,0>			, typename punch_year::template bits_range<3,0>			, typename punch_month::template bits_range<3,0>			, typename punch_day::template bits_range<4,0>			, typename am_pm::template bits_range<0>			, typename time_12h::template bits_range<15,0>			, typename punch_sub_second::template bits_range<7,0> > punch_8bytes_def;
 		typedef boost::mpl::deque<card5_id_part, card5_serie_part> card5_id_def;
 
 		template<typename T> struct punch_1byte_type: public bit_array<punch_1byte_def, T>{};
