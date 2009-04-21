@@ -3,6 +3,7 @@
 #include "tuple_child.hpp"
 #include <boost/tuple/tuple.hpp>
 #include <vector>
+#include <iomanip>
 
 namespace si
 {

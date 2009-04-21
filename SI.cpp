@@ -24,7 +24,9 @@
 #include "chip_readout.h"
 #include <boost/mpl/list_c.hpp>
 #include <iostream>
+#include <fstream>
 #include <string>
+
 
 #include <boost/tuple/tuple.hpp>
 #include "tuple_type.h"
@@ -86,9 +88,9 @@ void punch_arrived(si::extended::responses::transmit_record::pointer record_msg)
 }
 void punch_read(ofstream_pointer of, si::extended::responses::transmit_record::pointer record)
 {
-	std::fstream &fs = *of.get();
+	std::ostream &fs = *of.get();
 
-    fs << std::setfill(' ') << std::setw(8) << record->get<si::extended::si>().value;
+	fs << std::setfill(' ') << std::setw(8) << record->get<si::extended::si>().value;
 	fs << ':' << ' ';
 	out_time_duration(fs, boost::posix_time::millisec(1000*(record->get<si::extended::t>().value) 
 		+ (record->get<si::extended::tss>().value*1000/256)), true);
@@ -101,7 +103,7 @@ void chip_read(ofstream_pointer of, si::card_record::pointer record)
 {
 	typedef boost::tuples::element<si::card_record::PUNCH_RECORDS, si::card_record>::type punches_container;
 	std::size_t punches_count;
-	std::fstream &fs = *of.get();
+	std::ostream &fs = *of.get();
 
 	fs << std::setfill(' ') << std::setw(8) << record->get<si::card_record::CARD_ID>();
 	fs << ':' << ' ';
