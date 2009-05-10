@@ -60,7 +60,7 @@ namespace si
 				}
 			}
 		}
-      void register_response_expectation(boost::add_const<response_interface::pointer>::type expectation
+      void register_response_expectation(response_interface::const_pointer expectation
          , boost::posix_time::time_duration timeout  = boost::posix_time::not_a_date_time
          , channel_input_interface::timeout_call_type timeout_call = channel_input_interface::timeout_call_type())
       {

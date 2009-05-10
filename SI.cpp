@@ -19,6 +19,7 @@
 #include "channel_loopback.h"
 #include "channel_io_serial_port.h"
 #include "command_parameter.h"
+#include "command_parameter2.h"
 #include "create_parameter_sequence.h"
 #include "response.h"
 #include "chip_readout.h"
