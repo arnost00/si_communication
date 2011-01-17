@@ -3,6 +3,7 @@
 
 
 //#define _GLIBCXX_USE_WCHAR_T
+//#define _FULL_READ_
 
 #include <boost/asio.hpp>
 #include <boost/asio/serial_port.hpp>
@@ -190,12 +191,13 @@ int _tmain(int argc, _TCHAR* argv[])
 
 		if(output_file)
 			chip_read_cb = boost::bind(&chip_read, output_file, _1);
+#ifdef _FULL_READ_
 	   startup_sequence.start(siport
 		   , boost::bind(&si::chip_readout::start, &chip_readout, siport
 		   , si::control_sequence_base<>::callback_type()
 		   , si::control_sequence_base<>::callback_type()
 		   , chip_read_cb));
-/*///----------------------
+#else // RADIA
 		siport->set_protocol(si::channel_protocol_interface::pointer(new si::channel_protocol<si::protocols::extended>()));
 
 		si::response_interface::pointer read_responses = si::response<>::create(si::response<
@@ -204,7 +206,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			(boost::bind(&punch_read, output_file, _1)));
 
 		siport->register_response_expectation(read_responses);
-//-----------------------*/
+#endif
       
    }
    catch(...)
