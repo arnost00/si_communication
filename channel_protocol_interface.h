@@ -2,6 +2,7 @@
 
 #include "command_interface.h"
 #include <boost/shared_ptr.hpp>
+#include <boost/type_traits/add_pointer.hpp>
 
 namespace si
 {

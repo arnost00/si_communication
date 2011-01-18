@@ -6,6 +6,7 @@
 
 #include <boost/array.hpp>
 #include <queue>
+#include <iostream>
 
 namespace si
 {
