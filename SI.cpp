@@ -76,7 +76,7 @@ void out_time_duration(std::ostream &fs, boost::posix_time::time_duration const&
 
 	if(enable_ms)
 	{
-		unsigned ms = duration.total_milliseconds() - (duration.total_seconds() * 1000);
+		boost::posix_time::time_duration::fractional_seconds_type ms = duration.total_milliseconds() - (duration.total_seconds() * 1000);
 
 		fs << '.' << std::setw(3) << ms;
 	}
