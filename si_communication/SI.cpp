@@ -1,9 +1,7 @@
 // SI.cpp : Defines the entry point for the console application.
 //
 
-
 //#define _GLIBCXX_USE_WCHAR_T
-//#define _FULL_READ_
 
 #include <boost/asio.hpp>
 #include <boost/asio/serial_port.hpp>
@@ -29,6 +27,7 @@
 #include <fstream>
 #include <string>
 
+#include <boost/system/windows_error.hpp>
 
 #include <boost/tuple/tuple.hpp>
 #include "tuple_type.h"
@@ -135,29 +134,33 @@ void chip_read(ofstream_pointer of, si::card_record::pointer record)
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-	boost::program_options::options_description desc("Allowed options");
+   std::cout << "SI Card Reader" << std::endl; 
+	boost::program_options::options_description desc("This version can read only SI Stations in 'extended' mode.\nAllowed options");
+   int prog_type;
 	desc.add_options()
-		("help", "produce help message")
-		("device", boost::program_options::value<std::string>(), "set communication device")
-		("output", boost::program_options::value<std::string>(), "set output file");
+		("help,h", "produce help message")
+		("device,d", boost::program_options::value<std::string>(), "set communication device (ex. com2)")
+		("output,o", boost::program_options::value<std::string>(), "set output file (ex. card.txt)")
+      ("type,t", boost::program_options::value<int>(&prog_type)->default_value(0), "set program type (0 - card readout, 1 - station punch)");
 
 	boost::program_options::variables_map vm;
 	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
 	boost::program_options::notify(vm);    
 
-	if (vm.count("help"))
+	if (argc < 2 || vm.count("help"))
 	{
-		std::cout << desc << "\n";
-		 return 1;
+      std::cout << desc << std::endl;
+      return 1;
 	}
 
 	if (vm.count("device"))
 	{
-		 std::cout << "Device was set to " << vm["device"].as<std::string>() << std::endl;
+		 std::cout << "Communication device was set to " << vm["device"].as<std::string>() << std::endl;
 	}
 	else
 	{
-		 std::cout << "Device was not set.\n";
+		 std::cout << "Communication device was not set."<< std::endl;
+       return 2;
 	}
 
 	ofstream_pointer output_file;
@@ -171,14 +174,16 @@ int _tmain(int argc, _TCHAR* argv[])
 			output_file->open(vm["output"].as<std::string>().c_str(), std::ios_base::trunc| std::ios_base::out);
 			if(!output_file->is_open())
 			{
-				std::cout << "failed to open output file" << std::endl;
+				std::cout << "Failed to open output file" << std::endl;
 				output_file.reset();
+            return 4;
 			}
 		}
 	}
 	else
 	{
-		 std::cout << "Output was not set.\n";
+		 std::cout << "Output was not set."<< std::endl;
+       return 3;
 	}
    si::channel_io_serial_port::pointer siport(new si::channel_io_serial_port::pointer::element_type());
    si::chip_readout::callback_chip_read chip_read_cb;
@@ -186,31 +191,61 @@ int _tmain(int argc, _TCHAR* argv[])
    si::chip_readout chip_readout;
    try
    {
-		siport->open(vm["device"].as<std::string>());
-		std::cout << (siport->is_open()? "port opened": "port closed") << std::endl;
+      try
+      {
+		   siport->open(vm["device"].as<std::string>());
+		   std::cout << (siport->is_open()? "Communication port opened": "Communication port closed") << std::endl;
+      }
+      catch(boost::system::system_error &e)
+      {
+         switch (e.code().value())
+         {
+#ifdef BOOST_WINDOWS_API
+         case boost::system::windows_error::file_not_found:
+            std::cout << "Communication device not found." << std::endl;
+            break;
+#endif
+         case boost::asio::error::already_open:
+            std::cout << "Communication device already open (maybe another application)." << std::endl;
+            break;
+         default:
+            std::cout << "Boost error, while opening input device : " << e.what() << std::endl;
+         }
+         return 7;
+      }
 
 		if(output_file)
 			chip_read_cb = boost::bind(&chip_read, output_file, _1);
-#ifdef _FULL_READ_
-	   startup_sequence.start(siport
-		   , boost::bind(&si::chip_readout::start, &chip_readout, siport
-		   , si::control_sequence_base<>::callback_type()
-		   , si::control_sequence_base<>::callback_type()
-		   , chip_read_cb));
-#else // RADIA
-		siport->set_protocol(si::channel_protocol_interface::pointer(new si::channel_protocol<si::protocols::extended>()));
 
-		si::response_interface::pointer read_responses = si::response<>::create(si::response<
-			boost::mpl::deque<si::extended::responses::transmit_record>
-			, si::response_live_control::permanent>::reactions_type
-			(boost::bind(&punch_read, output_file, _1)));
+      if (prog_type == 0)
+      {
+	      startup_sequence.start(siport
+		      , boost::bind(&si::chip_readout::start, &chip_readout, siport
+		      , si::control_sequence_base<>::callback_type()
+		      , si::control_sequence_base<>::callback_type()
+		      , chip_read_cb));
+      }
+      else
+      {
+		   siport->set_protocol(si::channel_protocol_interface::pointer(new si::channel_protocol<si::protocols::extended>()));
 
-		siport->register_response_expectation(read_responses);
-#endif
-      
+		   si::response_interface::pointer read_responses = si::response<>::create(si::response<
+			   boost::mpl::deque<si::extended::responses::transmit_record>
+			   , si::response_live_control::permanent>::reactions_type
+			   (boost::bind(&punch_read, output_file, _1)));
+
+		   siport->register_response_expectation(read_responses);
+      }      
+   }
+   catch(boost::system::system_error &e)
+   {
+      std::cout << "Boost error: " << e.what() << std::endl;
+      return 5;
    }
    catch(...)
    {
+      std::cout << "Unknown error." << std::endl;
+      return 6;
    }
 	BOOL bRet;
 	MSG msg;
