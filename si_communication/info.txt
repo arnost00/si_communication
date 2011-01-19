@@ -1,0 +1,10 @@
+Tested with:
+
+MS Visual Studio:
+VS2008
+VS2010
+in VS2005 cannot be compiled, too old
+
+Boost:
+1.37.O
+1.45.0
