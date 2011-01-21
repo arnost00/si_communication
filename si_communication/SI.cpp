@@ -205,9 +205,12 @@ int _tmain(int argc, _TCHAR* argv[])
          case boost::system::windows_error::file_not_found:
             std::cout << "Communication device not found." << std::endl;
             break;
+         case boost::system::windows_error::access_denied:
+            std::cout << "Communication device access denied (maybe open by another application)." << std::endl;
+            break;
 #endif
          case boost::asio::error::already_open:
-            std::cout << "Communication device already open (maybe another application)." << std::endl;
+            std::cout << "Communication device already open (maybe by another application)." << std::endl;
             break;
          default:
             std::cout << "Boost error, while opening input device : " << e.what() << std::endl;
