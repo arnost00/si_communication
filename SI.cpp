@@ -93,6 +93,7 @@ void punch_read(ofstream_pointer of, si::extended::responses::transmit_record::p
 
 	fs << std::setfill(' ') << std::setw(8) << record->get<si::extended::si>().value;
 	fs << ':' << ' ';
+	fs << std::setw(4) << record->get<si::extended::cn>().value << "/";
 	out_time_duration(fs, boost::posix_time::millisec(1000*(record->get<si::extended::t>().value) 
 		+ (record->get<si::extended::tss>().value*1000/256)), true);
 	fs << std::endl << std::flush;
