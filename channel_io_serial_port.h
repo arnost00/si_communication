@@ -69,7 +69,14 @@ namespace si
 		{
 			if(0 < bytes_transfered)
 			{
-				process_input(bytes_transfered, read_buffer.data());
+            try
+            {
+				   process_input(bytes_transfered, read_buffer.data());
+            }
+            catch (std::invalid_argument &e)
+            {
+               std::cout << "Input processing failed: " << e.what() << std::endl;
+            }
 			}
 			if(ec)
 			{
