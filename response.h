@@ -61,7 +61,7 @@ namespace si
       };
 
       typedef typename boostext::tuple_type<typename responses_tuple_template<>::type>::type reactions_type;
-		response(reactions_type &reactions_)
+         response(reactions_type const& reactions_)
          : reactions(reactions_)
       {
       }
@@ -117,7 +117,7 @@ namespace si
       {
          return removal_policy.check();
       }
-        template<typename param_type> inline static typename response_interface::pointer create(param_type &param)
+        template<typename param_type> inline static typename response_interface::pointer create(param_type const& param)
 	  {\
 
 		typedef typename boost::tuples::element<boost::tuples::length<param_type>::value - 1, param_type>::type::type response_type;
@@ -141,7 +141,7 @@ namespace si
          : base_response(reactions_)
       {}
 
-		template<typename param_type> inline static typename response_interface::pointer create(param_type &param)
+      template<typename param_type> inline static typename response_interface::pointer create(param_type const& param)
       {
 			return response_interface::pointer(new response(base_response::reactions_type(param)));
       }
