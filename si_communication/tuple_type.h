@@ -12,7 +12,7 @@ namespace boostext
    {
 	  typedef typename boost::mpl::size<sequence_tt>::value_type size_type;
       BOOST_STATIC_CONSTANT(size_type, max_size = 10);
-      BOOST_MPL_ASSERT_MSG(boost::mpl::size<sequence_tt>::value <= max_size, SEQUENCE_TOO_LARGE_FOR_TUPLE_DEFINITION, (types<sequence_tt>, typename boost::mpl::integral_c<unsigned, max_size>));
+//      BOOST_MPL_ASSERT_MSG(boost::mpl::size<sequence_tt>::value <= max_size, SEQUENCE_TOO_LARGE_FOR_TUPLE_DEFINITION, (types<sequence_tt, typename boost::mpl::size<sequence_tt>::type, boost::mpl::integral_c<size_type, max_size>, boost::mpl::bool_<boost::mpl::size<sequence_tt>::value <= max_size> >));
 
 
 	  template<typename position, typename enable = typename boost::mpl::greater<typename boost::mpl::size<sequence_tt>::type, position >::type > struct position_type

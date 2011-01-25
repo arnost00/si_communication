@@ -15,7 +15,7 @@ namespace si
 		, public io_base<boost::mpl::deque<channel_input, boost::asio::serial_port> >
    {
 	private:
-		typedef io_base<boost::mpl::deque<channel_input, boost::asio::serial_port> > io_base;
+        typedef io_base<boost::mpl::deque<channel_input, boost::asio::serial_port> > io_base_type;
    public:
 		channel_io_serial_port()
 			: outbytes_transfered(0)
@@ -34,17 +34,17 @@ namespace si
       }
 		bool open(std::string const& device_name)
 		{
-			io_base::open(device_name);
-/*			io_base::set_option(boost::asio::serial_port_base::baud_rate(38400));
-			io_base::set_option(boost::asio::serial_port_base::stop_bits(boost::asio::serial_port_base::stop_bits::one));
-			io_base::set_option(boost::asio::serial_port_base::parity(boost::asio::serial_port_base::parity::none));
-			io_base::set_option(boost::asio::serial_port_base::character_size(8));
-			io_base::set_option(boost::asio::serial_port_base::flow_control(boost::asio::serial_port_base::flow_control::none));
+            io_base_type::open(device_name);
+/*			io_base_type::set_option(boost::asio::serial_port_base::baud_rate(38400));
+            io_base_type::set_option(boost::asio::serial_port_base::stop_bits(boost::asio::serial_port_base::stop_bits::one));
+            io_base_type::set_option(boost::asio::serial_port_base::parity(boost::asio::serial_port_base::parity::none));
+            io_base_type::set_option(boost::asio::serial_port_base::character_size(8));
+            io_base_type::set_option(boost::asio::serial_port_base::flow_control(boost::asio::serial_port_base::flow_control::none));
 */
-			if(!io_base::is_open())
+            if(!io_base_type::is_open())
 				return false;
 
-			io_base::async_read_some(boost::asio::buffer(read_buffer)
+            io_base_type::async_read_some(boost::asio::buffer(read_buffer)
 				, boost::bind(&channel_io_serial_port::handle_read
 					, this
 					, boost::asio::placeholders::bytes_transferred
@@ -83,7 +83,7 @@ namespace si
 				std::cerr << ec.message();
 				return;
 			}
-			io_base::async_read_some(boost::asio::buffer(read_buffer)
+                io_base_type::async_read_some(boost::asio::buffer(read_buffer)
 				, boost::bind(&channel_io_serial_port::handle_read
 					, this
 					, boost::asio::placeholders::bytes_transferred
