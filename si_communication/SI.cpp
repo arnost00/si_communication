@@ -1,3 +1,9 @@
+//  (C) Copyright 2009-2011 Vit Kasal,
+//  (C) Copyright 2011 Richard Patek
+//
+//  Distributed under the Boost Software License, Version 1.0.
+//  (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+
 // SI.cpp : Defines the entry point for the console application.
 //
 
@@ -135,7 +141,9 @@ void chip_read(ofstream_pointer of, si::card_record::pointer record)
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-   std::cout << "SI Card Reader" << std::endl; 
+   std::cout << "si_read v1.0.XXX - SI Card Reader" << std::endl; 
+   std::cout << "Copyright (C) 2009-2011 Vita, Arnost" << std::endl; 
+   std::cout << "EOBSystem - system.eob.cz" << std::endl; 
 	boost::program_options::options_description desc("This version can read only SI Stations in 'extended' mode.\nAllowed options");
    int prog_type;
 	desc.add_options()
