@@ -40,6 +40,7 @@
 #include <signal.h>
 
 #include <boost/system/windows_error.hpp>
+#include <boost/system/linux_error.hpp>
 
 #include <boost/tuple/tuple.hpp>
 #include "tuple_type.h"
@@ -240,12 +241,16 @@ int main(int argc, char* argv[])
          case boost::system::windows_error::access_denied:
             std::cout << "Communication device access denied (maybe open by another application)." << std::endl;
             break;
+#else // linux
+         case boost::system::errc::no_such_file_or_directory:
+            std::cout << "Communication device not found." << std::endl;
+            break;
 #endif
          case boost::asio::error::already_open:
             std::cout << "Communication device already open (maybe by another application)." << std::endl;
             break;
          default:
-            std::cout << "Boost error, while opening input device : " << e.what() << std::endl;
+            std::cout << "Boost error, while opening input device : " << e.what() << ". Code : " << e.code().value()<< std::endl;
          }
          return 7;
       }
@@ -283,25 +288,6 @@ int main(int argc, char* argv[])
       std::cout << "Unknown error." << std::endl;
       return 6;
    }
-/*	BOOL bRet;
-	MSG msg;
-
-	while( (bRet = GetMessage( &msg, 0, 0, 0 )) != 0)
-	{ 
-		 if (bRet == -1)
-		 {
-			 break;
-		 }
-		 else
-		 {
-			  TranslateMessage(&msg); 
-			  DispatchMessage(&msg); 
-		 }
-	}
-
-	return 0;
-*/
-
 
    signal(SIGINT, &notify_exit_condition);
    signal(SIGTERM, &notify_exit_condition);
