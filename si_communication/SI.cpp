@@ -305,7 +305,11 @@ int main(int argc, char* argv[])
 
    signal(SIGINT, &notify_exit_condition);
    signal(SIGTERM, &notify_exit_condition);
+#ifdef _WIN32
    signal(SIGBREAK, &notify_exit_condition);
+#else
+   signal(SIGQUIT, &notify_exit_condition);
+#endif
    signal(SIGABRT, &notify_exit_condition);
 
    exit_cond.wait(exit_mtx, boost::bind(&should_exit));
@@ -313,4 +317,5 @@ int main(int argc, char* argv[])
    std::cout << "exitting" << std::endl;
    siport->close();
 
+   return 0;
 }
