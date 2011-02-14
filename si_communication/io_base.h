@@ -16,6 +16,8 @@
 #include <boost/mpl/end.hpp>
 #include <boost/mpl/is_sequence.hpp>
 
+#include <boost/thread.hpp>
+
 namespace si
 {
 	template<typename base_tt = void, typename enabled = void> struct io_base: public io_base<boost::mpl::deque<base_tt> >
@@ -91,13 +93,13 @@ namespace si
 				thread.reset(new io_base<>::thread_pointer::element_type(boost::bind(&boost::asio::io_service::run, service.get())));
 			}
 		}
-      ~io_base()
-      {
+		~io_base()
+		{
 			work.reset();
 			if(thread && (thread->joinable()))
 			{
 				thread->interrupt();
-//				thread->join();
+				thread->join();
 			}
 		}
 

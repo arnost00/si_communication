@@ -9,7 +9,7 @@
 #include "si_constants.h"
 #include "si_auxilary.h"
 
-
+#include <stdint.h>
 
 namespace si
 {
@@ -240,7 +240,7 @@ template<> struct protocol_encoder<protocols::extended>
       boost::crc_16_type crc_value;
       crc_value.process_block(crc_it, out_it);
 */
-      unsigned __int16 crc_value = crc(in_size + 2, crc_it);
+      uint16_t crc_value = crc(in_size + 2, crc_it);
 
       *out_it++ = crc_value>>8 & 0xFF;
       *out_it++ = crc_value & 0xFF;
@@ -308,7 +308,7 @@ template<> struct protocol_encoder<protocols::extended>
       command_interface::data_type data(new byte[data_size]);
       read_command_data(size, it, data_size, data.get());
 
-      unsigned __int16 crc_value;
+      uint16_t crc_value;
       crc_value = *it++;
       crc_value <<= 8;
       crc_value |= *it++;

@@ -13,8 +13,8 @@
 namespace si
 {
 	typedef boost::tuple<
-		unsigned __int32
-		, unsigned __int32
+                uint32_t
+                , uint32_t
 		, boost::posix_time::time_duration
 		, boost::posix_time::time_duration
 		, boost::posix_time::time_duration

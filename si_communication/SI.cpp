@@ -16,7 +16,12 @@
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <boost/program_options/parsers.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/condition.hpp>
+
+#ifdef _WIN32
 #include <tchar.h>
+#endif
 
 #include "startup_sequence.h"
 #include "si_static_command.h"
@@ -32,6 +37,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <signal.h>
 
 #include <boost/system/windows_error.hpp>
 
@@ -139,18 +145,36 @@ void chip_read(ofstream_pointer of, si::card_record::pointer record)
 	fs << std::endl << std::flush;
 }
 
-int _tmain(int argc, _TCHAR* argv[])
+bool exit_predicate = false;
+boost::condition exit_cond;
+boost::recursive_mutex exit_mtx;
+inline bool should_exit()
 {
-   std::cout << "si_read v1.0.XXX - SI Card Reader" << std::endl; 
-   std::cout << "Copyright (C) 2009-2011 Vita, Arnost" << std::endl; 
-   std::cout << "EOBSystem - system.eob.cz" << std::endl; 
+	return exit_predicate;
+}
+void notify_exit_condition(int signum)
+{
+	boost::recursive_mutex::scoped_lock sl(exit_mtx);
+	exit_predicate = true;
+	exit_cond.notify_all();
+}
+
+#ifdef _WIN32
+int _tmain(int argc, _TCHAR* argv[])
+#else
+int main(int argc, char* argv[])
+#endif
+{
+	std::cout << "si_read v1.0.XXX - SI Card Reader" << std::endl; 
+	std::cout << "Copyright (C) 2009-2011 Vita, Arnost" << std::endl; 
+	std::cout << "EOBSystem - system.eob.cz" << std::endl; 
 	boost::program_options::options_description desc("This version can read only SI Stations in 'extended' mode.\nAllowed options");
-   int prog_type;
+	int prog_type;
 	desc.add_options()
 		("help,h", "produce help message")
-		("device,d", boost::program_options::value<std::string>(), "set communication device (ex. com2)")
+		("device,d", boost::program_options::value<std::string>(), "set communication device (ex. com2 or /dev/sportident/reader0)")
 		("output,o", boost::program_options::value<std::string>(), "set output file (ex. card.txt)")
-      ("type,t", boost::program_options::value<int>(&prog_type)->default_value(0), "set program type (0 - card readout, 1 - station punch)");
+		("type,t", boost::program_options::value<int>(&prog_type)->default_value(0), "set program type (0 - card readout, 1 - station punch)");
 
 	boost::program_options::variables_map vm;
 	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
@@ -259,7 +283,7 @@ int _tmain(int argc, _TCHAR* argv[])
       std::cout << "Unknown error." << std::endl;
       return 6;
    }
-	BOOL bRet;
+/*	BOOL bRet;
 	MSG msg;
 
 	while( (bRet = GetMessage( &msg, 0, 0, 0 )) != 0)
@@ -276,5 +300,17 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
 
 	return 0;
-}
+*/
 
+
+   signal(SIGINT, &notify_exit_condition);
+   signal(SIGTERM, &notify_exit_condition);
+   signal(SIGBREAK, &notify_exit_condition);
+   signal(SIGABRT, &notify_exit_condition);
+
+   exit_cond.wait(exit_mtx, boost::bind(&should_exit));
+
+   std::cout << "exitting" << std::endl;
+   siport->close();
+
+}
