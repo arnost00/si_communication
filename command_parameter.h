@@ -20,12 +20,13 @@
 #include <boost/mpl/empty.hpp>
 #include <boost/mpl/minus.hpp>
 
+#include <stdint.h>
 
 namespace si
 {
 
-	typedef boost::mpl::deque<__int8, __int16, __int32, __int64> signed_integers;
-	typedef boost::mpl::deque<unsigned __int8, unsigned __int16, unsigned __int32, unsigned __int64> unsigned_integers;
+        typedef boost::mpl::deque<int8_t, int16_t, int32_t, int64_t> signed_integers;
+        typedef boost::mpl::deque<uint8_t, uint16_t, uint32_t, uint64_t> unsigned_integers;
 
 
 	template <unsigned size
