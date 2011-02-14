@@ -328,18 +328,13 @@ namespace si
 
 			datablock = data[1]->get<extended::responses::read_out_data>().begin();
 
-			iterator current_record = datablock + 0x08;
+			datablock += 0x08;
 			max_size = 0x80 - 0x08;
 
 			punch_type punch;
 
 			for(std::size_t i = 0; 0 < records_count; i++, records_count--)
 			{
-				if(18 == i)
-				{
-					datablock = data[1]->get<extended::responses::read_out_data>().begin();
-					max_size = 128;
-				}
 				punch.read_data(max_size, datablock);
 				readout.get<card_record::PUNCH_RECORDS>()[i] = punch_record(punch.get<control_number>()
 					, card_reader<>::get_duration(punch.get<time_12h>()));

@@ -26,7 +26,7 @@ namespace si
 
 		void block_read(typename block_message_tt::pointer block)
 		{
-                        needed_blocks_container::iterator it = needed_blocks.find(block->template get<extended::bn>().value);
+            needed_blocks_container::iterator it = needed_blocks.find(block->template get<extended::bn>().value);
 			if(needed_blocks.end() == it)
 			{
 				return;
