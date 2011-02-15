@@ -28,7 +28,7 @@ public:
 
    bool open(const std::string filename)
    {
-      ofs.open(filename, std::ios::app );
+      ofs.open(filename.c_str(), std::ios::app );
       isopen = ofs.good();
       if (isopen)
       {
@@ -63,5 +63,4 @@ inline filelog& operator<< (filelog& s, T v)
 
 extern filelog multilog;
 
-//#define LOG(message) multilog << message
 #define LOG multilog
