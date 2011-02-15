@@ -18,10 +18,22 @@
 #include <boost/program_options/parsers.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition.hpp>
+#include <boost/mpl/list_c.hpp>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <signal.h>
+#include <boost/tuple/tuple.hpp>
+
+#include <boost/system/windows_error.hpp>
+#include <boost/system/linux_error.hpp>
 
 #ifdef _WIN32
 #include <tchar.h>
 #endif
+
+#include "program_info.h"
+#include "filelog.h"
 
 #include "startup_sequence.h"
 #include "si_static_command.h"
@@ -33,23 +45,13 @@
 #include "create_parameter_sequence.h"
 #include "response.h"
 #include "chip_readout.h"
-#include <boost/mpl/list_c.hpp>
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <signal.h>
-
-#include <boost/system/windows_error.hpp>
-#include <boost/system/linux_error.hpp>
-
-#include <boost/tuple/tuple.hpp>
 #include "tuple_type.h"
 #include "crc529.h"
 #include "fixed_command.h"
 
 void outchar(unsigned char ch)
 {
-   std::cout << std::hex << (int)ch << ',';
+   LOG << std::hex << (int)ch << ',';
 }
 
 /*
@@ -95,10 +97,9 @@ void out_time_duration(std::ostream &fs, boost::posix_time::time_duration const&
 }
 void punch_arrived(si::extended::responses::transmit_record::pointer record_msg)
 {
-	std::cout << "record arrived: " << record_msg->get<si::extended::si>().value << " ";
-	out_time_duration(std::cout, boost::posix_time::millisec(1000*(record_msg->get<si::extended::t>().value) + (record_msg->get<si::extended::tss>().value*1000/256)), true);
-	std::cout << std::endl;
-
+	LOG << "record arrived: " << record_msg->get<si::extended::si>().value << " ";
+	out_time_duration(LOG, boost::posix_time::millisec(1000*(record_msg->get<si::extended::t>().value) + (record_msg->get<si::extended::tss>().value*1000/256)), true);
+	LOG << std::endl;
 }
 void punch_read(ofstream_pointer of, si::extended::responses::transmit_record::pointer record)
 {
@@ -160,22 +161,25 @@ void notify_exit_condition(int signum)
 	exit_cond.notify_all();
 }
 
+filelog multilog;
+
 #ifdef _WIN32
 int _tmain(int argc, _TCHAR* argv[])
 #else
 int main(int argc, char* argv[])
 #endif
 {
-	std::cout << "si_read v1.0.XXX - SI Card Reader" << std::endl; 
-	std::cout << "Copyright (C) 2009-2011 Vita, Arnost" << std::endl; 
-	std::cout << "EOBSystem - system.eob.cz" << std::endl; 
+   std::cout << program_name << " " << program_version << " - " << program_description << std::endl; 
+   std::cout << "Copyright (C) 2009-2011 Vita, Arnost" << std::endl; 
+   std::cout << "EOBSystem - system.eob.cz" << std::endl; 
 	boost::program_options::options_description desc("This version can read only SI Stations in 'extended' mode.\nAllowed options");
 	int prog_type;
 	desc.add_options()
 		("help,h", "produce help message")
 		("device,d", boost::program_options::value<std::string>(), "set communication device (ex. com2 or /dev/sportident/reader0)")
 		("output,o", boost::program_options::value<std::string>(), "set output file (ex. card.txt)")
-		("type,t", boost::program_options::value<int>(&prog_type)->default_value(0), "set program type (0 - card readout, 1 - station punch)");
+		("type,t", boost::program_options::value<int>(&prog_type)->default_value(0), "set program type (0 - card readout, 1 - station punch)")
+      ("logfile,l", boost::program_options::value<std::string>(), "set log file (ex. logfile.txt)");
 
 	boost::program_options::variables_map vm;
 	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
@@ -186,21 +190,29 @@ int main(int argc, char* argv[])
       std::cout << desc << std::endl;
       return 1;
 	}
+   if (vm.count("logfile"))
+   {
+      if (!multilog.open(vm["logfile"].as<std::string>()))
+      {
+         std::cout << "Cannot open log file." << std::endl;
+         return 8;
+      }
+   }
 
 	if (vm.count("device"))
 	{
-		 std::cout << "Communication device was set to " << vm["device"].as<std::string>() << std::endl;
+		 LOG << "Communication device was set to " << vm["device"].as<std::string>() << std::endl;
 	}
 	else
 	{
-		 std::cout << "Communication device was not set."<< std::endl;
+		 LOG << "Communication device was not set."<< std::endl;
        return 2;
 	}
 
 	ofstream_pointer output_file;
 	if (vm.count("output"))
 	{
-		std::cout << "Output was set to " << vm["output"].as<std::string>() << std::endl;
+		LOG << "Output was set to " << vm["output"].as<std::string>() << std::endl;
 		output_file.reset(new std::fstream());
 		output_file->open(vm["output"].as<std::string>().c_str(), std::ios_base::app| std::ios_base::out);
 		if(!output_file->is_open())
@@ -208,7 +220,7 @@ int main(int argc, char* argv[])
 			output_file->open(vm["output"].as<std::string>().c_str(), std::ios_base::trunc| std::ios_base::out);
 			if(!output_file->is_open())
 			{
-				std::cout << "Failed to open output file" << std::endl;
+				LOG << "Failed to open output file" << std::endl;
 				output_file.reset();
             return 4;
 			}
@@ -216,7 +228,7 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		 std::cout << "Output was not set."<< std::endl;
+		 LOG << "Output was not set."<< std::endl;
        return 3;
 	}
    si::channel_io_serial_port::pointer siport(new si::channel_io_serial_port::pointer::element_type());
@@ -228,7 +240,7 @@ int main(int argc, char* argv[])
       try
       {
 		   siport->open(vm["device"].as<std::string>());
-		   std::cout << (siport->is_open()? "Communication port opened": "Communication port closed") << std::endl;
+		   LOG << (siport->is_open()? "Communication port opened": "Communication port closed") << std::endl;
       }
       catch(boost::system::system_error &e)
       {
@@ -236,21 +248,21 @@ int main(int argc, char* argv[])
          {
 #ifdef BOOST_WINDOWS_API
          case boost::system::windows_error::file_not_found:
-            std::cout << "Communication device not found." << std::endl;
+            LOG << "Communication device not found." << std::endl;
             break;
          case boost::system::windows_error::access_denied:
-            std::cout << "Communication device access denied (maybe open by another application)." << std::endl;
+            LOG << "Communication device access denied (maybe open by another application)." << std::endl;
             break;
 #else // linux
          case boost::system::errc::no_such_file_or_directory:
-            std::cout << "Communication device not found." << std::endl;
+            LOG << "Communication device not found." << std::endl;
             break;
 #endif
          case boost::asio::error::already_open:
-            std::cout << "Communication device already open (maybe by another application)." << std::endl;
+            LOG << "Communication device already open (maybe by another application)." << std::endl;
             break;
          default:
-            std::cout << "Boost error, while opening input device : " << e.what() << ". Code : " << e.code().value()<< std::endl;
+            LOG << "Boost error, while opening input device : " << e.what() << ". Code : " << e.code().value()<< std::endl;
          }
          return 7;
       }
@@ -280,12 +292,12 @@ int main(int argc, char* argv[])
    }
    catch(boost::system::system_error &e)
    {
-      std::cout << "Boost error: " << e.what() << std::endl;
+      LOG << "Boost error: " << e.what() << std::endl;
       return 5;
    }
    catch(...)
    {
-      std::cout << "Unknown error." << std::endl;
+      LOG << "Unknown error." << std::endl;
       return 6;
    }
 
@@ -300,7 +312,7 @@ int main(int argc, char* argv[])
 
    exit_cond.wait(exit_mtx, boost::bind(&should_exit));
 
-   std::cout << "exitting" << std::endl;
+   LOG << "exitting" << std::endl;
    siport->close();
 
    return 0;

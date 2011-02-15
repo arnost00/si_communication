@@ -49,27 +49,27 @@ namespace si
 	protected:
 		void response_set_ms_hi_speed(extended::responses::set_ms_mode::pointer &response)
 		{
-			std::cout << "hi speed response, cn: " << response->get<extended::cn>().value << std::endl;
+			LOG << "hi speed response, cn: " << response->get<extended::cn>().value << std::endl;
 			success();
 		}
 		void response_set_ms_hi_speed_basic(basic::responses::set_ms_mode::pointer &response)
 		{
-			std::cout << "hi speed response, basic protocol cn: " << response->get<basic::cn>().value << std::endl;
+			LOG << "hi speed response, basic protocol cn: " << response->get<basic::cn>().value << std::endl;
 			success();
 		}
 		void response_set_ms_lo_speed(extended::responses::set_ms_mode::pointer &response)
 		{
-			std::cout << "lo speed response, cn: " << response->get<extended::cn>().value << std::endl;
+			LOG << "lo speed response, cn: " << response->get<extended::cn>().value << std::endl;
 			success();
 		}
 		void response_set_ms_lo_speed_basic(basic::responses::set_ms_mode::pointer &response)
 		{
-			std::cout << "lo speed response, on basic protocol cn: " << response->get<basic::cn>().value << std::endl;
+			LOG << "lo speed response, on basic protocol cn: " << response->get<basic::cn>().value << std::endl;
 			success();
 		}
 		void nck_set_ms_lo_speed(extended::responses::nak::pointer &response)
 		{
-			std::cout << "lo speed nck" << std::endl;
+			LOG << "lo speed nck" << std::endl;
 			//check basic protocol
 		   channel->set_protocol(si::channel_protocol_interface::pointer(new si::channel_protocol<protocols::basic>()));
 			basic::commands::set_ms_mode::pointer set_ms_mode(new basic::commands::set_ms_mode);
@@ -87,7 +87,7 @@ namespace si
 		}
 		void nck_set_ms_hi_speed(extended::responses::nak::pointer &response)
 		{
-			std::cout << "hi speed nck" << std::endl;
+			LOG << "hi speed nck" << std::endl;
 			//check basic protocol
 		   channel->set_protocol(si::channel_protocol_interface::pointer(new si::channel_protocol<protocols::basic>()));
 			basic::commands::set_ms_mode::pointer set_ms_mode(new basic::commands::set_ms_mode);
@@ -105,17 +105,17 @@ namespace si
 		}
 		void nck_set_ms_hi_speed_basic(basic::responses::nak::pointer &response)
 		{
-			std::cout << "hi speed nck on basic protocol: fail" << std::endl;
+			LOG << "hi speed nck on basic protocol: fail" << std::endl;
 			failure();
 		}
 		void nck_set_ms_lo_speed_basic(basic::responses::nak::pointer &response)
 		{
-			std::cout << "lo speed nck on basic protocol: fail" << std::endl;
+			LOG << "lo speed nck on basic protocol: fail" << std::endl;
 			failure();
 		}
 		void timeout_set_ms_hi_speed()
 		{
-			std::cout << "hi speed timeout, setting lo speed and repeating"  << std::endl;
+			LOG << "hi speed timeout, setting lo speed and repeating"  << std::endl;
 			channel->set_option(boost::asio::serial_port_base::baud_rate(4800));
 
 			extended::commands::set_ms_mode::pointer set_ms_mode(new extended::commands::set_ms_mode);
@@ -133,17 +133,17 @@ namespace si
 		}
 		void timeout_set_ms_hi_speed_basic()
 		{
-			std::cout << "hi speed timeout on basic protocol: fail"  << std::endl;
+			LOG << "hi speed timeout on basic protocol: fail"  << std::endl;
 			failure();
 		}
 		void timeout_set_ms_lo_speed()
 		{
-			std::cout << "lo speed timeout: fail"  << std::endl;
+			LOG << "lo speed timeout: fail"  << std::endl;
 			failure();
 		}
 		void timeout_set_ms_lo_speed_basic()
 		{
-			std::cout << "lo speed timeout on basic protocol: fail"  << std::endl;
+			LOG << "lo speed timeout on basic protocol: fail"  << std::endl;
 			failure();
 		}
 	};
