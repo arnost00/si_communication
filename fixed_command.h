@@ -39,11 +39,11 @@ namespace si
 			typedef boost::mpl::integral_c<unsigned, boostext::sequence_position<typename parameter_tt::parameter_type, command_parameters_type>::value> type;
 		};
 
-		virtual id_type get_id(protocols::id<>::value_type protocol = protocols::id<>::value)
+		virtual id_type get_id(protocols::id<>::value_type = protocols::id<>::value)
 		{
 			return code;
 		}
-		virtual void get_data(std::size_t &size, data_type& data, protocols::id<>::value_type protocol = protocols::id<>::value)
+		virtual void get_data(std::size_t &size, data_type& data, protocols::id<>::value_type = protocols::id<>::value)
 		{
 			size = get_size();
 			data.reset(new si::byte[size]);
@@ -54,7 +54,7 @@ namespace si
 			return;
 		}
 
-		std::size_t get_size(protocols::id<>::value_type protocol = protocols::id<>::value)
+		std::size_t get_size(protocols::id<>::value_type = protocols::id<>::value)
 		{
 			return parameters_size_counter<parameters_tt, this_type>::get_size(this);
 		}

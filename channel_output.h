@@ -28,7 +28,7 @@ namespace si
 				write_raw_data(size, data);
          }
       }
-		virtual void write_raw_data(std::size_t size, channel_protocol_interface::data_type data)
+		virtual void write_raw_data(std::size_t, channel_protocol_interface::data_type )
 		{
 		}
       virtual void set_protocol(channel_protocol_interface::pointer protocol_)

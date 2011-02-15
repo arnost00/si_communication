@@ -99,11 +99,11 @@ namespace si
 			return get_size();
 		}
 
-		template<typename iterator_t>inline void write_data(std::size_t &size, iterator_t &it)
+		template<typename iterator_t>inline void write_data(std::size_t &, iterator_t &it)
 		{
 			*it++ = (base_type::value >> (ordinal << 3) ) & 0xFF;
 		}
-		template<typename iterator_t>inline bool read_data(std::size_t &size, iterator_t &it)
+		template<typename iterator_t>inline bool read_data(std::size_t &, iterator_t &it)
 		{
 			typename base_type::value_type new_part = typename base_type::value_type(0xFF) << (ordinal << 3);
 			base_type::value &= ~new_part;
@@ -127,11 +127,11 @@ namespace si
 		{
 			return get_size();
 		}
-		template<typename iterator_t>inline void write_data(std::size_t &size, iterator_t &it )
+		template<typename iterator_t>inline void write_data(std::size_t &, iterator_t &it )
 		{
 			*it++ = base_type::value & 0xFF;
 		}
-		template<typename iterator_t>inline bool read_data(std::size_t &size, iterator_t &it )
+		template<typename iterator_t>inline bool read_data(std::size_t &, iterator_t &it )
 		{
 			typename base_type::value_type new_part = typename base_type::value_type(0xFF);
 			base_type::value &= ~new_part;
@@ -190,7 +190,7 @@ namespace si
 				return get_size();
 			}
 
-			template<typename iterator_t>static void write_bits_data(this_type *that, std::size_t &size, iterator_t &it, unsigned &bit_offset)
+			template<typename iterator_t>static void write_bits_data(this_type *, std::size_t &, iterator_t &it, unsigned &bit_offset)
 			{
 				int step = ordinal_begin <= ordinal_end? +1: -1;
 				unsigned i = ordinal_begin;
@@ -299,7 +299,7 @@ namespace si
       {
          return true;
       }
-      template<typename iterator_t>static inline std::size_t get_read_data_size(std::size_t size, iterator_t & it)
+	  template<typename iterator_t>static inline std::size_t get_read_data_size(std::size_t , iterator_t & )
       {
          return get_size();
       }
@@ -487,11 +487,11 @@ namespace si
                }
             }
          }
-         template<typename that_type, typename iterator_t>static inline void write_data(that_type *that, std::size_t &size, iterator_t &it, unsigned &bit_offset)
+		 template<typename that_type, typename iterator_t>static inline void write_data(that_type *, std::size_t &size, iterator_t &it, unsigned &bit_offset)
          {
             skip(size, it, bit_offset);
          }         
-         template<typename that_type, typename iterator_t>static inline void read_data(that_type *that, std::size_t &size, iterator_t &it, unsigned &bit_offset)
+		 template<typename that_type, typename iterator_t>static inline void read_data(that_type *, std::size_t &size, iterator_t &it, unsigned &bit_offset)
          {
             skip(size, it, bit_offset);
          }         
@@ -529,11 +529,11 @@ namespace si
 		 , true >
       {
 //		BOOST_MPL_ASSERT_MSG(false, DATA_WRITER_DBG, (types<description, typename boost::mpl::empty<description>::type>));
-		 template<typename that_type, typename iterator_t>static inline void write_data(that_type *that, std::size_t &size, iterator_t &it, unsigned &bit_offset)
+		 template<typename that_type, typename iterator_t>static inline void write_data(that_type *, std::size_t &, iterator_t &, unsigned &)
          {
             return;
          }         
-         template<typename that_type, typename iterator_t>static inline bool read_data(that_type *that, std::size_t &size, iterator_t &it, unsigned &bit_offset)
+		 template<typename that_type, typename iterator_t>static inline bool read_data(that_type *, std::size_t &, iterator_t &, unsigned &)
          {
             return true;
          }
@@ -547,7 +547,7 @@ namespace si
       {
          return true;
       }
-      template<typename iterator_t>static inline std::size_t get_read_data_size(std::size_t size, iterator_t & it)
+	  template<typename iterator_t>static inline std::size_t get_read_data_size(std::size_t , iterator_t & )
       {
          return get_size();
       }
@@ -614,7 +614,7 @@ namespace si
 				{
 						it += description_part::size::value;
 				}
-				template<typename that_type, typename iterator_t>static inline void read_data(that_type *that, std::size_t &size, iterator_t &it)
+				template<typename that_type, typename iterator_t>static inline void read_data(that_type *, std::size_t &, iterator_t &it)
 				{
 						it += description_part::size::value;
 				}
@@ -643,7 +643,7 @@ namespace si
 				{
 						return;
 				}
-				template<typename that_type, typename iterator_t>static inline bool read_data(that_type *that, std::size_t &size, iterator_t &it)
+				template<typename that_type, typename iterator_t>static inline bool read_data(that_type *, std::size_t &, iterator_t &)
 				{
 						return true;
 				}
@@ -699,7 +699,7 @@ namespace si
 
    template<typename parameters_tt, typename that_type> struct parameters_size_counter<parameters_tt, that_type, true/*typename boost::enable_if<typename boost::mpl::empty<parameters_tt>::type >::type*/ >
    {
-      static inline std::size_t get_size(that_type* that)
+	  static inline std::size_t get_size(that_type* )
       {
          return 0;
       }
@@ -725,7 +725,7 @@ namespace si
       {
          return length;
       }
-      template<typename iterator_t>static inline std::size_t get_read_data_size(std::size_t size, iterator_t & it)
+	  template<typename iterator_t>static inline std::size_t get_read_data_size(std::size_t , iterator_t & )
       {
          return get_size();
       }
@@ -822,7 +822,7 @@ namespace si
    };
    template<typename that_type, typename command_template_tt> struct raw_data_writer<that_type, command_template_tt, typename boost::enable_if<typename boost::mpl::empty<command_template_tt>::type>::type>
    {
-      template<typename iterator_t>static inline void write_data(that_type* that, std::size_t size, iterator_t &it)
+	  template<typename iterator_t>static inline void write_data(that_type* , std::size_t , iterator_t &)
       {
       }
    };
@@ -963,7 +963,7 @@ namespace si
 
    template<typename that_type, typename command_template_tt> struct raw_data_reader<that_type, command_template_tt, typename boost::enable_if<typename boost::mpl::empty<command_template_tt>::type>::type>
    {
-      template<typename iterator_t>static inline std::size_t get_read_data_size(that_type* that, std::size_t size, iterator_t & it)
+	  template<typename iterator_t>static inline std::size_t get_read_data_size(that_type* , std::size_t , iterator_t & )
       {
          return 0;
       }
@@ -979,7 +979,7 @@ namespace si
       {
          return true;
       }
-      template<typename iterator_t>static inline bool read_data(that_type* that, std::size_t size, iterator_t &it)
+	  template<typename iterator_t>static inline bool read_data(that_type* , std::size_t , iterator_t &)
       {
          return true;
       }

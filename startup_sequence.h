@@ -67,7 +67,7 @@ namespace si
 			LOG << "lo speed response, on basic protocol cn: " << response->get<basic::cn>().value << std::endl;
 			success();
 		}
-		void nck_set_ms_lo_speed(extended::responses::nak::pointer &response)
+		void nck_set_ms_lo_speed(extended::responses::nak::pointer &)
 		{
 			LOG << "lo speed nck" << std::endl;
 			//check basic protocol
@@ -85,7 +85,7 @@ namespace si
 
 			channel->write_command(set_ms_mode);		
 		}
-		void nck_set_ms_hi_speed(extended::responses::nak::pointer &response)
+		void nck_set_ms_hi_speed(extended::responses::nak::pointer &)
 		{
 			LOG << "hi speed nck" << std::endl;
 			//check basic protocol
@@ -103,12 +103,12 @@ namespace si
 
 			channel->write_command(set_ms_mode);		
 		}
-		void nck_set_ms_hi_speed_basic(basic::responses::nak::pointer &response)
+		void nck_set_ms_hi_speed_basic(basic::responses::nak::pointer &)
 		{
 			LOG << "hi speed nck on basic protocol: fail" << std::endl;
 			failure();
 		}
-		void nck_set_ms_lo_speed_basic(basic::responses::nak::pointer &response)
+		void nck_set_ms_lo_speed_basic(basic::responses::nak::pointer &)
 		{
 			LOG << "lo speed nck on basic protocol: fail" << std::endl;
 			failure();

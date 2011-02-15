@@ -100,12 +100,12 @@ namespace si
 		 , unsigned offset> struct sequence_checker<commands_sequence, offset, true >
       {
          typedef typename boost::mpl::front<commands_sequence>::type command_type;
-         inline static bool check_input_command(command_interface::id_type command_id
-            , std::size_t size
-            , command_interface::data_type data
-            , bool control_sequence
-            , reactions_type &reactions
-            , removal_policy_tt &removal_policy)
+		 inline static bool check_input_command(command_interface::id_type
+			, std::size_t
+			, command_interface::data_type
+			, bool
+			, reactions_type &
+			, removal_policy_tt &)
          {
             return false;
          }

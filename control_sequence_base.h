@@ -20,8 +20,8 @@ namespace si
 			, callback_type success_cb_ = callback_type()
 			, callback_type failure_cb_ = callback_type())
 			: channel(channel_)
-			, success_cb(success_cb)
-			, failure_cb(failure_cb)
+			, success_cb(success_cb_)
+			, failure_cb(failure_cb_)
 		{
 		}
 
