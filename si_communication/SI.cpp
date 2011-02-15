@@ -154,7 +154,7 @@ inline bool should_exit()
 {
 	return exit_predicate;
 }
-void notify_exit_condition(int signum)
+void notify_exit_condition(int )
 {
 	boost::recursive_mutex::scoped_lock sl(exit_mtx);
 	exit_predicate = true;

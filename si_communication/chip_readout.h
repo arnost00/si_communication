@@ -218,7 +218,7 @@ namespace si
 		{
 			LOG << "card removed during readout, no: " << response->get<extended::si>().value << std::endl;
 		}
-		void nak(extended::responses::nak::pointer response)
+		void nak(extended::responses::nak::pointer )
 		{
 			LOG << "nak arrived" << std::endl;
 		}

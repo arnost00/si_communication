@@ -52,7 +52,7 @@ template<> struct protocol_encoder<protocols::basic>
    }
    template<typename iterator_in, typename iterator_out> static void write_data(byte command
       , std::size_t in_size, iterator_in it
-      , std::size_t out_size, iterator_out out_it)
+	  , std::size_t , iterator_out out_it)
    {
       *out_it++ = STX::value;
       *out_it++ = command;
@@ -100,7 +100,7 @@ template<> struct protocol_encoder<protocols::basic>
       }
       return unknown_size;
    }
-   template<typename iterator, typename out_iterator> static void read_command_data(std::size_t& size, iterator &it, std::size_t& out_size,  out_iterator out_it)
+   template<typename iterator, typename out_iterator> static void read_command_data(std::size_t& size, iterator &it, std::size_t& ,  out_iterator out_it)
    {
       bool prefixed_char = false;
       std::size_t processed_size = 0;
@@ -211,13 +211,13 @@ template<> struct protocol_encoder<protocols::basic>
 
 template<> struct protocol_encoder<protocols::extended>
 {
-   template<typename iterator> static std::size_t get_size(byte command, std::size_t in_size, iterator it, bool ff_start = false, bool extra_stx = false)
+   template<typename iterator> static std::size_t get_size(byte command, std::size_t in_size, iterator , bool ff_start = false, bool extra_stx = false)
    {
 		return sizeof(command) + sizeof(STX::value) + sizeof(ETX::value) + 3 + in_size + (ff_start? 1: 0) + (extra_stx? 1: 0);
    }
    template<typename iterator_in, typename iterator_out> static void write_data(byte command
       , std::size_t in_size, iterator_in it
-      , std::size_t out_size, iterator_out out_it
+	  , std::size_t , iterator_out out_it
 		, bool ff_start = false, bool extra_stx = false)
 	{
 		if(ff_start)
@@ -362,13 +362,13 @@ template<> struct protocol_encoder<protocols::extended>
 
 template<> struct protocol_encoder<control_sequence>
 {
-   template<typename iterator> static std::size_t get_size(byte command, std::size_t in_size, iterator it)
+   template<typename iterator> static std::size_t get_size(byte command, std::size_t , iterator )
    {
       return sizeof(command);
    }
    template<typename iterator_in, typename iterator_out> static void write_data(byte command
-      , std::size_t in_size, iterator_in it
-      , std::size_t out_size, iterator_out out_it)
+	  , std::size_t , iterator_in
+	  , std::size_t , iterator_out out_it)
    {
       *out_it++ = command;
    }

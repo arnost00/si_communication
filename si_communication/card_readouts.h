@@ -232,15 +232,15 @@ namespace si
 			, true>
 		{
 			typedef card_8_family type;
-			static inline bool read(si::byte parameter, card_record &readout, blocks_read<extended::responses::si_card8_get>& data)
+			static inline bool read(si::byte , card_record &, blocks_read<extended::responses::si_card8_get>& )
 			{
 				return false;
 			}
-			static inline bool get_blocks_needed(si::byte parameter, needed_blocks_container &blocks, extended::responses::si_card8_get& data)
+			static inline bool get_blocks_needed(si::byte , needed_blocks_container &, extended::responses::si_card8_get& )
 			{
 				return false;
 			}
-			static std::string& get_type_description(extended::si::value_type data)
+			static std::string& get_type_description(extended::si::value_type )
 			{
 				static std::string unsupported_card_type("unsupported card type");
 				return unsupported_card_type;
@@ -351,7 +351,7 @@ namespace si
 			}
 			return true;
 		}
-		static std::string& get_type_description(extended::si::value_type data)
+		static std::string& get_type_description(extended::si::value_type )
 		{
 			static std::string unsupported_card_type("card 8");
 			return unsupported_card_type;
@@ -416,7 +416,7 @@ namespace si
 			}
 			return true;
 		}
-		static std::string& get_type_description(extended::si::value_type data)
+		static std::string& get_type_description(extended::si::value_type )
 		{
 			static std::string unsupported_card_type("card 9");
 			return unsupported_card_type;
@@ -588,7 +588,7 @@ namespace si
 			}
 			return true;
 		}
-		static std::string& get_type_description(extended::si::value_type data)
+		static std::string& get_type_description(extended::si::value_type )
 		{
 			static std::string card_type("card p");
 			return card_type;
@@ -645,7 +645,7 @@ namespace si
 			}
 			return true;
 		}
-		static std::string& get_type_description(extended::si::value_type data)
+		static std::string& get_type_description(extended::si::value_type )
 		{
 			static std::string card_type("card t");
 			return card_type;

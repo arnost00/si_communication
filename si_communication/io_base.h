@@ -74,7 +74,7 @@ namespace si
 		};
 		template<typename bases_tt> struct bases<bases_tt, typename boost::enable_if<typename boost::mpl::empty<bases_tt>::type>::type>
 		{
-			bases(service_wrapper service)
+			bases(service_wrapper )
 			{}	
 		};
 	};
