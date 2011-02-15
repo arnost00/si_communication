@@ -38,44 +38,44 @@ namespace si
 	{
 	if(duration.is_not_a_date_time())
 	{
-		std::cout << "No time ";
+		LOG << "No time ";
 		return;
 	}
-	std::cout << std::setfill('0') << std::dec;
-	std::cout << std::setw(2) << duration.hours();
-	std::cout << ':' << std::setw(2) << duration.minutes();
-	std::cout << ':' << std::setw(2) << duration.seconds();
-//		std::cout << duration.total_milliseconds() % 1000;
+	LOG << std::setfill('0') << std::dec;
+	LOG << std::setw(2) << duration.hours();
+	LOG << ':' << std::setw(2) << duration.minutes();
+	LOG << ':' << std::setw(2) << duration.seconds();
+//		LOG << duration.total_milliseconds() % 1000;
 
 	}
 	void stdout_punch_record(punch_record &punch)
 	{
-		std::cout << std::setfill(' ') << std::setw(3) << punch.control_number << "/";
+		LOG << std::setfill(' ') << std::setw(3) << punch.control_number << "/";
 		stdout_ptime_duration(punch.punch_time);
-		std::cout << " \t";
+		LOG << " \t";
 	}
 
 	void stdout_card_record(card_record &card)
 	{
-		std::cout << "Card id: \t" << card.get<card_record::CARD_ID>() << std::endl;
-		std::cout << "Start no: \t" << card.get<card_record::START_NO>() << std::endl;
-		std::cout << "Start time: \t";
+		LOG << "Card id: \t" << card.get<card_record::CARD_ID>() << std::endl;
+		LOG << "Start no: \t" << card.get<card_record::START_NO>() << std::endl;
+		LOG << "Start time: \t";
 		stdout_ptime_duration(card.get<card_record::START_TIME>());
-		std::cout << std::endl;
-		std::cout << "Finish time: \t";
+		LOG << std::endl;
+		LOG << "Finish time: \t";
 		stdout_ptime_duration(card.get<card_record::FINISH_TIME>());
-		std::cout << std::endl;
-		std::cout << "Check time: \t";
+		LOG << std::endl;
+		LOG << "Check time: \t";
 		stdout_ptime_duration(card.get<card_record::CHECK_TIME>());
-		std::cout << std::endl;
-		std::cout << "Clear time: \t";
+		LOG << std::endl;
+		LOG << "Clear time: \t";
 		stdout_ptime_duration(card.get<card_record::CLEAR_TIME>());
-		std::cout << std::endl;
+		LOG << std::endl;
 
-		std::cout << "Punch recods: \t" << std::endl;
+		LOG << "Punch recods: \t" << std::endl;
 		std::for_each(card.get<card_record::PUNCH_RECORDS>().begin()
 			, card.get<card_record::PUNCH_RECORDS>().end()
 			, boost::bind(&stdout_punch_record, _1));
-		std::cout << std::endl;
+		LOG << std::endl;
 	}
 }//namespace si

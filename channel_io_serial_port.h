@@ -80,7 +80,7 @@ namespace si
             }
             catch (std::invalid_argument &e)
             {
-               std::cout << "Input processing failed: " << e.what() << std::endl;
+               LOG << "Input processing failed: " << e.what() << std::endl;
             }
 			}
 			if(ec)

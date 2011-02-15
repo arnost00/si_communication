@@ -35,9 +35,9 @@ namespace si
       {
          for(std::size_t i = 0; i< size; i++, data ++)
          {
-            std::cout << unsigned(*data) << ',';
+            LOG << unsigned(*data) << ',';
          }
-         std::cout << std::endl;
+         LOG << std::endl;
       }
    };
 }//namespace si
