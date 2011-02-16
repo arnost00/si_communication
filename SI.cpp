@@ -160,6 +160,10 @@ void notify_exit_condition(int )
 	exit_predicate = true;
 	exit_cond.notify_all();
 }
+void startup_sequence_failed()
+{
+	throw std::runtime_error("Startup sequence failec");
+}
 
 filelog multilog;
 
@@ -274,9 +278,10 @@ int main(int argc, char* argv[])
       {
 	      startup_sequence.start(siport
 		      , boost::bind(&si::chip_readout::start, &chip_readout, siport
-		      , si::control_sequence_base<>::callback_type()
-		      , si::control_sequence_base<>::callback_type()
-		      , chip_read_cb));
+				  , si::control_sequence_base<>::callback_type()
+				  , si::control_sequence_base<>::callback_type()
+				  , chip_read_cb)
+			  , boost::bind(&startup_sequence_failed) );
       }
       else
       {
@@ -294,6 +299,11 @@ int main(int argc, char* argv[])
    {
       LOG << "Boost error: " << e.what() << std::endl;
       return 5;
+   }
+   catch(std::exception &e)
+   {
+	  LOG << "Std error: " << e.what() << std::endl;
+	  return 8;
    }
    catch(...)
    {
@@ -315,5 +325,7 @@ int main(int argc, char* argv[])
    LOG << "exitting" << std::endl;
    siport->close();
 
-   return 0;
+    return 0;
+
+
 }
