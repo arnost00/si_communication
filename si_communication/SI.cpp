@@ -179,7 +179,7 @@ int main(int argc, char* argv[])
 	boost::program_options::options_description desc("This version can read only SI Stations in 'extended' mode.\nAllowed options");
 	int prog_type;
 	desc.add_options()
-		("help,h", "produce help message")
+		("help,h", "produce help message with allowed options and return values")
 		("device,d", boost::program_options::value<std::string>(), "set communication device (ex. com2 or /dev/sportident/reader0)")
 		("output,o", boost::program_options::value<std::string>(), "set output file (ex. card.txt)")
 		("type,t", boost::program_options::value<int>(&prog_type)->default_value(0), "set program type (0 - card readout, 1 - station punch)")
@@ -192,7 +192,20 @@ int main(int argc, char* argv[])
 	if (argc < 2 || vm.count("help"))
 	{
       std::cout << desc << std::endl;
-      return 1;
+		if (vm.count("help"))
+		{
+			std::cout << "Possible application return values:" << std::endl;
+			std::cout << "  " << 0 << " - normal application end" << std::endl;
+			std::cout << "  " << 1 << " - help or no options set" << std::endl;
+			std::cout << "  " << 2 << " - communication device not set" << std::endl;
+			std::cout << "  " << 3 << " - output file not set" << std::endl;
+			std::cout << "  " << 4 << " - failed to open output file" << std::endl;
+			std::cout << "  " << 5 << " - unhandled boost error" << std::endl;
+			std::cout << "  " << 6 << " - unhandled unknown error" << std::endl;
+			std::cout << "  " << 7 << " - failed to open communication device" << std::endl;
+			std::cout << "  " << 8 << " - unhandled std error" << std::endl;
+		}
+		return 1;
 	}
    if (vm.count("logfile"))
    {
