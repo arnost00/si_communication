@@ -174,7 +174,7 @@ int main(int argc, char* argv[])
 #endif
 {
    std::cout << program_name << " " << program_version << " - " << program_description << std::endl; 
-   std::cout << "Copyright (C) 2009-2011 Vita, Arnost" << std::endl; 
+	std::cout << "Copyright (C) 2009-2011 Vit Kasal, Richard Patek" << std::endl; 
    std::cout << "EOBSystem - system.eob.cz" << std::endl; 
 	boost::program_options::options_description desc("This version can read only SI Stations in 'extended' mode.\nAllowed options");
 	int prog_type;
