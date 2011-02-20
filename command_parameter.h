@@ -565,7 +565,7 @@ namespace si
    };
 
 	template<typename description_tt
-		, typename T>struct parameters_array
+		/*, typename T*/>struct parameters_array
 		: public boostext::tuple_type<typename create_parameter_sequence<description_tt>::type >::type
 		, public parameter
 	{		
@@ -587,8 +587,8 @@ namespace si
 		typedef description_tt description_type;
 		typedef typename boostext::tuple_type<typename create_parameter_sequence<description_tt>::type >::type base_tuple_type;
 		typedef typename boost::mpl::integral_c<std::size_t, get_description_length<description_type>::value>  description_size_type;
-		typedef T type;
-		typedef T parameter_type;
+//		typedef T type;
+//		typedef T parameter_type;
 
 		typedef typename create_parameter_sequence<description_tt>::type parameters_type;
 

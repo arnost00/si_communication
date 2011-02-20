@@ -15,14 +15,15 @@
 
 namespace si
 {
-	template<byte command_tt
+	template<typename command_tt
 		, typename parameters_tt = boost::mpl::deque<>
 		, bool control_sequence_tt = false
 		> struct fixed_command
-			: public parameters_array<parameters_tt, fixed_command<command_tt, parameters_tt, control_sequence_tt> >
+			: public parameters_array<parameters_tt>
 		, public command_interface
 	{
-		BOOST_STATIC_CONSTANT(byte, code = command_tt);
+		typedef typename command_tt::value_type command_t;
+		BOOST_STATIC_CONSTANT(command_t, code = command_tt::value);
 
 		BOOST_STATIC_CONSTANT(bool, control_sequence = control_sequence_tt);
 
@@ -30,7 +31,7 @@ namespace si
 		typedef typename create_parameter_sequence<parameters_tt>::type command_parameters_type;
 //		typedef typename boostext::tuple_type<typename create_parameter_sequence<parameters_tt>::type>::type parameters_tuple_type;
 
-		typedef parameters_array<parameters_tt, fixed_command<command_tt, parameters_tt, control_sequence_tt> > param_array_type;
+		typedef parameters_array<parameters_tt > param_array_type;
 		typedef boost::shared_ptr<fixed_command> pointer;
 
 		typedef fixed_command this_type;
@@ -39,9 +40,13 @@ namespace si
 			typedef boost::mpl::integral_c<unsigned, boostext::sequence_position<typename parameter_tt::parameter_type, command_parameters_type>::value> type;
 		};
 
+		template<typename top_of_tt, typename id_tt> struct get_top_part
+		{
+		typedef boost::mpl::integral_c<id_tt, (top_of_tt::value >> (sizeof(id_tt) < sizeof(command_t)? 8*(sizeof(command_t) - sizeof(id_tt)): 0 ))> type;
+		};
 		virtual id_type get_id(protocols::id<>::value_type = protocols::id<>::value)
 		{
-			return code;
+			return get_top_part<command_tt, id_type>::type::value;
 		}
 		virtual void get_data(std::size_t &size, data_type& data, protocols::id<>::value_type = protocols::id<>::value)
 		{

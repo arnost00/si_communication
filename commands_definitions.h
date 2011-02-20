@@ -11,10 +11,14 @@
 
 #include <boost/config/suffix.hpp>
 
+#include <stdint.h>
+
 namespace si
 {
 	struct basic
 	{	
+		typedef boost::integral_constant<uint8_t, 0x2E> card_moved_code;
+
 		typedef boost::integral_constant<byte, 0x70> set_ms_mode_code;
 		typedef boost::integral_constant<byte, 0x66> si_card6_inserted_code;
 		typedef boost::integral_constant<byte, 0x30> si_card5_set_card_number;
@@ -29,24 +33,27 @@ namespace si
 			BOOST_STATIC_CONSTANT(si::byte, slave = 0x53);
 		};
 		struct cn: public unsigned_integral_parameter<1, cn>{};
+		struct cmd: public unsigned_integral_parameter<1, cmd>{};
 
 		typedef boost::mpl::deque<> no_data;
+		typedef boost::mpl::deque<cmd> card_move_data_def;
 
 		struct commands
 		{
 			typedef boost::mpl::deque<m_s> set_ms_mode_data_def;
 
-			typedef fixed_command<ACK::value, no_data, true> ack;
-			typedef fixed_command<NAK::value, no_data, true> nak;
-			typedef fixed_command<set_ms_mode_code::value, set_ms_mode_data_def> set_ms_mode; 
+			typedef fixed_command<ACK, no_data, true> ack;
+			typedef fixed_command<NAK, no_data, true> nak;
+			typedef fixed_command<set_ms_mode_code, set_ms_mode_data_def> set_ms_mode;
 		};
 		struct responses
 		{
 			typedef boost::mpl::deque<cn, m_s> set_ms_mode_data_def;
 
-			typedef fixed_command<ACK::value, no_data, true> ack;
-			typedef fixed_command<NAK::value, no_data, true> nak;
-			typedef fixed_command<set_ms_mode_code::value, set_ms_mode_data_def> set_ms_mode;
+			typedef fixed_command<ACK, no_data, true> ack;
+			typedef fixed_command<NAK, no_data, true> nak;
+			typedef fixed_command<set_ms_mode_code, set_ms_mode_data_def> set_ms_mode;
+			typedef fixed_command<card_moved_code, card_move_data_def> card_move_mode;
 		};
 	};
 	struct extended
@@ -91,12 +98,12 @@ namespace si
 			typedef boost::mpl::deque<bn> si_card_multiblock_get_data_def;
 			typedef boost::mpl::deque<bn> si_card8_get_data_def;
 
-			typedef fixed_command<ACK::value, no_data, true> ack;
-			typedef fixed_command<NAK::value, no_data, true> nak;
-			typedef fixed_command<set_ms_mode_code::value, set_ms_mode_data_def> set_ms_mode; 
-			typedef fixed_command<si_card5_get_code::value, no_data> si_card5_get; 
-			typedef fixed_command<si_card6_get_code::value, si_card_multiblock_get_data_def> si_card6_get; 
-			typedef fixed_command<si_card8_get_code::value, si_card_multiblock_get_data_def> si_card8_get; 
+			typedef fixed_command<ACK, no_data, true> ack;
+			typedef fixed_command<NAK, no_data, true> nak;
+			typedef fixed_command<set_ms_mode_code, set_ms_mode_data_def> set_ms_mode;
+			typedef fixed_command<si_card5_get_code, no_data> si_card5_get;
+			typedef fixed_command<si_card6_get_code, si_card_multiblock_get_data_def> si_card6_get;
+			typedef fixed_command<si_card8_get_code, si_card_multiblock_get_data_def> si_card8_get;
 		};
 		struct responses
 		{
@@ -108,19 +115,19 @@ namespace si
 			typedef boost::mpl::deque<cn, bn, read_out_data> si_card_multiblock_get_data_def;
 			typedef boost::mpl::deque<cn, si, td, t, tss, mem> transmit_record_data_def;
 
-			typedef fixed_command<ACK::value, no_data, true> ack;
-			typedef fixed_command<NAK::value, no_data, true> nak;
-			typedef fixed_command<set_ms_mode_code::value, set_ms_mode_data_def> set_ms_mode;
-			typedef fixed_command<si_card5_inserted_code::value, card_move_data_def> si_card5_inserted;
-			typedef fixed_command<si_card6_inserted_code::value, card_move_data_def> si_card6_inserted;
-			typedef fixed_command<si_card8_inserted_code::value, card_move_data_def> si_card8_inserted;
-			typedef fixed_command<si_card_removed_code::value, card_move_data_def> si_card_removed;
+			typedef fixed_command<ACK, no_data, true> ack;
+			typedef fixed_command<NAK, no_data, true> nak;
+			typedef fixed_command<set_ms_mode_code, set_ms_mode_data_def> set_ms_mode;
+			typedef fixed_command<si_card5_inserted_code, card_move_data_def> si_card5_inserted;
+			typedef fixed_command<si_card6_inserted_code, card_move_data_def> si_card6_inserted;
+			typedef fixed_command<si_card8_inserted_code, card_move_data_def> si_card8_inserted;
+			typedef fixed_command<si_card_removed_code, card_move_data_def> si_card_removed;
 
-			typedef fixed_command<transmit_record_code::value, transmit_record_data_def> transmit_record;
+			typedef fixed_command<transmit_record_code, transmit_record_data_def> transmit_record;
 
-			typedef fixed_command<si_card5_get_code::value, si_card5_get_data_def> si_card5_get; 
-			typedef fixed_command<si_card6_get_code::value, si_card_multiblock_get_data_def> si_card6_get; 
-			typedef fixed_command<si_card8_get_code::value, si_card_multiblock_get_data_def> si_card8_get; 
+			typedef fixed_command<si_card5_get_code, si_card5_get_data_def> si_card5_get;
+			typedef fixed_command<si_card6_get_code, si_card_multiblock_get_data_def> si_card6_get;
+			typedef fixed_command<si_card8_get_code, si_card_multiblock_get_data_def> si_card8_get;
 		};
 	};
 /*		struct addr: public si::unsigned_integral_parameter<3, addr>{};

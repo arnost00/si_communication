@@ -83,7 +83,7 @@ namespace si
 			, don_t_care<0x0A>, start_no, start_time, finish_time, record_counter
 			, don_t_care<1>, check_time> card_5_header_def;
 
-		struct card_5_header_type: public parameters_array<card_5_header_def, card_5_header_type>{};
+		struct card_5_header_type: public parameters_array<card_5_header_def>{};
 		struct punch_type: public punch_3bytes_type<punch_type>{};
 		struct extra_punch_type: public punch_1byte_type<extra_punch_type>{};
 
@@ -165,7 +165,7 @@ namespace si
 			, don_t_care<0x01>
 			, don_t_care<0x01>, card_id> card_8_header_def;
 
-		struct card_8_header_type: public parameters_array<card_8_header_def, card_8_header_type>{};
+		struct card_8_header_type: public parameters_array<card_8_header_def>{};
 		struct punch_type: public punch_4bytes_type<punch_type>{};
 
 		typedef boost::mpl::deque<
@@ -443,7 +443,7 @@ namespace si
 			, finish_time, start_time, check_time, clear_time, start_no
 			> card_6_header_def;
 
-		struct card_6_header_type: public parameters_array<card_6_header_def, card_6_header_type>{};
+		struct card_6_header_type: public parameters_array<card_6_header_def>{};
 
                 static uint32_t get_id(extended::responses::si_card6_get& data)
 		{
