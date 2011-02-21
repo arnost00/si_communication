@@ -23,7 +23,7 @@ namespace si
 			, callback_type success_cb = callback_type()
 			, callback_type failure_cb = callback_type())
 		{
-                        control_sequence_base<channel_io_serial_port>::start(channel, success_cb, failure_cb);
+			control_sequence_base<channel_io_serial_port>::start(channel, success_cb, failure_cb);
 
 			channel->set_option(boost::asio::serial_port_base::baud_rate(38400));
 			channel->set_option(boost::asio::serial_port_base::stop_bits(boost::asio::serial_port_base::stop_bits::one));

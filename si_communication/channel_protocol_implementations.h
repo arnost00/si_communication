@@ -10,48 +10,7 @@
 
 namespace si
 {
-    /*
-   template <typename protocol_tt> struct channel_protocol_static: public channel_protocol_interface
-   {
-      virtual void encode_command(command_interface::pointer command, std::size_t &size, data_type& result)
-      {
-         return channel_protocol<protocol_tt>::encode_command(command, size, result);
-      }
-      virtual void process_input(command_interface::pointer command, std::size_t &size, data_type& result)
-      {
-         unprocessed_input.insert(unprocessed_input.end(), result.get(), result.get() + size);
-         return channel_protocol<protocol_tt>::encode_command(command, size, result);
-      }
-      typedef std::vector<byte> unprocessed_input_type;
-      unprocessed_input_type unprocessed_input;
-   };
-*/
-/*
-   struct channel_protocol_base: public channel_protocol_interface
-   {
-   };
 
-   template<typename base_tt> struct channel_protocol_common: public base_tt
-   {
-      typedef base_tt base_type;
-      virtual void process_input(std::size_t &input_size, channel_protocol_interface::data_type& result)
-      {
-         unprocessed_input.insert(unprocessed_input.end(), result.get(), result.get() + input_size);
-         unprocessed_input_type::iterator it = unprocessed_input.begin();
-         unprocessed_input_type::iterator recentit;
-         std::size_t size;
-         while(it != recentit)
-         {
-            recentit = it;
-            size = unprocessed_input.end() - it;
-            base_type::detect_command(size, it);
-         }
-         unprocessed_input.erase(unprocessed_input.begin(), it);
-      }
-      typedef std::vector<si::byte> unprocessed_input_type;
-      unprocessed_input_type unprocessed_input;
-   };
-*/
    template<typename protocol_tt> struct channel_protocol: public channel_protocol_interface
    {
       BOOST_MPL_ASSERT_MSG(false, UNKNOWNT_PROTOCOL, (types<protocol_tt>));

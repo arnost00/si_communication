@@ -78,55 +78,60 @@ template<> struct protocol_encoder<protocols::basic>
       std::size_t processed_size = 0;
       for(;processed_size < size; work_it++, processed_size++)
       {
-         if(prefixed_char)
-         {
-            data_size++;
-            continue;
-         }
-         if(0x20 > (*work_it))
-         {
-            data_size++;
-         }
-         switch(*work_it)
-         {
-         case DLE::value:
-            prefixed_char = true;
-            continue;
-         case ETX::value:
-            return data_size;
-         default:
-            throw std::invalid_argument("channel_protocol<protocols::basic>::detect_command_data_size: invalid input");
-         }
+			if(prefixed_char)
+			{
+				data_size++;
+				continue;
+			}
+			if(0x20 <= (*work_it))
+			{
+				data_size++;
+			}
+			else
+			{
+				switch(*work_it)
+				{
+				case DLE::value:
+					prefixed_char = true;
+					continue;
+				case ETX::value:
+					return data_size;
+				default:
+					throw std::invalid_argument("channel_protocol<protocols::basic>::detect_command_data_size: invalid input");
+				}
+			}
       }
       return unknown_size;
    }
-   template<typename iterator, typename out_iterator> static void read_command_data(std::size_t& size, iterator &it, std::size_t& ,  out_iterator out_it)
+   template<typename iterator, typename out_iterator> static void read_command_data(std::size_t&, iterator &it, std::size_t& data_size,  out_iterator out_it)
    {
       bool prefixed_char = false;
-      std::size_t processed_size = 0;
-      for(;processed_size < size; it++, processed_size++)
+
+	  for(std::size_t processed_size = 0; processed_size < data_size; it++, processed_size++)
       {
          if(prefixed_char)
          {
             *out_it++ = *it;
             continue;
          }
-         if(0x20 > (*it))
+		 if(0x20 <= (*it))
          {
             *out_it++ = *it;
             continue;
          }
-         switch(*it)
-         {
-         case DLE::value:
-            prefixed_char = true;
-            continue;
-         case ETX::value:
-            it++;
-            return;
-         default:
-            throw std::invalid_argument("channel_protocol<protocols::basic>::read_command_data: invalid input");
-         }
+		 else
+		 {
+			 switch(*it)
+			 {
+			 case DLE::value:
+				prefixed_char = true;
+				continue;
+			 case ETX::value:
+				throw std::invalid_argument("channel_protocol<protocols::basic>::read_command_data: invalid input: ETX not supposed to be part of data");
+			 default:
+				throw std::invalid_argument("channel_protocol<protocols::basic>::read_command_data: invalid input: unkonwn control charachter");
+			 }
+		 }
       }
    }
    template<typename iterator> static bool extract_command(std::size_t& size, iterator &it, channel_protocol_interface::callback_type callback)
@@ -271,6 +276,7 @@ template<> struct protocol_encoder<protocols::extended>
    template<typename iterator> static bool extract_command(std::size_t& size, iterator &it, channel_protocol_interface::callback_type callback)
    {
       iterator backup_it = it;
+	  std::size_t backup_size = size;
       command_interface::id_type command_id;
 
       if(3 >= size)//STX, command, ETX
@@ -290,7 +296,7 @@ template<> struct protocol_encoder<protocols::extended>
       size--;
       if((command_id < 0x80 ) || (command_id == 0xC4))
       {
-         return protocol_encoder<protocols::basic>::extract_command(size, it = backup_it, callback);
+		 return protocol_encoder<protocols::basic>::extract_command(size = backup_size, it = backup_it, callback);
       }
 
       std::size_t data_size = detect_command_data_size(size, it);
