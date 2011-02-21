@@ -6,16 +6,16 @@
 #pragma once
 
 #include <boost/type_traits.hpp>
-#include <stdint.h>
+#include <boost/cstdint.hpp>
 
 namespace si
 {
 //   unsigned int crc(unsigned int uiCount,unsigned char *pucDat);
 
-   BOOST_STATIC_CONSTANT( uint16_t, POLYNOM=0x8005);
+   BOOST_STATIC_CONSTANT( boost::uint16_t, POLYNOM=0x8005);
 
 
-   template<typename iterator>  uint16_t crc(std::size_t uiCount,iterator it)
+   template<typename iterator>  boost::uint16_t crc(std::size_t uiCount,iterator it)
    {
       short int iTmp;
       unsigned short int uiTmp,uiTmp1,uiVal;

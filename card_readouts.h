@@ -9,7 +9,7 @@
 #include "card_record.h"
 #include "blocks_read.h"
 
-#include <stdint.h>
+#include <boost/cstdint.hpp>
 #include <set>
 
 namespace si
@@ -59,7 +59,7 @@ namespace si
 
 		struct card5_id_type: public bit_array<card5_id_def, card5_id_type>{};
 
-                static inline boost::posix_time::time_duration get_duration(uint16_t source)
+                static inline boost::posix_time::time_duration get_duration(boost::uint16_t source)
 		{
 			return 0xEEEE == source
 				? boost::posix_time::time_duration(boost::posix_time::not_a_date_time)
@@ -254,14 +254,14 @@ namespace si
 		{
 			return card_type_getter<>::read(data.card_serie, readout, data);
 		}
-                static uint32_t get_id(extended::si::value_type data)
+                static boost::uint32_t get_id(extended::si::value_type data)
 		{
 			extended::si::value_type value = 
 				data & ~(extended::si::value_type(0xFF) << (8 * ( sizeof(extended::si::value_type) - 1)));
 
 			return value;
 		}
-                static uint32_t get_id(extended::responses::si_card8_get& data)
+                static boost::uint32_t get_id(extended::responses::si_card8_get& data)
 		{
 			card_id_serie id_serie;
 
@@ -445,7 +445,7 @@ namespace si
 
 		struct card_6_header_type: public parameters_array<card_6_header_def>{};
 
-                static uint32_t get_id(extended::responses::si_card6_get& data)
+                static boost::uint32_t get_id(extended::responses::si_card6_get& data)
 		{
 			typedef boost::tuples::element<extended::responses::si_card6_get::element<extended::responses::read_out_data>::type::value
 				, extended::responses::si_card6_get>::type::iterator iterator;
