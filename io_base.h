@@ -90,7 +90,7 @@ namespace si
 			work.reset(new io_base<>::work_pointer::element_type(*service.get()));
 			if(service_.is_created())
 			{
-				thread.reset(new io_base<>::thread_pointer::element_type(boost::bind(&boost::asio::io_service::run, service.get())));
+                                thread.reset(new io_base<>::thread_pointer::element_type(boost::bind(&boost::asio::io_service::run, service.get())));
 			}
 		}
 		~io_base()
@@ -105,7 +105,7 @@ namespace si
 
 		typename io_base<>::service_pointer service;
 		typename io_base<>::work_pointer work;
-		typename io_base<>::thread_pointer thread;
+                typename io_base<>::thread_pointer thread;
 	};
 
 }//namespace si
