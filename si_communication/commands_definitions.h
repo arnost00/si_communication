@@ -11,13 +11,13 @@
 
 #include <boost/config/suffix.hpp>
 
-#include <stdint.h>
+#include <boost/cstdint.hpp>
 
 namespace si
 {
 	struct basic
 	{	
-		typedef boost::integral_constant<uint8_t, 0x2E> card_moved_code;
+		typedef boost::integral_constant<boost::uint8_t, 0x2E> card_moved_code;
 
 		typedef boost::integral_constant<byte, 0x70> set_ms_mode_code;
 		typedef boost::integral_constant<byte, 0x66> si_card6_inserted_code;
