@@ -103,13 +103,14 @@ template<> struct protocol_encoder<protocols::basic>
       }
       return unknown_size;
    }
-   template<typename iterator, typename out_iterator> static void read_command_data(std::size_t&, iterator &it, std::size_t& data_size,  out_iterator out_it)
+   template<typename iterator, typename out_iterator> static void read_command_data(std::size_t& size, iterator &it, std::size_t& data_size,  out_iterator out_it)
    {
       bool prefixed_char = false;
 
 	  for(std::size_t processed_size = 0; processed_size < data_size; it++, processed_size++)
       {
-         if(prefixed_char)
+		  size --;
+		 if(prefixed_char)
          {
             *out_it++ = *it;
             continue;
@@ -117,7 +118,7 @@ template<> struct protocol_encoder<protocols::basic>
 		 if(0x20 <= (*it))
          {
             *out_it++ = *it;
-            continue;
+			continue;
          }
 		 else
 		 {
