@@ -32,12 +32,15 @@ namespace si
 					boost::mpl::deque<extended::responses::si_card5_inserted
 						, extended::responses::si_card6_inserted
 						, extended::responses::si_card8_inserted
-						, extended::responses::si_card_removed>
+						, extended::responses::si_card_removed
+						, basic::responses::si_card_moved>
 					, response_live_control::permanent>::reactions_type
 				reaction(boost::bind(&chip_readout::si_card5_inserted, this, _1)
 				, boost::bind(&chip_readout::si_card6_inserted, this, _1)
 				, boost::bind(&chip_readout::si_card8_inserted, this, _1)
-				, boost::bind(&chip_readout::si_card_removed, this, _1));
+				, boost::bind(&chip_readout::si_card_removed, this, _1)
+				, boost::bind(&chip_readout::si_card_moved, this, _1)
+				);
 			read_responses = si::response<>::create(reaction);
 
 			channel->register_response_expectation(read_responses);
@@ -213,6 +216,13 @@ namespace si
 		void si_card_removed(extended::responses::si_card_removed::pointer response)
 		{
 			LOG << "card removed, no: " << response->get<extended::si>().value << std::endl;
+		}
+		void si_card_moved(basic::responses::si_card_moved::pointer response)
+		{
+			LOG << "card 5 series moved " <<
+					((response->get<basic::cmd>().value == 'I') ? "in":
+					(response->get<basic::cmd>().value == 'O') ? "out":
+						(const char*)&(response->get<basic::cmd>().value)) << std::endl;
 		}
 		void si_card_removed_during_readout(extended::responses::si_card_removed::pointer response)
 		{

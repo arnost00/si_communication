@@ -17,7 +17,7 @@ namespace si
 {
 	struct basic
 	{	
-		typedef boost::integral_constant<boost::uint8_t, 0x2E> card_moved_code;
+		typedef boost::integral_constant<boost::uint8_t, 0x46> card_moved_code;
 
 		typedef boost::integral_constant<byte, 0x70> set_ms_mode_code;
 		typedef boost::integral_constant<byte, 0x66> si_card6_inserted_code;
@@ -36,7 +36,7 @@ namespace si
 		struct cmd: public unsigned_integral_parameter<1, cmd>{};
 
 		typedef boost::mpl::deque<> no_data;
-		typedef boost::mpl::deque<cmd> card_move_data_def;
+		typedef boost::mpl::deque<cmd> card_moved_data_def;
 
 		struct commands
 		{
@@ -53,7 +53,7 @@ namespace si
 			typedef fixed_command<ACK, no_data, true> ack;
 			typedef fixed_command<NAK, no_data, true> nak;
 			typedef fixed_command<set_ms_mode_code, set_ms_mode_data_def> set_ms_mode;
-			typedef fixed_command<card_moved_code, card_move_data_def> card_move_mode;
+			typedef fixed_command<card_moved_code, card_moved_data_def> si_card_moved;
 		};
 	};
 	struct extended
