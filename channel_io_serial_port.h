@@ -85,7 +85,8 @@ namespace si
 			}
 			if(ec)
 			{
-				if (ec.value() == boost::asio::error::operation_aborted)
+				if (ec.value() == boost::asio::error::eof // linux
+					|| ec.value() == boost::asio::error::operation_aborted) // win
 				{
 					LOG << "Serial port connection was closed." << std::endl;
 // 			   TODO: call close callback
@@ -106,7 +107,8 @@ namespace si
 		{
 			if(ec)
 			{
-				if (ec.value() == boost::asio::error::operation_aborted)
+				if (ec.value() == boost::asio::error::eof // linux
+					|| ec.value() == boost::asio::error::operation_aborted) // win
 				{
 					LOG << "Serial port connection was closed." << std::endl;
 // 			   TODO: call close callback
