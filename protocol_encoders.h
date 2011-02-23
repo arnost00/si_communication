@@ -78,14 +78,11 @@ template<> struct protocol_encoder<protocols::basic>
       std::size_t processed_size = 0;
       for(;processed_size < size; work_it++, processed_size++)
       {
-			if(prefixed_char)
+			if(prefixed_char || (0x20 <= (*work_it)))
 			{
 				data_size++;
+				prefixed_char = false;
 				continue;
-			}
-			if(0x20 <= (*work_it))
-			{
-				data_size++;
 			}
 			else
 			{
@@ -107,18 +104,15 @@ template<> struct protocol_encoder<protocols::basic>
    {
       bool prefixed_char = false;
 
-	  for(std::size_t processed_size = 0; processed_size < data_size; it++, processed_size++)
+	  for(std::size_t processed_size = 0; processed_size < data_size; it++)
       {
 		  size --;
-		 if(prefixed_char)
+		 if(prefixed_char || (0x20 <= (*it)))
          {
             *out_it++ = *it;
+			prefixed_char = false;
+			processed_size++;
             continue;
-         }
-		 if(0x20 <= (*it))
-         {
-            *out_it++ = *it;
-			continue;
          }
 		 else
 		 {

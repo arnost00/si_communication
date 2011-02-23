@@ -90,7 +90,7 @@ void punch_arrived(si::extended::responses::transmit_record::pointer record_msg)
 }
 void punch_arrived(si::basic::responses::transmit_record::pointer record_msg)
 {
-	LOG << "record arrived: " << record_msg->get<si::basic::sisn>().value << " serie: " << record_msg->get<si::basic::sis>().value << " ";
+	LOG << "record arrived: " << record_msg->get<si::basic::sisn>().value + 0x10000 * record_msg->get<si::basic::sis>().value << " serie: " << (double)(record_msg->get<si::basic::sis>().value) << " ";
 	out_time_duration(LOG, boost::posix_time::millisec(1000*(record_msg->get<si::basic::t>().value) + (record_msg->get<si::basic::tss>().value*1000/256)), true);
 	LOG << std::endl;
 }
@@ -112,7 +112,7 @@ void punch_read_basic(ofstream_pointer of, si::basic::responses::transmit_record
 {
 	std::ostream &fs = *of.get();
 
-	fs << std::setfill(' ') << std::setw(8) << record->get<si::basic::sisn>().value;
+	fs << std::setfill(' ') << std::setw(8) << (record->get<si::basic::sisn>().value + 0x10000 * record->get<si::basic::sis>().value);
 	fs << ':';
 	fs << std::setw(4) << record->get<si::basic::cn>().value << "/";
 	out_time_duration(fs, boost::posix_time::millisec(1000*(record->get<si::basic::t>().value)
