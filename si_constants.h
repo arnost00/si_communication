@@ -15,15 +15,14 @@
 
 namespace si
 {
-   typedef unsigned char byte;
 
-   typedef boost::mpl::integral_c<byte, 0x02> STX;
-   typedef boost::mpl::integral_c<byte, 0x03> ETX;
-   typedef boost::mpl::integral_c<byte, 0x06> ACK;
-   typedef boost::mpl::integral_c<byte, 0x15> NAK;
-   typedef boost::mpl::integral_c<byte, 0x10> DLE;
+   typedef boost::mpl::integral_c<boost::uint8_t, 0x02> STX;
+   typedef boost::mpl::integral_c<boost::uint8_t, 0x03> ETX;
+   typedef boost::mpl::integral_c<boost::uint8_t, 0x06> ACK;
+   typedef boost::mpl::integral_c<boost::uint8_t, 0x15> NAK;
+   typedef boost::mpl::integral_c<boost::uint8_t, 0x10> DLE;
 
-   template <byte value> struct byte_type:public boost::mpl::integral_c<byte, value>{};
+   template <boost::uint8_t value> struct byte_type:public boost::mpl::integral_c<boost::uint8_t, value>{};
 
    struct control_sequence{};
 

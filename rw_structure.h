@@ -15,7 +15,7 @@
 
 namespace si
 {
-   template<byte command_tt
+   template<boost::uint8_t command_tt
       , typename parameters_tt = boost::deque<>
       > struct rw_structure
       : public boostext::tuple_type<typename create_parameter_sequence<parameters_tt>::type>::type

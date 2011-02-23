@@ -49,7 +49,7 @@ namespace si
       typedef first type;
    };
 
-   typedef append_sequences<boost::mpl::deque<>, boost::mpl::list_c<byte, 0x80, 0x05> >::type polynom_type;
+   typedef append_sequences<boost::mpl::deque<>, boost::mpl::list_c<boost::uint8_t, 0x80, 0x05> >::type polynom_type;
 
       template <typename command_tt> struct select_protocol_by_command
    {
@@ -65,14 +65,14 @@ namespace si
    {
       typedef typename boost::mpl::if_<add_flag_tt
          , typename boost::mpl::push_back<typename boost::mpl::pop_back<value_tt>::type
-            ,  typename boost::mpl::plus<typename boost::mpl::back<value_tt>::type , byte_type<1> >::type>::type
+			,  typename boost::mpl::plus<typename boost::mpl::back<value_tt>::type , byte_type<1> >::type>::type
          , value_tt>::type type;
    };
 
    template<typename value_tt, typename add_flag_tt> struct inc_if_flag
    {
       typedef typename boost::mpl::if_<add_flag_tt
-         , typename boost::mpl::plus<value_tt, byte_type<1> >::type
+		 , typename boost::mpl::plus<value_tt, byte_type<1> >::type
          , value_tt>::type type;
    };
 
@@ -82,7 +82,7 @@ namespace si
       typedef typename meta_xor<typename boost::mpl::pop_front<first>::type
                   , typename boost::mpl::pop_front<second>::type
                   , typename boost::mpl::push_back<result
-                        , byte_type< boost::mpl::front<first>::type::value
+						, byte_type< boost::mpl::front<first>::type::value
                                     ^ boost::mpl::front<second>::type::value> >::type >::type type;
    };
 
@@ -163,10 +163,10 @@ namespace si
    {
       BOOST_STATIC_CONSTANT(bool, are_data_shorter_than_two = boost::mpl::size<data_tt>::value < 2);
       typedef typename boost::mpl::if_<boost::mpl::bool_<are_data_shorter_than_two>
-         , boost::mpl::deque<typename byte_type<0x00>::type, typename byte_type<0x00>::type>
+		 , boost::mpl::deque<typename byte_type<0x00>::type, typename byte_type<0x00>::type>
          , typename boost::mpl::if_c<(boost::mpl::size<data_tt>::value >> 1 << 1 == boost::mpl::size<data_tt>::value)
-         , typename si_crc16_internal<typename boost::mpl::push_back<typename boost::mpl::push_back<data_tt, si::byte_type<0x00>::type>::type, si::byte_type<0x00>::type>::type >::type
-         , typename si_crc16_internal<typename boost::mpl::push_back<data_tt, si::byte_type<0x00>::type >::type >::type >::type
+		 , typename si_crc16_internal<typename boost::mpl::push_back<typename boost::mpl::push_back<data_tt, si::byte_type<0x00>::type>::type, si::byte_type<0x00>::type>::type >::type
+		 , typename si_crc16_internal<typename boost::mpl::push_back<data_tt, si::byte_type<0x00>::type >::type >::type >::type
       >::type::type type;
    };
 
@@ -180,7 +180,7 @@ namespace si
    {
       typedef typename append_sequences<boost::mpl::deque<>, data_tt>::type data_t;
       typedef typename boost::mpl::push_front<
-         typename boost::mpl::push_front<data_t, typename byte_type<boost::mpl::size<data_t>::value>::type>::type, command_tt>::type crc_base_t;
+		 typename boost::mpl::push_front<data_t, typename byte_type<boost::mpl::size<data_t>::value>::type>::type, command_tt>::type crc_base_t;
       typedef typename boost::mpl::push_back<
          typename boost::mpl::push_front<typename append_sequences<crc_base_t, typename si_crc16<crc_base_t>::type>::type, STX>::type
          , ETX>::type type;

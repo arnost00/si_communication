@@ -14,7 +14,7 @@ namespace si
 struct channel_protocol_interface 
 {
    typedef boost::shared_ptr<channel_protocol_interface> pointer;
-   typedef boost::shared_array<byte> data_type;
+   typedef boost::shared_array<boost::uint8_t> data_type;
    typedef boost::add_pointer<data_type::element_type>::type raw_data_type;
    typedef boost::function<void(command_interface::id_type ,std::size_t, command_interface::data_type, bool)> callback_type;
 

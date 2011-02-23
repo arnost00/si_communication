@@ -9,7 +9,7 @@
 
 namespace si
 {
-   template<byte command_tt
+   template<boost::uint8_t command_tt
       , typename parameters_tt = boost::deque<>
       , bool control_sequence = false
          > struct command
@@ -32,6 +32,6 @@ namespace si
          command_id = new_command_code;
       }
 
-      byte command_id;
+      boost::uint8_t command_id;
    };
 }//namespace si
