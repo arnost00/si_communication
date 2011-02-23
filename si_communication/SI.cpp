@@ -149,7 +149,7 @@ void notify_exit_condition(int )
 }
 void startup_sequence_failed()
 {
-	throw std::runtime_error("Startup sequence failec");
+	throw std::runtime_error("Startup sequence failed.");
 }
 
 filelog multilog;
@@ -169,7 +169,7 @@ int main(int argc, char* argv[])
 		("help,h", "produce help message with allowed options and return values")
 		("device,d", boost::program_options::value<std::string>(), "set communication device (ex. com2 or /dev/sportident/reader0)")
 		("output,o", boost::program_options::value<std::string>(), "set output file (ex. card.txt)")
-		("type,t", boost::program_options::value<int>(&prog_type)->default_value(0), "set program type (0 - card readout, 1 - station punch)")
+		("type,t", boost::program_options::value<int>(&prog_type)->default_value(0), "set program mode (0 - card readout, 1 - station punch)")
       ("logfile,l", boost::program_options::value<std::string>(), "set log file (ex. logfile.txt)");
 
 	boost::program_options::variables_map vm;
@@ -274,8 +274,10 @@ int main(int argc, char* argv[])
 		if(output_file)
 			chip_read_cb = boost::bind(&chip_read, output_file, _1);
 
+		LOG << "Program set to ";
       if (prog_type == 0)
       {
+			LOG << "card readout mode." << std::endl;
 	      startup_sequence.start(siport
 		      , boost::bind(&si::chip_readout::start, &chip_readout, siport
 				  , si::control_sequence_base<>::callback_type()
@@ -285,6 +287,7 @@ int main(int argc, char* argv[])
       }
       else
       {
+			LOG << "station punch mode." << std::endl;
 		   siport->set_protocol(si::channel_protocol_interface::pointer(new si::channel_protocol<si::protocols::extended>()));
 
 		   si::response_interface::pointer read_responses = si::response<>::create(si::response<
