@@ -85,20 +85,36 @@ namespace si
 			}
 			if(ec)
 			{
-				std::cerr << ec.message();
+				if (ec.value() == boost::asio::error::operation_aborted)
+				{
+					LOG << "Serial port connection was closed." << std::endl;
+// 			   TODO: call close callback
+				}
+				else
+				{
+					LOG << "Read error: " << ec.message() << "(" << ec.value() << ")" << std::endl;
+				}
 				return;
 			}
-                io_base_type::async_read_some(boost::asio::buffer(read_buffer)
+			io_base_type::async_read_some(boost::asio::buffer(read_buffer)
 				, boost::bind(&channel_io_serial_port::handle_read
-					, this
-					, boost::asio::placeholders::bytes_transferred
-					, boost::asio::placeholders::error));
+				, this
+				, boost::asio::placeholders::bytes_transferred
+				, boost::asio::placeholders::error));
 		}
 		void handle_write(std::size_t bytes_transfered, const boost::system::error_code& ec)
 		{
 			if(ec)
 			{
-				std::cerr << ec.message();
+				if (ec.value() == boost::asio::error::operation_aborted)
+				{
+					LOG << "Serial port connection was closed." << std::endl;
+// 			   TODO: call close callback
+				}
+				else
+				{
+					LOG << "Write error: " << ec.message() << "(" << ec.value() << ")" << std::endl;
+				}
 				return;
 			}
 			mutal_exclusion_type::scoped_lock sl(mtx);
@@ -107,11 +123,7 @@ namespace si
 				; outbytes_transfered -= output_storage.front().first, output_storage.pop());
 			if(output_storage.empty())
 				return;
-			if(ec)
-			{
-				std::cerr << ec.message();
-				return;
-			}
+
 			boost::asio::async_write(*this
 				, boost::asio::buffer(output_storage.front().second.get(), output_storage.front().first)
 				, boost::bind(&channel_io_serial_port::handle_write
