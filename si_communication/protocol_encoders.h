@@ -19,11 +19,11 @@ template<typename protocol = void> struct protocol_encoder
    {
       command_interface::data_type data;
       std::size_t data_size;
-      byte command_id = command->get_id();
+	  boost::uint8_t command_id = command->get_id();
       command->get_data(data_size, data);
 
       size = protocol_encoder<encoder_type>::get_size(command_id, data_size, data.get());
-      result.reset(new byte[size]);
+	  result.reset(new boost::uint8_t[size]);
       protocol_encoder<encoder_type>::write_data(command_id, data_size, data.get(), size, result.get());
    }
    template<typename iterator> static void detect_command(std::size_t& size, iterator &it)
@@ -34,11 +34,11 @@ template<typename protocol = void> struct protocol_encoder
 
 template<> struct protocol_encoder<protocols::basic>
 {
-   inline static bool is_prefixed_data_byte(byte data_byte)
+   inline static bool is_prefixed_data_byte(boost::uint8_t data_byte)
    {
       return data_byte <= 0x1F; 
    }
-   template<typename iterator> static std::size_t get_size(byte command, std::size_t in_size, iterator it)
+   template<typename iterator> static std::size_t get_size(boost::uint8_t command, std::size_t in_size, iterator it)
    {
       std::size_t size = sizeof(command) + sizeof(STX::value) + sizeof(ETX::value) + in_size;
       for(std::size_t i = 0; i < in_size; size++, i++)
@@ -50,7 +50,7 @@ template<> struct protocol_encoder<protocols::basic>
       }
       return size;
    }
-   template<typename iterator_in, typename iterator_out> static void write_data(byte command
+   template<typename iterator_in, typename iterator_out> static void write_data(boost::uint8_t command
       , std::size_t in_size, iterator_in it
 	  , std::size_t , iterator_out out_it)
    {
@@ -169,7 +169,7 @@ template<> struct protocol_encoder<protocols::basic>
          return false;            
       }
 
-      command_interface::data_type data(new byte[data_size]);
+	  command_interface::data_type data(new boost::uint8_t[data_size]);
       read_command_data(size, it, data_size, data.get());
 
       size--;
@@ -205,11 +205,11 @@ template<> struct protocol_encoder<protocols::basic>
    {
       command_interface::data_type data;
       std::size_t data_size;
-      byte command_id = command->get_id();
+	  boost::uint8_t command_id = command->get_id();
       command->get_data(data_size, data);
 
       size = get_size(command_id, data_size, data.get());
-      result.reset(new byte[size]);
+	  result.reset(new boost::uint8_t[size]);
       write_data(command_id, data_size, data.get(), size, result.get());
    }
 
@@ -217,11 +217,11 @@ template<> struct protocol_encoder<protocols::basic>
 
 template<> struct protocol_encoder<protocols::extended>
 {
-   template<typename iterator> static std::size_t get_size(byte command, std::size_t in_size, iterator , bool ff_start = false, bool extra_stx = false)
+   template<typename iterator> static std::size_t get_size(boost::uint8_t command, std::size_t in_size, iterator , bool ff_start = false, bool extra_stx = false)
    {
 		return sizeof(command) + sizeof(STX::value) + sizeof(ETX::value) + 3 + in_size + (ff_start? 1: 0) + (extra_stx? 1: 0);
    }
-   template<typename iterator_in, typename iterator_out> static void write_data(byte command
+   template<typename iterator_in, typename iterator_out> static void write_data(boost::uint8_t command
       , std::size_t in_size, iterator_in it
 	  , std::size_t , iterator_out out_it
 		, bool ff_start = false, bool extra_stx = false)
@@ -236,7 +236,7 @@ template<> struct protocol_encoder<protocols::extended>
       iterator_out crc_it = out_it;
 
       *out_it++ = command;
-      *out_it++ = si::byte(in_size);
+	  *out_it++ = boost::uint8_t(in_size);
 
       for(std::size_t i = 0; i < in_size; i++)
       {
@@ -312,7 +312,7 @@ template<> struct protocol_encoder<protocols::extended>
          it = backup_it;
          return false;            
       }
-      command_interface::data_type data(new byte[data_size]);
+	  command_interface::data_type data(new boost::uint8_t[data_size]);
       read_command_data(size, it, data_size, data.get());
 
       boost::uint16_t crc_value;
@@ -357,11 +357,11 @@ template<> struct protocol_encoder<protocols::extended>
    {
       command_interface::data_type data;
       std::size_t data_size;
-      byte command_id = command->get_id();
+	  boost::uint8_t command_id = command->get_id();
       command->get_data(data_size, data);
 
       size = get_size(command_id, data_size, data.get(), true, true);
-      result.reset(new byte[size]);
+	  result.reset(new boost::uint8_t[size]);
       write_data(command_id, data_size, data.get(), size, result.get(), true, true);
    }
 
@@ -369,11 +369,11 @@ template<> struct protocol_encoder<protocols::extended>
 
 template<> struct protocol_encoder<control_sequence>
 {
-   template<typename iterator> static std::size_t get_size(byte command, std::size_t , iterator )
+   template<typename iterator> static std::size_t get_size(boost::uint8_t command, std::size_t , iterator )
    {
       return sizeof(command);
    }
-   template<typename iterator_in, typename iterator_out> static void write_data(byte command
+   template<typename iterator_in, typename iterator_out> static void write_data(boost::uint8_t command
 	  , std::size_t , iterator_in
 	  , std::size_t , iterator_out out_it)
    {
@@ -386,14 +386,14 @@ template<typename protocols_tt = protocols::supported_set, class enabled = void>
 {
    template<typename protocol_tt> struct encoder 
    {
-      template <typename iterator> static void inline apply(byte command, std::size_t size, iterator it)
+	  template <typename iterator> static void inline apply(boost::uint8_t command, std::size_t size, iterator it)
       {
          std::size_t encoded_size = protocol_encoder<protocol_tt>::get_size(command, size, it);
-         boost::shared_array<si::byte> data_binary(new si::byte[encoded_size]);
+		 boost::shared_array<boost::uint8_t> data_binary(new boost::uint8_t[encoded_size]);
          protocol_encoder<protocol_tt>::write_data(command, size, it, encoded_size, data_binary.get());
       }
    };
-   template <typename iterator> static void inline find_encoder(protocols::id<>::value_type protocol_id, byte command, std::size_t size, iterator it)
+   template <typename iterator> static void inline find_encoder(protocols::id<>::value_type protocol_id, boost::uint8_t command, std::size_t size, iterator it)
    {
       if(0 == protocol_id)
       {
@@ -404,7 +404,7 @@ template<typename protocols_tt = protocols::supported_set, class enabled = void>
          by_protocol<typename boost::mpl::pop_front<protocols_tt>::type>::find_encoder(protocol_id - 1, command, size, it);
       }
    }
-   template <typename iterator> static void encode(protocols::id<>::value_type protocol_id, byte command, std::size_t size, iterator it)
+   template <typename iterator> static void encode(protocols::id<>::value_type protocol_id, boost::uint8_t command, std::size_t size, iterator it)
    {
       if(protocol_id >= boost::mpl::size<protocols_tt>::value)
       {
@@ -416,7 +416,7 @@ template<typename protocols_tt = protocols::supported_set, class enabled = void>
 };
 template<typename protocols_tt> struct by_protocol<protocols_tt, typename boost::enable_if<typename boost::mpl::empty<protocols_tt>::type>::type>
 {
-   template <typename iterator> static void inline encode(protocols::id<>::value_type protocol_id, byte command, std::size_t size, iterator it)
+   template <typename iterator> static void inline encode(protocols::id<>::value_type protocol_id, boost::uint8_t command, std::size_t size, iterator it)
    {
       throw std::invalid_argument("invalid protocol id passed");
    }

@@ -136,7 +136,7 @@ namespace si
 		typedef boost::recursive_mutex mutal_exclusion_type;
 		output_storage_type output_storage;
 		std::size_t outbytes_transfered;
-		boost::array<si::byte, 256> read_buffer;
+		boost::array<boost::uint8_t, 256> read_buffer;
    };
 
 }//namespace si

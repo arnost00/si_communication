@@ -21,13 +21,13 @@ namespace si
       unsigned short int uiTmp,uiTmp1,uiVal;
       iterator pucTmpDat;
 
-      if (uiCount < 2) return(0);        // response value is "0" for none or one data byte
+      if (uiCount < 2) return(0);        // response value is "0" for none or one data boost::uint8_t
       pucTmpDat = it;
 
       uiTmp1 = *pucTmpDat++;
       uiTmp1 = (uiTmp1<<8) + *pucTmpDat++;
 
-      if (uiCount == 2) return(uiTmp1);   // response value is CRC for two data bytes
+      if (uiCount == 2) return(uiTmp1);   // response value is CRC for two data boost::uint8_ts
       for (iTmp=(int)(uiCount>>1);iTmp>0;iTmp--)
       {
 
@@ -38,7 +38,7 @@ namespace si
          }
          else 
          {
-            if (uiCount&1)               // odd number of data bytes, complete with "0"         
+            if (uiCount&1)               // odd number of data boost::uint8_ts, complete with "0"         
             {
                uiVal = *pucTmpDat;
                uiVal= (uiVal<<8);

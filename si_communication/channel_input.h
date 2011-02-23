@@ -92,7 +92,7 @@ namespace si
          }
       }
 
-      void process_input(std::size_t data_size, byte* data)
+      void process_input(std::size_t data_size, boost::uint8_t* data)
       {
          mutal_exclusion_type::scoped_lock sl(mtx);
 

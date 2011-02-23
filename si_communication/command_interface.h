@@ -17,9 +17,9 @@ namespace si
    struct command_interface
    {
       typedef boost::shared_ptr<command_interface> pointer;
-      typedef boost::function<void(const byte*,const std::size_t)> writer_type;
-      typedef byte id_type;
-      typedef boost::shared_array<byte> data_type;
+      typedef boost::function<void(const boost::uint8_t*,const std::size_t)> writer_type;
+      typedef boost::uint8_t id_type;
+      typedef boost::shared_array<boost::uint8_t> data_type;
 
       virtual id_type get_id(protocols::id<>::value_type protocol = protocols::id<>::value) = 0;
       virtual void get_data(std::size_t &size, data_type& data, protocols::id<>::value_type protocol = protocols::id<>::value) = 0;

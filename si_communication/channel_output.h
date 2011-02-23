@@ -13,7 +13,7 @@ namespace si
 {
    struct channel_output: public channel_output_interface
    {
-      typedef boost::function<void(const byte* data, const std::size_t size)> writer_type;
+      typedef boost::function<void(const boost::uint8_t* data, const std::size_t size)> writer_type;
       virtual void write_command(command_interface::pointer command)
       {
          if(command)

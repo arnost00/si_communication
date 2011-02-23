@@ -213,7 +213,7 @@ namespace si
 					}
 					if(0 == bit_offset)
 					{
-						bit_offset = si::byte(1) << 7;
+						bit_offset = boost::uint8_t(1) << 7;
 						it++;
 					}
 					else
@@ -707,8 +707,8 @@ namespace si
 
 
    template<typename T, std::size_t length = unknown_size> struct byte_array
-      : public parameter
-      , public std::vector<byte>
+		: public parameter
+		, public std::vector<boost::uint8_t>
    {
       byte_array()
       {
@@ -717,7 +717,7 @@ namespace si
             resize(length);
          }
       }
-      typedef std::vector<byte> value_type;
+	  typedef std::vector<boost::uint8_t> value_type;
       typedef T type;
       typedef T parameter_type;
 
@@ -755,9 +755,9 @@ namespace si
 
    template<typename T> struct byte_array<T, unknown_size>
       : public parameter
-      , public std::vector<byte>
+	  , public std::vector<boost::uint8_t>
    {
-      typedef std::vector<byte> value_type;
+	  typedef std::vector<boost::uint8_t> value_type;
       typedef T type;
 
       byte_array()

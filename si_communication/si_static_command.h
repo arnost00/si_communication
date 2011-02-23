@@ -19,10 +19,10 @@
 
 namespace si
 {
-   template <typename command_sequence> struct command_binary_type: public boost::array<byte, boost::mpl::size<command_sequence>::type::value>
+   template <typename command_sequence> struct command_binary_type: public boost::array<boost::uint8_t, boost::mpl::size<command_sequence>::type::value>
    {
    protected:
-      typedef boost::array<byte, boost::mpl::size<command_sequence>::type::value> base_type;
+      typedef boost::array<boost::uint8_t, boost::mpl::size<command_sequence>::type::value> base_type;
    public:
       template<typename sequence = command_sequence, std::size_t position = 0, bool is_empty = boost::mpl::empty<sequence>::value> struct copy_sequence_to_base
       {
@@ -46,14 +46,14 @@ namespace si
       }
    };
 
-   template<byte command_tt
+   template<boost::uint8_t command_tt
       , typename data_tt
-      , typename protocol_tt = typename select_protocol_by_command<typename byte_type<command_tt>::type>::type
+	  , typename protocol_tt = typename select_protocol_by_command<typename byte_type<command_tt>::type>::type
       , typename allowed_in_protocols_policy = protocols::less_or_equeal_protocol<protocol_tt> >
    struct static_command_base
    {
-    BOOST_STATIC_CONSTANT(byte, command = command_tt);
-    typedef typename construct_sequence<typename byte_type<command>::type
+    BOOST_STATIC_CONSTANT(boost::uint8_t, command = command_tt);
+	typedef typename construct_sequence<typename byte_type<command>::type
             , data_tt
             , protocol_tt>::type command_sequence;
     typedef protocol_tt protocol;
@@ -93,9 +93,9 @@ namespace si
       void operator()(typename shared_ptr_type::element_type* p){}
    };
 
-   template<byte command_tt
+   template<boost::uint8_t command_tt
       , typename data_tt
-      , typename protocol_tt = typename select_protocol_by_command<typename byte_type<command_tt>::type>::type
+	  , typename protocol_tt = typename select_protocol_by_command<typename byte_type<command_tt>::type>::type
       , typename allowed_in_protocols_policy = protocols::less_or_equeal_protocol<protocol_tt> >
    class static_command: public command_interface, public static_command_base<command_tt, data_tt, protocol_tt>, public boost::enable_shared_from_this<static_command<command_tt, data_tt, protocol_tt> >
    {

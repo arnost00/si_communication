@@ -88,6 +88,12 @@ void punch_arrived(si::extended::responses::transmit_record::pointer record_msg)
 	out_time_duration(LOG, boost::posix_time::millisec(1000*(record_msg->get<si::extended::t>().value) + (record_msg->get<si::extended::tss>().value*1000/256)), true);
 	LOG << std::endl;
 }
+void punch_arrived(si::basic::responses::transmit_record::pointer record_msg)
+{
+	LOG << "record arrived: " << record_msg->get<si::basic::sisn>().value << " serie: " << record_msg->get<si::basic::sis>().value << " ";
+	out_time_duration(LOG, boost::posix_time::millisec(1000*(record_msg->get<si::basic::t>().value) + (record_msg->get<si::basic::tss>().value*1000/256)), true);
+	LOG << std::endl;
+}
 void punch_read(ofstream_pointer of, si::extended::responses::transmit_record::pointer record)
 {
 	std::ostream &fs = *of.get();
@@ -95,8 +101,22 @@ void punch_read(ofstream_pointer of, si::extended::responses::transmit_record::p
 	fs << std::setfill(' ') << std::setw(8) << record->get<si::extended::si>().value;
 	fs << ':';
 	fs << std::setw(4) << record->get<si::extended::cn>().value << "/";
-	out_time_duration(fs, boost::posix_time::millisec(1000*(record->get<si::extended::t>().value) 
+	out_time_duration(fs, boost::posix_time::millisec(1000*(record->get<si::extended::t>().value)
 		+ (record->get<si::extended::tss>().value*1000/256)), true);
+	fs << std::endl << std::flush;
+
+	punch_arrived(record);
+
+}
+void punch_read_basic(ofstream_pointer of, si::basic::responses::transmit_record::pointer record)
+{
+	std::ostream &fs = *of.get();
+
+	fs << std::setfill(' ') << std::setw(8) << record->get<si::basic::sisn>().value;
+	fs << ':';
+	fs << std::setw(4) << record->get<si::basic::cn>().value << "/";
+	out_time_duration(fs, boost::posix_time::millisec(1000*(record->get<si::basic::t>().value)
+		+ (record->get<si::basic::tss>().value*1000/256)), true);
 	fs << std::endl << std::flush;
 
 	punch_arrived(record);
@@ -291,9 +311,9 @@ int main(int argc, char* argv[])
 		   siport->set_protocol(si::channel_protocol_interface::pointer(new si::channel_protocol<si::protocols::extended>()));
 
 		   si::response_interface::pointer read_responses = si::response<>::create(si::response<
-			   boost::mpl::deque<si::extended::responses::transmit_record>
+			   boost::mpl::deque<si::extended::responses::transmit_record, si::basic::responses::transmit_record>
 			   , si::response_live_control::permanent>::reactions_type
-			   (boost::bind(&punch_read, output_file, _1)));
+			   (boost::bind(&punch_read, output_file, _1), boost::bind(&punch_read_basic, output_file, _1)));
 
 		   siport->register_response_expectation(read_responses);
       }      

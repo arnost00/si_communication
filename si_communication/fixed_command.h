@@ -51,7 +51,7 @@ namespace si
 		virtual void get_data(std::size_t &size, data_type& data, protocols::id<>::value_type = protocols::id<>::value)
 		{
 			size = get_size();
-			data.reset(new si::byte[size]);
+			data.reset(new boost::uint8_t[size]);
 			data_type::element_type *it = data.get();
 
 			raw_data_writer<this_type>::write_data(this, size, it);

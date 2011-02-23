@@ -15,10 +15,10 @@
 namespace si
 {
 /*
-	struct one_byte_type: public unsigned_integral_parameter<1, one_byte_type>{};
-	struct two_bytes_type: public unsigned_integral_parameter<2, two_bytes_type>{};
-	struct three_bytes_type: public unsigned_integral_parameter<3, three_bytes_type>{};
-	struct four_bytes_type: public unsigned_integral_parameter<4, four_bytes_type>{};
+	struct one_boost::uint8_t_type: public unsigned_integral_parameter<1, one_boost::uint8_t_type>{};
+	struct two_boost::uint8_ts_type: public unsigned_integral_parameter<2, two_boost::uint8_ts_type>{};
+	struct three_boost::uint8_ts_type: public unsigned_integral_parameter<3, three_boost::uint8_ts_type>{};
+	struct four_boost::uint8_ts_type: public unsigned_integral_parameter<4, four_boost::uint8_ts_type>{};
 */
 
 	struct card_type{};
@@ -49,7 +49,21 @@ namespace si
 		struct punch_sub_second: public unsigned_integral_parameter<1, punch_sub_second>{};
 
 		typedef boost::mpl::deque<typename control_number::template bits_range<7,0> > punch_1byte_def;
-		typedef boost::mpl::deque<typename control_number::template bits_range<7,0>, typename time_12h::template bits_range<15,0> > punch_3bytes_def;		typedef boost::mpl::deque<typename control_number::template bits_range<9,8>			, typename day_of_week::template bits_range<1,0>			, typename week_counter::template bits_range<2,0>			, typename am_pm::template bits_range<0>			, typename control_number::template bits_range<7,0>			, typename time_12h::template bits_range<15,0> > punch_4bytes_def;		typedef boost::mpl::deque<typename control_number::template bits_range<7,0>			, typename si_station_id::template bits_range<17,0>			, typename punch_year::template bits_range<3,0>			, typename punch_month::template bits_range<3,0>			, typename punch_day::template bits_range<4,0>			, typename am_pm::template bits_range<0>			, typename time_12h::template bits_range<15,0>			, typename punch_sub_second::template bits_range<7,0> > punch_8bytes_def;
+		typedef boost::mpl::deque<typename control_number::template bits_range<7,0>, typename time_12h::template bits_range<15,0> > punch_3bytes_def;
+		typedef boost::mpl::deque<typename control_number::template bits_range<9,8>
+			, typename day_of_week::template bits_range<1,0>
+			, typename week_counter::template bits_range<2,0>
+			, typename am_pm::template bits_range<0>
+			, typename control_number::template bits_range<7,0>
+			, typename time_12h::template bits_range<15,0> > punch_4bytes_def;
+		typedef boost::mpl::deque<typename control_number::template bits_range<7,0>
+				, typename si_station_id::template bits_range<17,0>
+				, typename punch_year::template bits_range<3,0>
+				, typename punch_month::template bits_range<3,0>
+				, typename punch_day::template bits_range<4,0>
+				, typename am_pm::template bits_range<0>
+				, typename time_12h::template bits_range<15,0>
+				, typename punch_sub_second::template bits_range<7,0> > punch_8bytes_def;
 		typedef boost::mpl::deque<card5_id_part, card5_serie_part> card5_id_def;
 
 		template<typename T> struct punch_1byte_type: public bit_array<punch_1byte_def, T>{};
@@ -189,7 +203,7 @@ namespace si
 			punch_count = card_8_header.get<record_counter>();
 			return true;
 		}
-		template <typename iterator> static si::byte get_punches_count(iterator datablock)
+		template <typename iterator> static boost::uint8_t get_punches_count(iterator datablock)
 		{
 			std::size_t max_size = 128;
 
@@ -203,7 +217,7 @@ namespace si
 		template<typename card_types = known_card_types, bool enabled = boost::mpl::empty<card_types>::value>struct card_type_getter
 		{
          BOOST_MPL_ASSERT_MSG(!boost::mpl::empty<card_types>::value, NOT_A_SEQUENCE, (types<card_types>));
-			static inline bool read(si::byte param, card_record &readout, blocks_read<extended::responses::si_card8_get>& data)
+			static inline bool read(boost::uint8_t param, card_record &readout, blocks_read<extended::responses::si_card8_get>& data)
 			{
 				if(param == boost::mpl::first<typename boost::mpl::front<card_types>::type>::type::value)
 				{
@@ -211,7 +225,7 @@ namespace si
 				}
 				return card_type_getter<typename boost::mpl::pop_front<card_types>::type>::read(param, readout,data);
 			}
-			static inline bool get_blocks_needed(si::byte param, needed_blocks_container &blocks, extended::responses::si_card8_get& data)
+			static inline bool get_blocks_needed(boost::uint8_t param, needed_blocks_container &blocks, extended::responses::si_card8_get& data)
 			{
 				if(param == boost::mpl::first<typename boost::mpl::front<card_types>::type>::type::value)
 				{
@@ -232,11 +246,11 @@ namespace si
 			, true>
 		{
 			typedef card_8_family type;
-			static inline bool read(si::byte , card_record &, blocks_read<extended::responses::si_card8_get>& )
+			static inline bool read(boost::uint8_t , card_record &, blocks_read<extended::responses::si_card8_get>& )
 			{
 				return false;
 			}
-			static inline bool get_blocks_needed(si::byte , needed_blocks_container &, extended::responses::si_card8_get& )
+			static inline bool get_blocks_needed(boost::uint8_t , needed_blocks_container &, extended::responses::si_card8_get& )
 			{
 				return false;
 			}
@@ -273,7 +287,7 @@ namespace si
 
 			return id_serie.get<card_id>();
 		}
-		static si::byte get_serie(extended::responses::si_card8_get data)
+		static boost::uint8_t get_serie(extended::responses::si_card8_get data)
 		{
 			card_id_serie id_serie;
 
@@ -301,7 +315,7 @@ namespace si
 			id_serie.read_data(max_size, item);
 			return card_type_getter<>::get_type_description(id_serie.get<card_serie>());
 		}
-		static bool get_blocks_needed(si::byte card_serie, needed_blocks_container &blocks, extended::responses::si_card8_get& data)
+		static bool get_blocks_needed(boost::uint8_t card_serie, needed_blocks_container &blocks, extended::responses::si_card8_get& data)
 		{
 			return card_type_getter<>::get_blocks_needed(card_serie, blocks, data);
 		}
@@ -343,7 +357,7 @@ namespace si
 		}
 		static inline bool get_blocks_needed(needed_blocks_container &blocks, extended::responses::si_card8_get& data)
 		{
-			si::byte punches_count(get_punches_count(data.get<extended::responses::read_out_data>().begin()));
+			boost::uint8_t punches_count(get_punches_count(data.get<extended::responses::read_out_data>().begin()));
 			blocks.insert(0);
 			if(0 < punches_count)
 			{
@@ -359,7 +373,7 @@ namespace si
 	};
 	template<> struct card_reader<card_9>: public card_reader<card_8_family>
 	{
-		template <typename iterator> static si::byte get_punches_count(iterator datablock)
+		template <typename iterator> static boost::uint8_t get_punches_count(iterator datablock)
 		{
 			std::size_t max_size = 128;
 			record_counter rc;
@@ -408,7 +422,7 @@ namespace si
 		}
 		static inline bool get_blocks_needed(needed_blocks_container &blocks, extended::responses::si_card8_get& data)
 		{
-			si::byte punches_count(get_punches_count(data.get<extended::responses::read_out_data>().begin()));
+			boost::uint8_t punches_count(get_punches_count(data.get<extended::responses::read_out_data>().begin()));
 			blocks.insert(0);
 			if(19 < punches_count)
 			{
@@ -460,7 +474,7 @@ namespace si
 			return id;
 		}
 
-		template <typename iterator> static si::byte get_punches_count(iterator datablock)
+		template <typename iterator> static boost::uint8_t get_punches_count(iterator datablock)
 		{
 			record_counter rc;
 
@@ -529,7 +543,7 @@ namespace si
 		{
 			static const unsigned sectors[] = {6, 7, 2, 3, 4, 5};
 
-			si::byte punches_count(get_punches_count(data.get<extended::responses::read_out_data>().begin()));
+			boost::uint8_t punches_count(get_punches_count(data.get<extended::responses::read_out_data>().begin()));
 			blocks.insert(0);
 			unsigned sectors_needed = punches_count >> 5;
 			if(0 != (punches_count % 32))
@@ -580,7 +594,7 @@ namespace si
 		}
 		static inline bool get_blocks_needed(needed_blocks_container &blocks, extended::responses::si_card8_get& data)
 		{
-			si::byte punches_count(get_punches_count(data.get<extended::responses::read_out_data>().begin()));
+			boost::uint8_t punches_count(get_punches_count(data.get<extended::responses::read_out_data>().begin()));
 			blocks.insert(0);
 			if(0 < punches_count)
 			{
@@ -637,7 +651,7 @@ namespace si
 		}
 		static inline bool get_blocks_needed(needed_blocks_container &blocks, extended::responses::si_card8_get& data)
 		{
-			si::byte punches_count(get_punches_count(data.get<extended::responses::read_out_data>().begin()));
+			boost::uint8_t punches_count(get_punches_count(data.get<extended::responses::read_out_data>().begin()));
 			blocks.insert(0);
 			if(19 < punches_count)
 			{

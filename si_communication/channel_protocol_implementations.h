@@ -22,7 +22,7 @@ namespace si
 
       virtual void encode_command(command_interface::pointer command, std::size_t &size, channel_protocol_interface::data_type& result)
       {
-         byte command_id = command->get_id();
+         boost::uint8_t command_id = command->get_id();
          if((command_id >= 0x80) && (command_id != 0xC4))
          {
             throw std::invalid_argument("channel_protocol<protocols::basic>::write_command: invalid command_id");
@@ -44,7 +44,7 @@ namespace si
          {
             return protocol_encoder<>::encode<control_sequence>(command, size, result);
          }
-         byte command_id = command->get_id();
+         boost::uint8_t command_id = command->get_id();
          if((command_id < 0x80) || (command_id == 0xC4))
          {
             return protocol_encoder<protocols::basic>::encode(command, size, result);
