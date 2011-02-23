@@ -7,8 +7,6 @@
 // SI.cpp : Defines the entry point for the console application.
 //
 
-//#define _GLIBCXX_USE_WCHAR_T
-
 #include <boost/asio.hpp>
 #include <boost/asio/serial_port.hpp>
 #include <boost/bind.hpp>
@@ -50,18 +48,6 @@
 #include "crc529.h"
 #include "fixed_command.h"
 
-void outchar(unsigned char ch)
-{
-   LOG << std::hex << (int)ch << ',';
-}
-
-/*
-struct read_si_after_punch: public si::parameter_t<read_si_after_punch>{};
-struct access_with_password_only: public si::parameter_t<access_with_password_only>{};
-struct handshake: public si::parameter_t<handshake>{};
-struct auto_send_out: public si::parameter_t<auto_send_out>{};
-struct extended_protocol: public si::parameter_t<extended_protocol>{};
-*/
 struct read_si_after_punch: public si::unsigned_integral_parameter<1, read_si_after_punch>{};
 struct access_with_password_only: public si::unsigned_integral_parameter<1, access_with_password_only>{};
 struct handshake: public si::unsigned_integral_parameter<1, handshake>{};
@@ -77,7 +63,7 @@ template<typename command_type>void send_to_channel(typename command_type::point
 
 typedef boost::shared_ptr<std::fstream> ofstream_pointer;
 
-void out_time_duration(std::ostream &fs, boost::posix_time::time_duration const& duration, const bool enable_ms = false)
+template<class TOStream> void out_time_duration(TOStream &fs, boost::posix_time::time_duration const& duration, const bool enable_ms = false)
 {
 	if(duration.is_not_a_date_time())
 	{
@@ -339,7 +325,5 @@ int main(int argc, char* argv[])
    LOG << "exitting" << std::endl;
    siport->close();
 
-    return 0;
-
-
+	return 0;
 }

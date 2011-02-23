@@ -7,7 +7,7 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-class filelog : public std::ofstream
+class filelog
 {
 public:
    std::ofstream ofs;
