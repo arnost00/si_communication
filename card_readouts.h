@@ -159,6 +159,10 @@ namespace si
 		{
 			return internal_read(readout, data.get<extended::responses::read_out_data>().begin());
 		}
+		static bool read(card_record &readout, basic::responses::si_card5_get& data)
+		{
+			return internal_read(readout, data.get<basic::responses::read_out_data>().begin());
+		}
 	};
 	template<> struct card_reader<card_8_family>: public card_reader<>
 	{

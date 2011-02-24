@@ -41,12 +41,11 @@ namespace si
 		typedef boost::integral_constant<boost::uint8_t, 0x46> si_card_moved_code;
 		typedef boost::integral_constant<boost::uint8_t, 0x66> si_card6_inserted_code;
 		typedef boost::integral_constant<boost::uint8_t, 0x53> transmit_record_code;
+		typedef boost::integral_constant<boost::uint8_t, 0x31> si_card5_get_code;
+		typedef boost::integral_constant<boost::uint8_t, 0x61> si_card6_get_code;
 
 		typedef boost::integral_constant<boost::uint8_t, 0x70> set_ms_mode_code;
 		typedef boost::integral_constant<boost::uint8_t, 0x30> si_card5_set_card_number;
-		typedef boost::integral_constant<boost::uint8_t, 0x31> si_card5_get_code;
-		typedef boost::integral_constant<boost::uint8_t, 0x61> si_card6_get_code;
-		typedef boost::integral_constant<boost::uint8_t, 0x53> get_punch_2_code;
 		typedef boost::integral_constant<boost::uint8_t, 0x54> time_send;
 
 		struct m_s: public unsigned_integral_parameter<1, m_s>
@@ -63,6 +62,7 @@ namespace si
 		struct sis: public unsigned_integral_parameter<1, sis>{};
 
 		struct crc: public unsigned_integral_parameter<2, crc>{};
+		struct cs: public unsigned_integral_parameter<1, cs>{};
 
 
 		struct am_pm: public unsigned_integral_parameter<1, am_pm>{};
@@ -76,22 +76,28 @@ namespace si
 			> td_def;
 		struct td: public bit_array<td_def, td>{};
 
-		typedef boost::mpl::deque<> no_data;
-		typedef boost::mpl::deque<cmd> si_card_moved_data_def;
-		typedef boost::mpl::deque<ti, tp, cn, si> si_card6_inserted_data_def;
 
 		struct commands
 		{
 			typedef boost::mpl::deque<m_s> set_ms_mode_data_def;
+			typedef boost::mpl::deque<bn> si_card6_get_data_def;
 
 			typedef fixed_command<ACK, no_data, true> ack;
 			typedef fixed_command<NAK, no_data, true> nak;
 			typedef fixed_command<set_ms_mode_code, set_ms_mode_data_def> set_ms_mode;
+			typedef fixed_command<si_card5_get_code, no_data> si_card5_get;
+			typedef fixed_command<si_card6_get_code, si_card6_get_data_def> si_card6_get;
 		};
 		struct responses
 		{
+			struct read_out_data: public byte_array<read_out_data, 128>{};
+
+			typedef boost::mpl::deque<cmd> si_card_moved_data_def;
+			typedef boost::mpl::deque<ti, tp, cn, si> si_card6_inserted_data_def;
 			typedef boost::mpl::deque<cn, m_s> set_ms_mode_data_def;
 			typedef boost::mpl::deque<td, cn, sis, sisn, ql, t, tss, crc> transmit_record_data_def;
+			typedef boost::mpl::deque<cn, read_out_data, cs> si_card5_get_data_def;
+			typedef boost::mpl::deque<cn, bn, read_out_data, cs> si_card6_get_data_def;
 
 			typedef fixed_command<ACK, no_data, true> ack;
 			typedef fixed_command<NAK, no_data, true> nak;
@@ -99,6 +105,8 @@ namespace si
 			typedef fixed_command<si_card_moved_code, si_card_moved_data_def> si_card_moved;
 			typedef fixed_command<si_card6_inserted_code, si_card6_inserted_data_def> si_card6_inserted;
 			typedef fixed_command<transmit_record_code, transmit_record_data_def> transmit_record;
+			typedef fixed_command<si_card5_get_code, si_card5_get_data_def> si_card5_get;
+			typedef fixed_command<si_card6_get_code, si_card6_get_data_def> si_card6_get;
 		};
 	};
 	struct extended: public common
