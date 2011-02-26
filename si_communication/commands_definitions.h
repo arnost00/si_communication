@@ -33,7 +33,13 @@ namespace si
 			> td_def;
 		struct td: public bit_array<td_def, td>{};
 
+		struct read_out_data: public byte_array<read_out_data, 128>{};
+
 		typedef boost::mpl::deque<> no_data;
+
+		typedef fixed_command<ACK, no_data, true> ack;
+		typedef fixed_command<NAK, no_data, true> nak;
+
 
 	};
 	struct basic: public common
@@ -82,15 +88,14 @@ namespace si
 			typedef boost::mpl::deque<m_s> set_ms_mode_data_def;
 			typedef boost::mpl::deque<bn> si_card6_get_data_def;
 
-			typedef fixed_command<ACK, no_data, true> ack;
-			typedef fixed_command<NAK, no_data, true> nak;
+//			typedef fixed_command<ACK, no_data, true> ack;
+//			typedef fixed_command<NAK, no_data, true> nak;
 			typedef fixed_command<set_ms_mode_code, set_ms_mode_data_def> set_ms_mode;
 			typedef fixed_command<si_card5_get_code, no_data> si_card5_get;
 			typedef fixed_command<si_card6_get_code, si_card6_get_data_def> si_card6_get;
 		};
 		struct responses
 		{
-			struct read_out_data: public byte_array<read_out_data, 128>{};
 
 			typedef boost::mpl::deque<cmd> si_card_moved_data_def;
 			typedef boost::mpl::deque<ti, tp, cn, si> si_card6_inserted_data_def;
@@ -99,8 +104,8 @@ namespace si
 			typedef boost::mpl::deque<cn, read_out_data, cs> si_card5_get_data_def;
 			typedef boost::mpl::deque<cn, bn, read_out_data, cs> si_card6_get_data_def;
 
-			typedef fixed_command<ACK, no_data, true> ack;
-			typedef fixed_command<NAK, no_data, true> nak;
+//			typedef fixed_command<ACK, no_data, true> ack;
+//			typedef fixed_command<NAK, no_data, true> nak;
 			typedef fixed_command<set_ms_mode_code, set_ms_mode_data_def> set_ms_mode;
 			typedef fixed_command<si_card_moved_code, si_card_moved_data_def> si_card_moved;
 			typedef fixed_command<si_card6_inserted_code, si_card6_inserted_data_def> si_card6_inserted;
@@ -135,8 +140,8 @@ namespace si
 			typedef boost::mpl::deque<bn> si_card_multiblock_get_data_def;
 			typedef boost::mpl::deque<bn> si_card8_get_data_def;
 
-			typedef fixed_command<ACK, no_data, true> ack;
-			typedef fixed_command<NAK, no_data, true> nak;
+//			typedef fixed_command<ACK, no_data, true> ack;
+//			typedef fixed_command<NAK, no_data, true> nak;
 			typedef fixed_command<set_ms_mode_code, set_ms_mode_data_def> set_ms_mode;
 			typedef fixed_command<si_card5_get_code, no_data> si_card5_get;
 			typedef fixed_command<si_card6_get_code, si_card_multiblock_get_data_def> si_card6_get;
@@ -144,7 +149,6 @@ namespace si
 		};
 		struct responses
 		{
-			struct read_out_data: public byte_array<read_out_data, 128>{};
 
 			typedef boost::mpl::deque<cn, m_s> set_ms_mode_data_def;
 			typedef boost::mpl::deque<cn, si> card_move_data_def;
@@ -152,8 +156,8 @@ namespace si
 			typedef boost::mpl::deque<cn, bn, read_out_data> si_card_multiblock_get_data_def;
 			typedef boost::mpl::deque<cn, si, td, t, tss, mem> transmit_record_data_def;
 
-			typedef fixed_command<ACK, no_data, true> ack;
-			typedef fixed_command<NAK, no_data, true> nak;
+//			typedef fixed_command<ACK, no_data, true> ack;
+//			typedef fixed_command<NAK, no_data, true> nak;
 			typedef fixed_command<set_ms_mode_code, set_ms_mode_data_def> set_ms_mode;
 			typedef fixed_command<si_card5_inserted_code, card_move_data_def> si_card5_inserted;
 			typedef fixed_command<si_card6_inserted_code, card_move_data_def> si_card6_inserted;

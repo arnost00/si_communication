@@ -157,11 +157,11 @@ namespace si
 		}
 		static bool read(card_record &readout, extended::responses::si_card5_get& data)
 		{
-			return internal_read(readout, data.get<extended::responses::read_out_data>().begin());
+			return internal_read(readout, data.get<common::read_out_data>().begin());
 		}
 		static bool read(card_record &readout, basic::responses::si_card5_get& data)
 		{
-			return internal_read(readout, data.get<basic::responses::read_out_data>().begin());
+			return internal_read(readout, data.get<common::read_out_data>().begin());
 		}
 	};
 	template<> struct card_reader<card_8_family>: public card_reader<>
@@ -221,7 +221,7 @@ namespace si
 		template<typename card_types = known_card_types, bool enabled = boost::mpl::empty<card_types>::value>struct card_type_getter
 		{
          BOOST_MPL_ASSERT_MSG(!boost::mpl::empty<card_types>::value, NOT_A_SEQUENCE, (types<card_types>));
-			static inline bool read(boost::uint8_t param, card_record &readout, blocks_read<extended::responses::si_card8_get>& data)
+		 static inline bool read(boost::uint8_t param, card_record &readout, blocks_read<common::read_out_data>& data)
 			{
 				if(param == boost::mpl::first<typename boost::mpl::front<card_types>::type>::type::value)
 				{
@@ -250,7 +250,7 @@ namespace si
 			, true>
 		{
 			typedef card_8_family type;
-			static inline bool read(boost::uint8_t , card_record &, blocks_read<extended::responses::si_card8_get>& )
+			static inline bool read(boost::uint8_t , card_record &, blocks_read<common::read_out_data>& )
 			{
 				return false;
 			}
@@ -268,7 +268,7 @@ namespace si
 		{
 			return false;
 		}
-		static bool read(card_record &readout, blocks_read<extended::responses::si_card8_get>& data)
+		static bool read(card_record &readout, blocks_read<common::read_out_data>& data)
 		{
 			return card_type_getter<>::read(data.card_serie, readout, data);
 		}
@@ -285,8 +285,8 @@ namespace si
 
 			std::size_t max_size = 128;
 
-			boost::tuples::element<extended::responses::si_card8_get::element<extended::responses::read_out_data>::type::value
-					, extended::responses::si_card8_get>::type::iterator item(data.get<extended::responses::read_out_data>().begin() + 0x18);
+			boost::tuples::element<extended::responses::si_card8_get::element<common::read_out_data>::type::value
+					, extended::responses::si_card8_get>::type::iterator item(data.get<common::read_out_data>().begin() + 0x18);
 			id_serie.read_data(max_size, item);
 
 			return id_serie.get<card_id>();
@@ -297,8 +297,8 @@ namespace si
 
 			std::size_t max_size = 128;
 
-			boost::tuples::element<extended::responses::si_card8_get::element<extended::responses::read_out_data>::type::value
-					, extended::responses::si_card8_get>::type::iterator item(data.get<extended::responses::read_out_data>().begin() + 0x18);
+			boost::tuples::element<extended::responses::si_card8_get::element<common::read_out_data>::type::value
+					, extended::responses::si_card8_get>::type::iterator item(data.get<common::read_out_data>().begin() + 0x18);
 			id_serie.read_data(max_size, item);
 			return id_serie.get<card_serie>();
 		}
@@ -314,8 +314,8 @@ namespace si
 
 			std::size_t max_size = 128;
 
-			boost::tuples::element<extended::responses::si_card8_get::element<extended::responses::read_out_data>::type::value
-					, extended::responses::si_card8_get>::type::iterator item(data.get<extended::responses::read_out_data>().begin() + 0x18);
+			boost::tuples::element<extended::responses::si_card8_get::element<common::read_out_data>::type::value
+					, extended::responses::si_card8_get>::type::iterator item(data.get<common::read_out_data>().begin() + 0x18);
 			id_serie.read_data(max_size, item);
 			return card_type_getter<>::get_type_description(id_serie.get<card_serie>());
 		}
@@ -326,11 +326,11 @@ namespace si
 	};
 	template<> struct card_reader<card_8>: public card_reader<card_8_family>
 	{
-		static bool read(card_record &readout, blocks_read<extended::responses::si_card8_get>& data)
+		static bool read(card_record &readout, blocks_read<common::read_out_data>& data)
 		{
-			typedef boost::tuples::element<extended::responses::si_card8_get::element<extended::responses::read_out_data>::type::value
+			typedef boost::tuples::element<extended::responses::si_card8_get::element<common::read_out_data>::type::value
 				, extended::responses::si_card8_get>::type::iterator iterator;
-			iterator datablock = data[0]->get<extended::responses::read_out_data>().begin();
+			iterator datablock = data[0].begin();
 
 			std::size_t max_size = 128;
 			std::size_t records_count;
@@ -344,7 +344,7 @@ namespace si
 
 			readout.get<card_record::PUNCH_RECORDS>().resize(records_count);
 
-			datablock = data[1]->get<extended::responses::read_out_data>().begin();
+			datablock = data[1].begin();
 
 			datablock += 0x08;
 			max_size = 0x80 - 0x08;
@@ -361,7 +361,7 @@ namespace si
 		}
 		static inline bool get_blocks_needed(needed_blocks_container &blocks, extended::responses::si_card8_get& data)
 		{
-			boost::uint8_t punches_count(get_punches_count(data.get<extended::responses::read_out_data>().begin()));
+			boost::uint8_t punches_count(get_punches_count(data.get<common::read_out_data>().begin()));
 			blocks.insert(0);
 			if(0 < punches_count)
 			{
@@ -386,11 +386,11 @@ namespace si
 			rc.read_data(max_size, item = datablock + 0x16);
 			return rc;
 		}
-		static bool read(card_record &readout, blocks_read<extended::responses::si_card8_get>& data)
+		static bool read(card_record &readout, blocks_read<common::read_out_data>& data)
 		{
-			typedef boost::tuples::element<extended::responses::si_card8_get::element<extended::responses::read_out_data>::type::value
+			typedef boost::tuples::element<extended::responses::si_card8_get::element<common::read_out_data>::type::value
 				, extended::responses::si_card8_get>::type::iterator iterator;
-			iterator datablock = data[0]->get<extended::responses::read_out_data>().begin();
+			iterator datablock = data[0].begin();
 
 			std::size_t max_size = 128;
 			std::size_t records_count;
@@ -404,7 +404,7 @@ namespace si
 
 			readout.get<card_record::PUNCH_RECORDS>().resize(records_count);
 
-			datablock = data[0]->get<extended::responses::read_out_data>().begin();
+			datablock = data[0].begin();
 
 			datablock += 0x38;
 			max_size = 0x80 - 0x38;
@@ -415,7 +415,7 @@ namespace si
 			{
 				if(18 == i)
 				{
-					datablock = data[1]->get<extended::responses::read_out_data>().begin();
+					datablock = data[1].begin();
 					max_size = 128;
 				}
 				punch.read_data(max_size, datablock);
@@ -426,7 +426,7 @@ namespace si
 		}
 		static inline bool get_blocks_needed(needed_blocks_container &blocks, extended::responses::si_card8_get& data)
 		{
-			boost::uint8_t punches_count(get_punches_count(data.get<extended::responses::read_out_data>().begin()));
+			boost::uint8_t punches_count(get_punches_count(data.get<common::read_out_data>().begin()));
 			blocks.insert(0);
 			if(19 < punches_count)
 			{
@@ -463,9 +463,9 @@ namespace si
 
 		struct card_6_header_type: public parameters_array<card_6_header_def>{};
 
-                static boost::uint32_t get_id(extended::responses::si_card6_get& data)
+		static boost::uint32_t get_id(common::read_out_data& data)
 		{
-			typedef boost::tuples::element<extended::responses::si_card6_get::element<extended::responses::read_out_data>::type::value
+			typedef boost::tuples::element<extended::responses::si_card6_get::element<common::read_out_data>::type::value
 				, extended::responses::si_card6_get>::type::iterator iterator;
 
 			card_id id;
@@ -473,7 +473,7 @@ namespace si
 			std::size_t max_size = 128;
 			iterator item;
 
-			id.read_data(max_size, item = data.get<extended::responses::read_out_data>().begin() + 0x0A);
+			id.read_data(max_size, item = data.begin() + 0x0A);
 
 			return id;
 		}
@@ -488,13 +488,13 @@ namespace si
 			rc.read_data(max_size, item = datablock + 0x12);
 			return rc;
 		}
-		static bool read(card_record &readout, blocks_read<extended::responses::si_card6_get>& data)
+		static bool read(card_record &readout, blocks_read<common::read_out_data>& data)
 		{
 			static const unsigned sectors[] = {6, 7, 2, 3, 4, 5};
 
-			typedef boost::tuples::element<extended::responses::si_card6_get::element<extended::responses::read_out_data>::type::value
+			typedef boost::tuples::element<extended::responses::si_card6_get::element<common::read_out_data>::type::value
 				, extended::responses::si_card6_get>::type::iterator iterator;
-			iterator datablock = data[0]->get<extended::responses::read_out_data>().begin();
+			iterator datablock = data[0].begin();
 
 			card_6_header_type card_6_header;
 
@@ -517,7 +517,7 @@ namespace si
 
 			readout.get<card_record::PUNCH_RECORDS>().resize(records_count);
 
-			datablock = data[6]->get<extended::responses::read_out_data>().begin();
+			datablock = data[6].begin();
 			max_size = 128;
 
 			iterator punch_base = datablock;
@@ -529,25 +529,25 @@ namespace si
 			{
 				if(0 == (i % 32))
 				{
-					datablock = data[sectors[i / 32]]->get<extended::responses::read_out_data>().begin();
+					datablock = data[sectors[i / 32]].begin();
 					max_size = 128;
 
 					punch_base = datablock;
 					current_record = punch_base;
 				}
-            punch.read_data(max_size, current_record);
-            readout.get<card_record::PUNCH_RECORDS>()[i] = punch_record(punch.get<control_number>().value
-               , card_reader<>::get_duration(punch.get<time_12h>().value));
+				punch.read_data(max_size, current_record);
+				readout.get<card_record::PUNCH_RECORDS>()[i] = punch_record(punch.get<control_number>().value
+					, card_reader<>::get_duration(punch.get<time_12h>().value));
 
 			}
 			
 			return true;
 		}
-		static inline bool get_blocks_needed(needed_blocks_container &blocks, extended::responses::si_card6_get& data)
+		static inline bool get_blocks_needed(needed_blocks_container &blocks, common::read_out_data& data)
 		{
 			static const unsigned sectors[] = {6, 7, 2, 3, 4, 5};
 
-			boost::uint8_t punches_count(get_punches_count(data.get<extended::responses::read_out_data>().begin()));
+			boost::uint8_t punches_count(get_punches_count(data.begin()));
 			blocks.insert(0);
 			unsigned sectors_needed = punches_count >> 5;
 			if(0 != (punches_count % 32))
@@ -558,11 +558,11 @@ namespace si
 	};
 	template<> struct card_reader<card_p>: public card_reader<card_8_family>
 	{
-		static bool read(card_record &readout, blocks_read<extended::responses::si_card8_get>& data)
+		static bool read(card_record &readout, blocks_read<common::read_out_data>& data)
 		{
-			typedef boost::tuples::element<extended::responses::si_card8_get::element<extended::responses::read_out_data>::type::value
+			typedef boost::tuples::element<extended::responses::si_card8_get::element<common::read_out_data>::type::value
 				, extended::responses::si_card8_get>::type::iterator iterator;
-			iterator datablock = data[0]->get<extended::responses::read_out_data>().begin();
+			iterator datablock = data[0].begin();
 
 			std::size_t max_size = 128;
 			std::size_t records_count;
@@ -576,7 +576,7 @@ namespace si
 
 			readout.get<card_record::PUNCH_RECORDS>().resize(records_count);
 
-			datablock = data[1]->get<extended::responses::read_out_data>().begin();
+			datablock = data[1].begin();
 
 			iterator current_record = datablock + 0x30;
 			max_size = 0x80 - 0x30;
@@ -587,7 +587,7 @@ namespace si
 			{
 				if(18 == i)
 				{
-					datablock = data[1]->get<extended::responses::read_out_data>().begin();
+					datablock = data[1].begin();
 					max_size = 128;
 				}
 				punch.read_data(max_size, datablock);
@@ -598,7 +598,7 @@ namespace si
 		}
 		static inline bool get_blocks_needed(needed_blocks_container &blocks, extended::responses::si_card8_get& data)
 		{
-			boost::uint8_t punches_count(get_punches_count(data.get<extended::responses::read_out_data>().begin()));
+			boost::uint8_t punches_count(get_punches_count(data.get<common::read_out_data>().begin()));
 			blocks.insert(0);
 			if(0 < punches_count)
 			{
@@ -615,11 +615,11 @@ namespace si
 	template<> struct card_reader<card_t>: public card_reader<card_8_family>
 	{
 		struct punch_type: public punch_8bytes_type<punch_type>{};
-		static bool read(card_record &readout, blocks_read<extended::responses::si_card8_get>& data)
+		static bool read(card_record &readout, blocks_read<common::read_out_data>& data)
 		{
-			typedef boost::tuples::element<extended::responses::si_card8_get::element<extended::responses::read_out_data>::type::value
+			typedef boost::tuples::element<extended::responses::si_card8_get::element<common::read_out_data>::type::value
 				, extended::responses::si_card8_get>::type::iterator iterator;
-			iterator datablock = data[0]->get<extended::responses::read_out_data>().begin();
+			iterator datablock = data[0].begin();
 
 			std::size_t max_size = 128;
 			std::size_t records_count;
@@ -633,7 +633,7 @@ namespace si
 
 			readout.get<card_record::PUNCH_RECORDS>().resize(records_count);
 
-			datablock = data[0]->get<extended::responses::read_out_data>().begin();
+			datablock = data[0].begin();
 
 			datablock += 0x38;
 			max_size = 0x80 - 0x38;
@@ -644,7 +644,7 @@ namespace si
 			{
 				if(9 == i)
 				{
-					datablock = data[1]->get<extended::responses::read_out_data>().begin();
+					datablock = data[1].begin();
 					max_size = 128;
 				}
 				punch.read_data(max_size, datablock);
@@ -655,7 +655,7 @@ namespace si
 		}
 		static inline bool get_blocks_needed(needed_blocks_container &blocks, extended::responses::si_card8_get& data)
 		{
-			boost::uint8_t punches_count(get_punches_count(data.get<extended::responses::read_out_data>().begin()));
+			boost::uint8_t punches_count(get_punches_count(data.get<common::read_out_data>().begin()));
 			blocks.insert(0);
 			if(19 < punches_count)
 			{

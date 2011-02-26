@@ -33,13 +33,15 @@ namespace si
 						, extended::responses::si_card6_inserted
 						, extended::responses::si_card8_inserted
 						, extended::responses::si_card_removed
-						, basic::responses::si_card_moved>
+						, basic::responses::si_card_moved
+						, basic::responses::si_card6_inserted>
 					, response_live_control::permanent>::reactions_type
 				reaction(boost::bind(&chip_readout::si_card5_inserted, this, _1)
 				, boost::bind(&chip_readout::si_card6_inserted, this, _1)
 				, boost::bind(&chip_readout::si_card8_inserted, this, _1)
 				, boost::bind(&chip_readout::si_card_removed, this, _1)
 				, boost::bind(&chip_readout::si_card_moved, this, _1)
+				, boost::bind(&chip_readout::si_card6_inserted_basic, this, _1)
 				);
 			read_responses = si::response<>::create(reaction);
 
@@ -63,7 +65,7 @@ namespace si
 
 			si::response<boost::mpl::deque<extended::responses::si_card5_get
 					, extended::responses::si_card_removed
-					, extended::responses::nak> >::reactions_type
+					, common::nak> >::reactions_type
 				reaction(boost::bind(&chip_readout::si_card5_read, this, _1)
 				, boost::bind(&chip_readout::si_card_removed_during_readout, this, _1)
 				, boost::bind(&chip_readout::nak, this, _1));
@@ -79,7 +81,7 @@ namespace si
 			LOG << "card 5 read" << std::endl;
 
 			make_pointer<card_record> readout;
-			make_pointer<extended::commands::ack> ack;
+			make_pointer<common::ack> ack;
 			channel->write_command(ack);
 
 			card_reader<card_5>::read(*readout.get(), *response.get());
@@ -93,7 +95,7 @@ namespace si
 			LOG << "card 5 read" << std::endl;
 
 			make_pointer<card_record> readout;
-			make_pointer<basic::commands::ack> ack;
+			make_pointer<common::ack> ack;
 			channel->write_command(ack);
 
 			card_reader<card_5>::read(*readout.get(), *response.get());
@@ -112,10 +114,10 @@ namespace si
 				<< card_reader<card_8_family>::get_id(response->get<extended::si>().value) << std::endl;
 			si::response<boost::mpl::deque<extended::responses::si_card8_get
 					, extended::responses::si_card_removed
-					, extended::responses::nak> >::reactions_type
-				reaction(boost::bind(&chip_readout::si_card8_read, this, _1, make_pointer<blocks_read<extended::responses::si_card8_get> >())
-				, boost::bind(&chip_readout::si_card_removed_during_readout, this, _1)
-				, boost::bind(&chip_readout::nak, this, _1));
+					, common::nak> >::reactions_type
+				reaction(boost::bind(&chip_readout::si_card8_read, this, _1, make_pointer<blocks_read<common::read_out_data> >())
+					, boost::bind(&chip_readout::si_card_removed_during_readout, this, _1)
+					, boost::bind(&chip_readout::nak, this, _1));
 
 			channel->register_response_expectation(si::response<>::create(reaction)
 				, boost::posix_time::seconds(2)
@@ -125,7 +127,7 @@ namespace si
 			channel->write_command(read_card8);
 		}
 		void si_card8_read(extended::responses::si_card8_get::pointer response
-			, blocks_read<extended::responses::si_card8_get>::pointer blocks)
+						   , blocks_read<common::read_out_data>::pointer blocks)
 		{
 			LOG << "card 8: block: " << unsigned(response->get<extended::bn>().value) << " read" << std::endl;
 			if(0 == response->get<extended::bn>().value)
@@ -137,7 +139,7 @@ namespace si
 			blocks->block_read(response);
 			if(blocks->ready())
 			{
-				make_pointer<extended::commands::ack> ack;
+				make_pointer<common::ack> ack;
 				channel->write_command(ack);
 
 				make_pointer<card_record> readout;
@@ -151,7 +153,7 @@ namespace si
 			}
 			si::response<boost::mpl::deque<extended::responses::si_card8_get
 					, extended::responses::si_card_removed
-					, extended::responses::nak> >::reactions_type
+					, common::nak> >::reactions_type
 				reaction(boost::bind(&chip_readout::si_card8_read, this, _1, blocks)
 				, boost::bind(&chip_readout::si_card_removed_during_readout, this, _1)
 				, boost::bind(&chip_readout::nak, this, _1));
@@ -168,15 +170,32 @@ namespace si
 		{
 			LOG << "card 8 read timeout" << std::endl;			
 		}
+		void si_card6_inserted_basic(basic::responses::si_card6_inserted::pointer response)
+		{
+			LOG << "card 6 inserted, no: " << response->get<extended::si>().value << std::endl;
+			si::response<boost::mpl::deque<basic::responses::si_card6_get
+					, basic::responses::si_card_moved
+					, common::nak> >::reactions_type
+				reaction(boost::bind(&chip_readout::si_card6_read_basic, this, _1, make_pointer<blocks_read<common::read_out_data> >())
+					, boost::bind(&chip_readout::si_card_moved_during_readout_basic, this, _1)
+					, boost::bind(&chip_readout::nak, this, _1));
+
+			channel->register_response_expectation(si::response<>::create(reaction)
+				, boost::posix_time::seconds(2)
+				, boost::bind(&chip_readout::si_card6_read_timeout, this));
+			make_pointer<basic::commands::si_card6_get> read_card6;
+			read_card6->get<common::bn>().value = 0;
+			channel->write_command(read_card6);
+		}
 		void si_card6_inserted(extended::responses::si_card6_inserted::pointer response)
 		{
 			LOG << "card 6 inserted, no: " << response->get<extended::si>().value << std::endl;
 			si::response<boost::mpl::deque<extended::responses::si_card6_get
 					, extended::responses::si_card_removed
-					, extended::responses::nak> >::reactions_type
-				reaction(boost::bind(&chip_readout::si_card6_read, this, _1, make_pointer<blocks_read<extended::responses::si_card6_get> >())
-				, boost::bind(&chip_readout::si_card_removed_during_readout, this, _1)
-				, boost::bind(&chip_readout::nak, this, _1));
+					, common::nak> >::reactions_type
+				reaction(boost::bind(&chip_readout::si_card6_read, this, _1, make_pointer<blocks_read<common::read_out_data> >())
+					, boost::bind(&chip_readout::si_card_removed_during_readout, this, _1)
+					, boost::bind(&chip_readout::nak, this, _1));
 
 			channel->register_response_expectation(si::response<>::create(reaction)
 				, boost::posix_time::seconds(2)
@@ -186,18 +205,18 @@ namespace si
 			channel->write_command(read_card6);
 		}
 		void si_card6_read(extended::responses::si_card6_get::pointer response
-			, blocks_read<extended::responses::si_card6_get>::pointer blocks)
+						   , blocks_read<common::read_out_data>::pointer blocks)
 		{
 			LOG << "card 6: block: " << unsigned(response->get<extended::bn>().value) << " read" << std::endl;
 			if(0 == response->get<extended::bn>().value)
 			{
-				blocks->card_id = card_reader<card_6>::get_id(*response.get());
-				card_reader<card_6>::get_blocks_needed(blocks->needed_blocks, *response.get());
+				blocks->card_id = card_reader<card_6>::get_id(response.get()->get<common::read_out_data>());
+				card_reader<card_6>::get_blocks_needed(blocks->needed_blocks, response->get<common::read_out_data>());
 			}
 			blocks->block_read(response);
 			if(blocks->ready())
 			{
-				make_pointer<extended::commands::ack> ack;
+				make_pointer<common::ack> ack;
 				channel->write_command(ack);
 
 				make_pointer<card_record> readout;
@@ -211,7 +230,7 @@ namespace si
 			}
 			si::response<boost::mpl::deque<extended::responses::si_card6_get
 					, extended::responses::si_card_removed
-					, extended::responses::nak> >::reactions_type
+					, common::nak> >::reactions_type
 				reaction(boost::bind(&chip_readout::si_card6_read, this, _1, blocks)
 				, boost::bind(&chip_readout::si_card_removed_during_readout, this, _1)
 				, boost::bind(&chip_readout::nak, this, _1));
@@ -221,6 +240,44 @@ namespace si
 				, boost::bind(&chip_readout::si_card6_read_timeout, this));
 			make_pointer<extended::commands::si_card6_get> read_card6;
 			read_card6->get<extended::bn>().value = *(blocks->needed_blocks.begin());
+			channel->write_command(read_card6);
+		}
+		void si_card6_read_basic(basic::responses::si_card6_get::pointer response
+			, blocks_read<common::read_out_data>::pointer blocks)
+		{
+			LOG << "card 6: block: " << unsigned(response->get<extended::bn>().value) << " read" << std::endl;
+			if(0 == response->get<extended::bn>().value)
+			{
+				blocks->card_id = card_reader<card_6>::get_id(response.get()->get<common::read_out_data>());
+				card_reader<card_6>::get_blocks_needed(blocks->needed_blocks, response->get<common::read_out_data>());
+			}
+			blocks->block_read(response);
+			if(blocks->ready())
+			{
+				make_pointer<common::ack> ack;
+				channel->write_command(ack);
+
+				make_pointer<card_record> readout;
+
+				card_reader<card_6>::read(*readout.get(), *blocks.get());
+				if(chip_read_cb)
+					chip_read_cb(readout);
+
+				stdout_card_record(*readout.get());
+				return;
+			}
+			si::response<boost::mpl::deque<basic::responses::si_card6_get
+					, basic::responses::si_card_moved
+					, common::nak> >::reactions_type
+				reaction(boost::bind(&chip_readout::si_card6_read_basic, this, _1, blocks)
+				, boost::bind(&chip_readout::si_card_moved_during_readout_basic, this, _1)
+				, boost::bind(&chip_readout::nak, this, _1));
+
+			channel->register_response_expectation(si::response<>::create(reaction)
+				, boost::posix_time::seconds(2)
+				, boost::bind(&chip_readout::si_card6_read_timeout, this));
+			make_pointer<basic::commands::si_card6_get> read_card6;
+			read_card6->get<basic::bn>().value = *(blocks->needed_blocks.begin());
 			channel->write_command(read_card6);
 		}
 		void si_card6_read_timeout()
@@ -233,18 +290,26 @@ namespace si
 		}
 		void si_card_moved(basic::responses::si_card_moved::pointer response)
 		{
-			LOG << "card 5 series moved " <<
-					((response->get<basic::cmd>().value == 'I') ? "in":
-					(response->get<basic::cmd>().value == 'O') ? "out":
-						(const char*)&(response->get<basic::cmd>().value)) << std::endl;
-			if(response->get<basic::cmd>().value == 'O')
+			switch(response->get<basic::cmd>().value)
+			{
+			case 'I':
+				LOG << "card 5 series moved in" << std::endl;
+				si_card5_inserted();
 				return;
-
+			case 'O':
+				LOG << "card removed" << std::endl;
+				return;
+			default:
+				LOG << "card moved in unkonwn direction" << std::endl;
+			};
+		}
+		void si_card5_inserted()
+		{
 			si::response<boost::mpl::deque<basic::responses::si_card5_get
 					, basic::responses::si_card_moved
-					, basic::responses::nak> >::reactions_type
+					, common::nak> >::reactions_type
 				reaction(boost::bind(&chip_readout::si_card5_read_basic, this, _1)
-				, boost::bind(&chip_readout::si_card_removed_during_readout_basic, this, _1)
+				, boost::bind(&chip_readout::si_card_moved_during_readout_basic, this, _1)
 				, boost::bind(&chip_readout::nak, this, _1));
 			channel->register_response_expectation(
 				si::response<>::create(reaction)
@@ -254,15 +319,26 @@ namespace si
 			channel->write_command(read_card5);
 
 		}
-		void si_card_removed_during_readout_basic(basic::responses::si_card_moved::pointer response)
+		void si_card_moved_during_readout_basic(basic::responses::si_card_moved::pointer response)
 		{
-			LOG << "card moved during readout" << (response->get<basic::cmd>().value) << std::endl;
+			LOG << "card moved during readout: ";
+			switch(response->get<basic::cmd>().value)
+			{
+			case 'I':
+				LOG << "in (seems like if two are inserted at the same time, wierd)" << std::endl;
+				return;
+			case 'O':
+				LOG << "out" << std::endl;
+				return;
+			default:
+				LOG << "card moved in unkonwn direction" << std::endl;
+			};
 		}
 		void si_card_removed_during_readout(extended::responses::si_card_removed::pointer response)
 		{
 			LOG << "card removed during readout, no: " << response->get<extended::si>().value << std::endl;
 		}
-		void nak(extended::responses::nak::pointer )
+		void nak(common::nak::pointer )
 		{
 			LOG << "nak arrived" << std::endl;
 		}
