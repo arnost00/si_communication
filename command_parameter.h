@@ -710,6 +710,7 @@ namespace si
 		: public parameter
 		, public std::vector<boost::uint8_t>
    {
+		typedef std::vector<boost::uint8_t> storage_base_type;
       byte_array()
       {
          if(unknown_size!= length)
@@ -717,6 +718,11 @@ namespace si
             resize(length);
          }
       }
+	  byte_array(byte_array const &that)
+		  : storage_base_type(that)
+	  {
+	  }
+
 	  typedef std::vector<boost::uint8_t> value_type;
       typedef T type;
       typedef T parameter_type;

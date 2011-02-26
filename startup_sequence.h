@@ -35,7 +35,7 @@ namespace si
 			extended::commands::set_ms_mode::pointer set_ms_mode(new extended::commands::set_ms_mode);
 			set_ms_mode->get<extended::m_s>().value = extended::m_s::master;
 
-			si::response<boost::mpl::deque<extended::responses::set_ms_mode, extended::responses::nak> >::reactions_type
+			si::response<boost::mpl::deque<extended::responses::set_ms_mode, common::nak> >::reactions_type
 				reaction(boost::bind(&startup_sequence::response_set_ms_hi_speed, this, _1)
 				, boost::bind(&startup_sequence::nck_set_ms_hi_speed, this, _1));
 			channel->register_response_expectation(
@@ -67,7 +67,7 @@ namespace si
 			LOG << "lo speed response, on basic protocol cn: " << response->get<basic::cn>().value << std::endl;
 			success();
 		}
-		void nck_set_ms_lo_speed(extended::responses::nak::pointer &)
+		void nck_set_ms_lo_speed(common::nak::pointer &)
 		{
 			LOG << "lo speed nck" << std::endl;
 			//check basic protocol
@@ -75,7 +75,7 @@ namespace si
 			basic::commands::set_ms_mode::pointer set_ms_mode(new basic::commands::set_ms_mode);
 			set_ms_mode->get<basic::m_s>().value = basic::m_s::master;
 
-			si::response<boost::mpl::deque<basic::responses::set_ms_mode, basic::responses::nak> >::reactions_type
+			si::response<boost::mpl::deque<basic::responses::set_ms_mode, common::nak> >::reactions_type
 				reaction(boost::bind(&startup_sequence::response_set_ms_lo_speed_basic, this, _1)
 				, boost::bind(&startup_sequence::nck_set_ms_lo_speed_basic, this, _1));
 			channel->register_response_expectation(
@@ -85,7 +85,7 @@ namespace si
 
 			channel->write_command(set_ms_mode);		
 		}
-		void nck_set_ms_hi_speed(extended::responses::nak::pointer &)
+		void nck_set_ms_hi_speed(common::nak::pointer &)
 		{
 			LOG << "hi speed nck" << std::endl;
 			//check basic protocol
@@ -93,7 +93,7 @@ namespace si
 			basic::commands::set_ms_mode::pointer set_ms_mode(new basic::commands::set_ms_mode);
 			set_ms_mode->get<basic::m_s>().value = basic::m_s::master;
 
-			si::response<boost::mpl::deque<basic::responses::set_ms_mode, basic::responses::nak> >::reactions_type
+			si::response<boost::mpl::deque<basic::responses::set_ms_mode, common::nak> >::reactions_type
 				reaction(boost::bind(&startup_sequence::response_set_ms_hi_speed_basic, this, _1)
 				, boost::bind(&startup_sequence::nck_set_ms_hi_speed_basic, this, _1));
 			channel->register_response_expectation(
@@ -103,12 +103,12 @@ namespace si
 
 			channel->write_command(set_ms_mode);		
 		}
-		void nck_set_ms_hi_speed_basic(basic::responses::nak::pointer &)
+		void nck_set_ms_hi_speed_basic(common::nak::pointer &)
 		{
 			LOG << "hi speed nck on basic protocol: fail" << std::endl;
 			failure();
 		}
-		void nck_set_ms_lo_speed_basic(basic::responses::nak::pointer &)
+		void nck_set_ms_lo_speed_basic(common::nak::pointer &)
 		{
 			LOG << "lo speed nck on basic protocol: fail" << std::endl;
 			failure();
@@ -121,7 +121,7 @@ namespace si
 			extended::commands::set_ms_mode::pointer set_ms_mode(new extended::commands::set_ms_mode);
 			set_ms_mode->get<extended::m_s>().value = extended::m_s::master;
 
-			si::response<boost::mpl::deque<extended::responses::set_ms_mode, extended::responses::nak> >::reactions_type
+			si::response<boost::mpl::deque<extended::responses::set_ms_mode, common::nak> >::reactions_type
 				reaction(boost::bind(&startup_sequence::response_set_ms_lo_speed, this, _1)
 				, boost::bind(&startup_sequence::nck_set_ms_lo_speed, this, _1));
 			channel->register_response_expectation(

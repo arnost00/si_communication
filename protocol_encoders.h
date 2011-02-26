@@ -65,7 +65,7 @@ template<> struct protocol_encoder<protocols::basic>
          }
          *out_it++ = *it++;
       }
-      *out_it++ = STX::value;
+	  *out_it++ = ETX::value;
 
       return;
    }
@@ -213,7 +213,7 @@ template<> struct protocol_encoder<protocols::extended>
 {
    template<typename iterator> static std::size_t get_size(boost::uint8_t command, std::size_t in_size, iterator , bool ff_start = false, bool extra_stx = false)
    {
-		return sizeof(command) + sizeof(STX::value) + sizeof(ETX::value) + 3 + in_size + (ff_start? 1: 0) + (extra_stx? 1: 0);
+		return sizeof(command) + sizeof(STX::value) + sizeof(ETX::value) + 3/*size+crc*/ + in_size + (ff_start? 1: 0) + (extra_stx? 1: 0);
    }
    template<typename iterator_in, typename iterator_out> static void write_data(boost::uint8_t command
       , std::size_t in_size, iterator_in it

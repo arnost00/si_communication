@@ -14,25 +14,25 @@ namespace si
 {
 	typedef std::set<unsigned> needed_blocks_container;
 
-	template<typename block_message_tt> struct blocks_read: public std::map<unsigned, typename block_message_tt::pointer>
+	template<typename block_type_tt> struct blocks_read: public std::map<unsigned, block_type_tt>
 	{
-		typedef std::map<unsigned, typename block_message_tt::pointer> base_container;
+		typedef std::map<unsigned, block_type_tt> base_container;
 		typedef typename base_container::value_type base_value_type;
 		typedef boost::shared_ptr<blocks_read> pointer;
-		typedef block_message_tt element_type;
+		typedef block_type_tt element_type;
 		unsigned card_id;
 		unsigned card_serie;
 		needed_blocks_container needed_blocks;
 
-		void block_read(typename block_message_tt::pointer block)
+		template<typename block_holder_tt> void block_read(block_holder_tt &block)
 		{
-            needed_blocks_container::iterator it = needed_blocks.find(block->template get<extended::bn>().value);
+			needed_blocks_container::iterator it = needed_blocks.find(block->template get<common::bn>().value);
 			if(needed_blocks.end() == it)
 			{
 				return;
 			}
 			needed_blocks.erase(it);
-			base_value_type insertion_value(block->template get<extended::bn>().value, block);
+			base_value_type insertion_value(block->template get<common::bn>().value, block->template get<common::read_out_data>());
 			insert(insertion_value);
 		}
 		bool ready()
