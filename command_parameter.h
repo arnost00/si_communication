@@ -9,6 +9,7 @@
 #include "tuple_type.h"
 #include "create_parameter_sequence.h"
 #include "sequence_position.h"
+#include "type_forwarder.h"
 
 #include <boost/type_traits/add_reference.hpp>
 #include <boost/type_traits/add_const.hpp>
@@ -25,8 +26,9 @@
 namespace si
 {
 
-        typedef boost::mpl::deque<boost::int8_t, boost::int16_t, boost::int32_t, boost::int64_t> signed_integers;
-        typedef boost::mpl::deque<boost::uint8_t, boost::uint16_t, boost::uint32_t, boost::uint64_t> unsigned_integers;
+	typedef boost::mpl::deque<boost::int8_t, boost::int16_t, boost::int32_t, boost::int64_t> signed_integers;
+	typedef boost::mpl::deque<boost::uint8_t, boost::uint16_t, boost::uint32_t, boost::uint64_t> unsigned_integers;
+	struct value_not_fixed{};
 
 
 	template <unsigned size
@@ -61,6 +63,17 @@ namespace si
 	struct decide_integer_size<size, integer_types, true>
 	{
 		BOOST_MPL_ASSERT_MSG(false, NO_TYPE_OF_SUITABLE_SIZE_FOUND, (types<typename boost::mpl::integral_c<unsigned, size> >));
+	};
+
+	template <typename value_type_tt, typename value_tv> struct value_holder_static
+	{
+		typedef value_type_tt value_type;
+		typedef value_holder_static<value_type_tt, value_tv> value_holder_type;
+		BOOST_STATIC_CONSTANT(value_type, value = value_tv::value);
+		operator value_type()
+		{
+			return value;
+		}
 	};
 
 	template <typename value_type_tt> struct value_holder
@@ -141,10 +154,14 @@ namespace si
 		}
 	};
 
-        template <unsigned size_tt, typename T/*, typename implementation_candidates = unsigned_integers*/>
+		template <unsigned size_tt, typename T, typename fixed_value = value_not_fixed/*, typename implementation_candidates = unsigned_integers*/>
                 struct unsigned_integral_parameter
 		: public parameter
-		, public byte_part<size_tt - 1, value_holder<typename decide_integer_size<size_tt, unsigned_integers>::type> >
+		, public byte_part<size_tt - 1, typename boost::mpl::if_< typename boost::is_same<fixed_value, value_not_fixed>::type
+															, type_forwarder<value_holder<typename decide_integer_size<size_tt, unsigned_integers>::type> >
+															, value_holder_static<type_forwarder<typename decide_integer_size<size_tt, unsigned_integers>::type>
+																, fixed_value > >::type::type
+							>
 	{
 		typedef T type;
 		typedef T parameter_type;
@@ -152,6 +169,7 @@ namespace si
 		typedef typename decide_integer_size<size_tt, unsigned_integers>::type decided_type;
 		typedef byte_part<size_tt - 1
 			, value_holder<decided_type> > byte_parts;
+		typedef boost::integral_constant<unsigned, size_tt> parameter_size_type;
 
 //		typedef unsigned_integers implementation_candidates;
 		 
@@ -706,11 +724,14 @@ namespace si
    };
 
 
-   template<typename T, std::size_t length = unknown_size> struct byte_array
+	template<typename T, std::size_t length = unknown_size> struct byte_array
 		: public parameter
 		, public std::vector<boost::uint8_t>
    {
 		typedef std::vector<boost::uint8_t> storage_base_type;
+		typedef T type;
+		typedef T parameter_type;
+
       byte_array()
       {
          if(unknown_size!= length)
@@ -724,8 +745,6 @@ namespace si
 	  }
 
 	  typedef std::vector<boost::uint8_t> value_type;
-      typedef T type;
-      typedef T parameter_type;
 
       static inline std::size_t get_size()
       {
@@ -744,7 +763,8 @@ namespace si
          }
       }
       template<typename iterator_t>inline static bool can_read_data(std::size_t &out_size, iterator_t &it )
-      {
+	  {
+		  //TODO: check data size
          return true;
       }         
       template<typename iterator_t>inline bool read_data(std::size_t &out_size, iterator_t &it )
@@ -764,13 +784,15 @@ namespace si
 	  , public std::vector<boost::uint8_t>
    {
 	  typedef std::vector<boost::uint8_t> value_type;
-      typedef T type;
+	  typedef T type;
+	  typedef T parameter_type;
 
-      byte_array()
+	  byte_array()
+		  :value_type(0)
       {
       }
 
-      static inline std::size_t get_size()
+	  inline std::size_t get_size()
       {
          return size();
       }

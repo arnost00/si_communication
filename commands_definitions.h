@@ -12,6 +12,7 @@
 #include <boost/config/suffix.hpp>
 
 #include <boost/cstdint.hpp>
+#include <boost/type_traits/is_base_of.hpp>
 
 namespace si
 {
@@ -88,8 +89,6 @@ namespace si
 			typedef boost::mpl::deque<m_s> set_ms_mode_data_def;
 			typedef boost::mpl::deque<bn> si_card6_get_data_def;
 
-//			typedef fixed_command<ACK, no_data, true> ack;
-//			typedef fixed_command<NAK, no_data, true> nak;
 			typedef fixed_command<set_ms_mode_code, set_ms_mode_data_def> set_ms_mode;
 			typedef fixed_command<si_card5_get_code, no_data> si_card5_get;
 			typedef fixed_command<si_card6_get_code, si_card6_get_data_def> si_card6_get;
@@ -104,8 +103,6 @@ namespace si
 			typedef boost::mpl::deque<cn, read_out_data, cs> si_card5_get_data_def;
 			typedef boost::mpl::deque<cn, bn, read_out_data, cs> si_card6_get_data_def;
 
-//			typedef fixed_command<ACK, no_data, true> ack;
-//			typedef fixed_command<NAK, no_data, true> nak;
 			typedef fixed_command<set_ms_mode_code, set_ms_mode_data_def> set_ms_mode;
 			typedef fixed_command<si_card_moved_code, si_card_moved_data_def> si_card_moved;
 			typedef fixed_command<si_card6_inserted_code, si_card6_inserted_data_def> si_card6_inserted;
@@ -125,6 +122,9 @@ namespace si
 		typedef boost::integral_constant<boost::uint8_t, 0xE1> si_card6_get_code;
 		typedef boost::integral_constant<boost::uint8_t, 0xEF> si_card8_get_code;
 		typedef boost::integral_constant<boost::uint8_t, 0xD3> transmit_record_code;
+
+		typedef boost::integral_constant<boost::uint8_t, 0x83> get_config_value_code;
+
 		struct m_s: public unsigned_integral_parameter<1, m_s>
 		{
 			BOOST_STATIC_CONSTANT(boost::uint8_t, master = 0x4D);
@@ -133,19 +133,33 @@ namespace si
 
 		struct cn: public unsigned_integral_parameter<2, cn>{};
 		struct mem: public unsigned_integral_parameter<3, mem>{};
+		struct config_value_id: public unsigned_integral_parameter<3, config_value_id>{};
+		struct config_value_size: public unsigned_integral_parameter<1, config_value_size>{};
+		struct config_value_array: public byte_array<config_value_array>{};
+
+
+		template<boost::uint8_t config_value_id_tt, typename specific_value_tt, bool enabled = (boost::is_base_of<parameter, specific_value_tt>::type::value) >
+			struct get_config_value_specific
+		{
+			typedef boost::mpl::deque<typename specific_value_tt::value_id, typename specific_value_tt::paramer_size_type> command_data_def;
+			typedef boost::mpl::deque<cn, typename specific_value_tt::value_id, specific_value_tt> response_data_def;
+
+			typedef fixed_command<get_config_value_code, command_data_def> command;
+			typedef fixed_command<get_config_value_code, response_data_def> response;
+		};
 
 		struct commands
 		{
 			typedef boost::mpl::deque<m_s> set_ms_mode_data_def;
 			typedef boost::mpl::deque<bn> si_card_multiblock_get_data_def;
 			typedef boost::mpl::deque<bn> si_card8_get_data_def;
+			typedef boost::mpl::deque<config_value_id, config_value_size> get_config_value_data_def;
 
-//			typedef fixed_command<ACK, no_data, true> ack;
-//			typedef fixed_command<NAK, no_data, true> nak;
 			typedef fixed_command<set_ms_mode_code, set_ms_mode_data_def> set_ms_mode;
 			typedef fixed_command<si_card5_get_code, no_data> si_card5_get;
 			typedef fixed_command<si_card6_get_code, si_card_multiblock_get_data_def> si_card6_get;
 			typedef fixed_command<si_card8_get_code, si_card_multiblock_get_data_def> si_card8_get;
+			typedef fixed_command<get_config_value_code, get_config_value_data_def> get_config_value;
 		};
 		struct responses
 		{
@@ -155,9 +169,8 @@ namespace si
 			typedef boost::mpl::deque<cn, read_out_data> si_card5_get_data_def;
 			typedef boost::mpl::deque<cn, bn, read_out_data> si_card_multiblock_get_data_def;
 			typedef boost::mpl::deque<cn, si, td, t, tss, mem> transmit_record_data_def;
+			typedef boost::mpl::deque<cn, config_value_id, config_value_array> get_config_value_data_def;
 
-//			typedef fixed_command<ACK, no_data, true> ack;
-//			typedef fixed_command<NAK, no_data, true> nak;
 			typedef fixed_command<set_ms_mode_code, set_ms_mode_data_def> set_ms_mode;
 			typedef fixed_command<si_card5_inserted_code, card_move_data_def> si_card5_inserted;
 			typedef fixed_command<si_card6_inserted_code, card_move_data_def> si_card6_inserted;
@@ -169,28 +182,7 @@ namespace si
 			typedef fixed_command<si_card5_get_code, si_card5_get_data_def> si_card5_get;
 			typedef fixed_command<si_card6_get_code, si_card_multiblock_get_data_def> si_card6_get;
 			typedef fixed_command<si_card8_get_code, si_card_multiblock_get_data_def> si_card8_get;
+			typedef fixed_command<get_config_value_code, get_config_value_data_def> get_config_value;
 		};
 	};
-/*		struct addr: public si::unsigned_integral_parameter<3, addr>{};
-		struct num: public si::unsigned_integral_parameter<1, num>{};
-
-		struct cn: public si::unsigned_integral_parameter<2, cn>{};
-
-		struct read_si_after_punch: public si::parameter_t<read_si_after_punch>{};
-		struct access_with_password_only: public si::parameter_t<access_with_password_only>{};
-		struct handshake: public si::parameter_t<handshake>{};
-		struct auto_send_out: public si::parameter_t<auto_send_out>{};
-		struct extended_protocol: public si::parameter_t<extended_protocol>{};
-
-		struct cpc: public si::bit_array<boost::mpl::deque<read_si_after_punch, si::don_t_care, si::don_t_care, access_with_password_only, si::don_t_care, handshake, auto_send_out, extended_protocol>, cpc>{};
-
-		typedef boost::mpl::deque<addr, num> read_backup_data_def;
-		typedef boost::mpl::deque<cn, boost::mpl::integral_c<si::boost::uint8_t, 0x74>, cpc> protocol_configuration_def;
-
-
-		typedef si::fixed_command<0x81, read_backup_data_def> read_backup_data_command; 
-		typedef si::fixed_command<0x83, protocol_configuration_def> protocol_configuration_response; 
-		typedef si::fixed_command<0x83, boost::mpl::deque<boost::mpl::integral_c<si::boost::uint8_t, 0x72>, boost::mpl::integral_c<si::boost::uint8_t, 0x01> > > whatever_command_def;
-
-	}//namespace commands*/
 }//namespace si
