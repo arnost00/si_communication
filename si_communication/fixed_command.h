@@ -16,11 +16,11 @@
 namespace si
 {
 	template<typename command_tt
-		, typename parameters_tt = boost::mpl::deque<>
-		, bool control_sequence_tt = false
-		> struct fixed_command
+				, typename parameters_tt = boost::mpl::deque<>
+				, bool control_sequence_tt = false
+				> struct fixed_command
 			: public parameters_array<parameters_tt>
-		, public command_interface
+			, public command_interface
 	{
 		typedef typename command_tt::value_type command_t;
 		BOOST_STATIC_CONSTANT(command_t, code = command_tt::value);
@@ -29,7 +29,7 @@ namespace si
 
 		typedef parameters_tt command_template_type;
 		typedef typename create_parameter_sequence<parameters_tt>::type command_parameters_type;
-//		typedef typename boostext::tuple_type<typename create_parameter_sequence<parameters_tt>::type>::type parameters_tuple_type;
+		//		typedef typename boostext::tuple_type<typename create_parameter_sequence<parameters_tt>::type>::type parameters_tuple_type;
 
 		typedef parameters_array<parameters_tt > param_array_type;
 		typedef boost::shared_ptr<fixed_command> pointer;
@@ -42,7 +42,7 @@ namespace si
 
 		template<typename top_of_tt, typename id_tt> struct get_top_part
 		{
-		typedef boost::mpl::integral_c<id_tt, (top_of_tt::value >> (sizeof(id_tt) < sizeof(command_t)? 8*(sizeof(command_t) - sizeof(id_tt)): 0 ))> type;
+			typedef boost::mpl::integral_c<id_tt, (top_of_tt::value >> (sizeof(id_tt) < sizeof(command_t)? 8*(sizeof(command_t) - sizeof(id_tt)): 0 ))> type;
 		};
 		virtual id_type get_id(protocols::id<>::value_type = protocols::id<>::value)
 		{
@@ -74,15 +74,15 @@ namespace si
 
 			boost::add_pointer<data_type::element_type>::type it = data.get();
 			return raw_data_reader<this_type>::read_data(this, size, it);
-		//			return read_data(size, it);		
+			//			return read_data(size, it);
 		}
-/*		virtual bool can_accept_data(std::size_t size, data_type data)
+		/*		virtual bool can_accept_data(std::size_t size, data_type data)
 		{
 			boost::add_pointer<data_type::element_type>::type it = data.get();
 //			return raw_data_reader<this_type>::can_read_data(this, size, it);
 			return can_accept_data(size, it);
 		}*/
-/*		static inline bool can_accept_data_static(std::size_t size, data_type data)
+		/*		static inline bool can_accept_data_static(std::size_t size, data_type data)
 		{
 			boost::add_pointer<data_type::element_type>::type it = data.get();
 			return raw_data_reader<this_type>::can_read_data_static(size, it);

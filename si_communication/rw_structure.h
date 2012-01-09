@@ -15,50 +15,50 @@
 
 namespace si
 {
-   template<boost::uint8_t command_tt
-      , typename parameters_tt = boost::deque<>
-      > struct rw_structure
-      : public boostext::tuple_type<typename create_parameter_sequence<parameters_tt>::type>::type
-   {
+	template<boost::uint8_t command_tt
+				, typename parameters_tt = boost::deque<>
+				> struct rw_structure
+			: public boostext::tuple_type<typename create_parameter_sequence<parameters_tt>::type>::type
+	{
 
-      typedef parameters_tt structure_template_type;
-      typedef typename create_parameter_sequence<parameters_tt>::type parameters_type;
-      typedef typename boostext::tuple_type<typename create_parameter_sequence<parameters_tt>::type>::type parameters_tuple_type;
+		typedef parameters_tt structure_template_type;
+		typedef typename create_parameter_sequence<parameters_tt>::type parameters_type;
+		typedef typename boostext::tuple_type<typename create_parameter_sequence<parameters_tt>::type>::type parameters_tuple_type;
 
-      typedef boost::shared_ptr<rw_structure> pointer;
+		typedef boost::shared_ptr<rw_structure> pointer;
 
-      typedef rw_structure this_type;
+		typedef rw_structure this_type;
 		template<typename parameter_tt>struct element
 		{
 			typedef boost::mpl::integral_c<unsigned, boostext::sequence_position<typename parameter_tt::parameter_type, command_parameters_type>::value> type;
 		};
 
-      template<typename parameter_tt> typename parameter_tt::type & get()
-      {
-         return *(typename parameter_tt::type*)&parameters_tuple_type::get<boostext::sequence_position<typename parameter_tt::parameter_type, command_parameters_type>::value>();
-      }
+		template<typename parameter_tt> typename parameter_tt::type & get()
+		{
+			return *(typename parameter_tt::type*)&parameters_tuple_type::get<boostext::sequence_position<typename parameter_tt::parameter_type, command_parameters_type>::value>();
+		}
 
-      std::size_t get_size(protocols::id<>::value_type protocol = protocols::id<>::value)
-      {
-         return parameters_size_counter<parameters_tt, this_type>::get_size(this);
-      }
+		std::size_t get_size(protocols::id<>::value_type protocol = protocols::id<>::value)
+		{
+			return parameters_size_counter<parameters_tt, this_type>::get_size(this);
+		}
 
 
-      virtual bool accept_data(std::size_t size, data_type data)
-      {
-         boost::add_pointer<data_type::element_type>::type it = data.get();
-         return raw_data_reader<this_type>::read_data(this, size, it);
-      }
-      virtual bool can_accept_data(std::size_t size, data_type data)
-      {
-         boost::add_pointer<data_type::element_type>::type it = data.get();
-         return raw_data_reader<this_type>::can_read_data(this, size, it);
-      }
-      static inline bool can_accept_data_static(std::size_t size, data_type data)
-      {
-         boost::add_pointer<data_type::element_type>::type it = data.get();
-         return raw_data_reader<this_type>::can_read_data_static(size, it);
-      }
+		virtual bool accept_data(std::size_t size, data_type data)
+		{
+			boost::add_pointer<data_type::element_type>::type it = data.get();
+			return raw_data_reader<this_type>::read_data(this, size, it);
+		}
+		virtual bool can_accept_data(std::size_t size, data_type data)
+		{
+			boost::add_pointer<data_type::element_type>::type it = data.get();
+			return raw_data_reader<this_type>::can_read_data(this, size, it);
+		}
+		static inline bool can_accept_data_static(std::size_t size, data_type data)
+		{
+			boost::add_pointer<data_type::element_type>::type it = data.get();
+			return raw_data_reader<this_type>::can_read_data_static(size, it);
+		}
 
-   };
+	};
 };//namespace si

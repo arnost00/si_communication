@@ -28,10 +28,10 @@ namespace si
 		struct week_counter: public unsigned_integral_parameter<1, week_counter>{};
 
 		typedef boost::mpl::deque<don_t_care<2>
-			, day_of_week::bits_range<1,0>
-			, week_counter::bits_range<2,0>
-			, am_pm::bits_range<0>
-			> td_def;
+		, day_of_week::bits_range<1,0>
+		, week_counter::bits_range<2,0>
+		, am_pm::bits_range<0>
+		> td_def;
 		struct td: public bit_array<td_def, td>{};
 
 		struct read_out_data: public byte_array<read_out_data, 128>{};
@@ -44,7 +44,7 @@ namespace si
 
 	};
 	struct basic: public common
-	{	
+	{
 		typedef boost::integral_constant<boost::uint8_t, 0x46> si_card_moved_code;
 		typedef boost::integral_constant<boost::uint8_t, 0x66> si_card6_inserted_code;
 		typedef boost::integral_constant<boost::uint8_t, 0x53> transmit_record_code;
@@ -77,10 +77,10 @@ namespace si
 		struct week_counter: public unsigned_integral_parameter<1, week_counter>{};
 
 		typedef boost::mpl::deque<don_t_care<2>
-			, day_of_week::bits_range<1,0>
-			, week_counter::bits_range<2,0>
-			, am_pm::bits_range<0>
-			> td_def;
+		, day_of_week::bits_range<1,0>
+		, week_counter::bits_range<2,0>
+		, am_pm::bits_range<0>
+		> td_def;
 		struct td: public bit_array<td_def, td>{};
 
 
@@ -139,7 +139,7 @@ namespace si
 
 
 		template<boost::uint8_t config_value_id_tt, typename specific_value_tt, bool enabled = (boost::is_base_of<parameter, specific_value_tt>::type::value) >
-			struct get_config_value_specific
+		struct get_config_value_specific
 		{
 			typedef boost::mpl::deque<typename specific_value_tt::value_id, typename specific_value_tt::paramer_size_type> command_data_def;
 			typedef boost::mpl::deque<cn, typename specific_value_tt::value_id, specific_value_tt> response_data_def;
