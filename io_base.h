@@ -15,82 +15,51 @@
 #include <boost/mpl/find.hpp>
 #include <boost/mpl/end.hpp>
 #include <boost/mpl/is_sequence.hpp>
-
+#include <boost/asio/serial_port_service.hpp>
 #include <boost/thread.hpp>
 
 namespace si
 {
-	template<typename base_tt = void, typename enabled = void> struct io_base: public io_base<boost::mpl::deque<base_tt> >
-	{
-      typedef boost::shared_ptr<boost::asio::io_service> service_pointer;
-		io_base(service_pointer service_ = service_pointer())
-			: io_base<boost::mpl::deque<base_tt> >(service_)
-		{}
-	};
-	template<> struct io_base<void, void>
-	{
-		typedef boost::shared_ptr<boost::asio::io_service> service_pointer;
 
-		class service_wrapper: public service_pointer
+	struct io_base
+	{
+		struct extended_service_ptr: public boost::shared_ptr<boost::asio::io_service>
 		{
-		public:
-			service_wrapper(service_pointer &service)
-				: service_pointer(service)
-				, created(!service)
-			{
-				if(created)
-				{
-					reset(new service_pointer::element_type());
-				}
-			}
-			service_wrapper()
-				: service_pointer(new service_pointer::element_type())
-				, created(true)
+			typedef boost::shared_ptr<boost::asio::io_service> base_type;
+			extended_service_ptr()
 			{}
-			bool is_created()
+			extended_service_ptr(base_type::element_type *element)
+				: base_type(element)
+			{}
+			extended_service_ptr(base_type const& base)
+				: base_type(base)
+			{}
+			operator base_type::element_type&()
 			{
-				return created;
+				return **(base_type*)this;
 			}
-			operator service_pointer::element_type&()
+			~extended_service_ptr()
 			{
-				return *get();
+				//std::cout << "~io_service&" << this->use_count() << std::endl;
 			}
-		protected:
-			bool created;
 		};
+		//typedef boost::shared_ptr<boost::asio::io_service> service_pointer;
+		typedef boost::shared_ptr<io_base> pointer;
+		typedef extended_service_ptr service_pointer;
+		typedef boost::shared_ptr<boost::asio::serial_port_service> serial_service_pointer;
 		typedef boost::shared_ptr<boost::asio::io_service::work> work_pointer;
 		typedef boost::shared_ptr<boost::thread> thread_pointer;
 
-		template<typename bases_tt, typename enabled = void> struct bases
-			: public boost::mpl::front<bases_tt>::type
-			, public bases<typename boost::mpl::pop_front<bases_tt>::type>
+		io_base(io_base::service_pointer service_ = io_base::service_pointer())
+			: service(service_)
 		{
-			typedef typename boost::mpl::front<bases_tt>::type item_base_type;
-                        typedef typename si::io_base<void, void>::bases<typename boost::mpl::pop_front<bases_tt>::type> remaining_bases_type;
-			bases(service_wrapper service)
-				: item_base_type(service)
-				, remaining_bases_type(service)
-			{}	
-		};
-		template<typename bases_tt> struct bases<bases_tt, typename boost::enable_if<typename boost::mpl::empty<bases_tt>::type>::type>
-		{
-			bases(service_wrapper )
-			{}	
-		};
-	};
-
-	template<typename base_tt> struct io_base<base_tt
-		, typename boost::enable_if<typename boost::mpl::is_sequence<base_tt>::type>::type>
-			: public io_base<>::bases<base_tt>
-	{
-		io_base(io_base<>::service_wrapper service_ = io_base<>::service_wrapper())
-			: io_base<>::bases<base_tt>(service_)
-			, service(service_)
-		{
-			work.reset(new io_base<>::work_pointer::element_type(*service.get()));
-			if(service_.is_created())
+			if(!service)
 			{
-                                thread.reset(new io_base<>::thread_pointer::element_type(boost::bind(&boost::asio::io_service::run, service.get())));
+				service.reset(new service_pointer::element_type());
+				work.reset(new io_base::work_pointer::element_type(*service));
+				thread.reset(new io_base::thread_pointer::element_type
+								 (boost::bind(&service_pointer::element_type::run, service.get())));
+				serial_service.reset(new serial_service_pointer::element_type(*service));
 			}
 		}
 		~io_base()
@@ -98,14 +67,59 @@ namespace si
 			work.reset();
 			if(thread && (thread->joinable()))
 			{
+				if(serial_service)
+				{
+					serial_service_pointer::element_type::implementation_type i_t;
+					boost::system::error_code ec;
+					serial_service->cancel(i_t, ec);
+					if(ec)
+					{
+						std::cout << ec.message();
+					}
+				}
+				service->stop();
+				service->reset();
 				thread->interrupt();
-				thread->join();
+				//            thread->join();
+				serial_service.reset();
+				thread.reset();
 			}
 		}
 
-		typename io_base<>::service_pointer service;
-		typename io_base<>::work_pointer work;
-                typename io_base<>::thread_pointer thread;
+		service_pointer service;
+		serial_service_pointer serial_service;
+		work_pointer work;
+		thread_pointer thread;
+
+	};
+
+	template<typename bases_tt, typename enabled = void> struct bases
+			: public boost::mpl::front<bases_tt>::type
+			, public bases<typename boost::mpl::pop_front<bases_tt>::type>
+	{
+		typedef typename boost::mpl::front<bases_tt>::type item_base_type;
+		typedef bases<typename boost::mpl::pop_front<bases_tt>::type> remaining_bases_type;
+		bases(io_base::service_pointer service)
+			: item_base_type(service)
+			, remaining_bases_type(service)
+		{}
+	};
+	template<typename bases_tt> struct bases
+			<bases_tt, typename boost::enable_if<typename boost::mpl::empty<bases_tt>::type>::type>
+	{
+		bases(io_base::service_pointer service)
+		{}
+	};
+
+	template<typename base_tt> struct io_bases
+			: public io_base
+			, public bases<base_tt>
+	{
+		io_bases(io_base::service_pointer service_ = io_base::service_pointer())
+			: io_base(service_)
+			, bases<base_tt>(io_base::service)
+		{
+		}
 	};
 
 }//namespace si

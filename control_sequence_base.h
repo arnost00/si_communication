@@ -15,10 +15,10 @@ namespace si
 		typedef boost::function<void()> callback_type;
 		typedef typename channel_tt::pointer channel_type;
 
-//		BOOST_MPL_ASSERT_MSG(false, CHANNEL_TT_PARAMETER, (types<channel_tt>));
+		//		BOOST_MPL_ASSERT_MSG(false, CHANNEL_TT_PARAMETER, (types<channel_tt>));
 		control_sequence_base(channel_type channel_ = channel_type()
-			, callback_type success_cb_ = callback_type()
-			, callback_type failure_cb_ = callback_type())
+				, callback_type success_cb_ = callback_type()
+				, callback_type failure_cb_ = callback_type())
 			: channel(channel_)
 			, success_cb(success_cb_)
 			, failure_cb(failure_cb_)
@@ -26,8 +26,8 @@ namespace si
 		}
 
 		void start(channel_type channel_
-			, callback_type success_cb_ = callback_type()
-			, callback_type failure_cb_ = callback_type())
+					  , callback_type success_cb_ = callback_type()
+				, callback_type failure_cb_ = callback_type())
 		{
 			channel = channel_;
 			success_cb = success_cb_;

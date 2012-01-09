@@ -14,12 +14,12 @@
 
 namespace si
 {
-/*
+	/*
 	struct one_boost::uint8_t_type: public unsigned_integral_parameter<1, one_boost::uint8_t_type>{};
 	struct two_boost::uint8_ts_type: public unsigned_integral_parameter<2, two_boost::uint8_ts_type>{};
 	struct three_boost::uint8_ts_type: public unsigned_integral_parameter<3, three_boost::uint8_ts_type>{};
 	struct four_boost::uint8_ts_type: public unsigned_integral_parameter<4, four_boost::uint8_ts_type>{};
-*/
+	*/
 
 	struct card_type{};
 	struct card_5: public card_type{};
@@ -51,19 +51,19 @@ namespace si
 		typedef boost::mpl::deque<typename control_number::template bits_range<7,0> > punch_1byte_def;
 		typedef boost::mpl::deque<typename control_number::template bits_range<7,0>, typename time_12h::template bits_range<15,0> > punch_3bytes_def;
 		typedef boost::mpl::deque<typename control_number::template bits_range<9,8>
-			, typename day_of_week::template bits_range<1,0>
-			, typename week_counter::template bits_range<2,0>
-			, typename am_pm::template bits_range<0>
-			, typename control_number::template bits_range<7,0>
-			, typename time_12h::template bits_range<15,0> > punch_4bytes_def;
+		, typename day_of_week::template bits_range<1,0>
+		, typename week_counter::template bits_range<2,0>
+		, typename am_pm::template bits_range<0>
+		, typename control_number::template bits_range<7,0>
+		, typename time_12h::template bits_range<15,0> > punch_4bytes_def;
 		typedef boost::mpl::deque<typename control_number::template bits_range<7,0>
-				, typename si_station_id::template bits_range<17,0>
-				, typename punch_year::template bits_range<3,0>
-				, typename punch_month::template bits_range<3,0>
-				, typename punch_day::template bits_range<4,0>
-				, typename am_pm::template bits_range<0>
-				, typename time_12h::template bits_range<15,0>
-				, typename punch_sub_second::template bits_range<7,0> > punch_8bytes_def;
+		, typename si_station_id::template bits_range<17,0>
+		, typename punch_year::template bits_range<3,0>
+		, typename punch_month::template bits_range<3,0>
+		, typename punch_day::template bits_range<4,0>
+		, typename am_pm::template bits_range<0>
+		, typename time_12h::template bits_range<15,0>
+		, typename punch_sub_second::template bits_range<7,0> > punch_8bytes_def;
 		typedef boost::mpl::deque<card5_id_part, card5_serie_part> card5_id_def;
 
 		template<typename T> struct punch_1byte_type: public bit_array<punch_1byte_def, T>{};
@@ -73,11 +73,11 @@ namespace si
 
 		struct card5_id_type: public bit_array<card5_id_def, card5_id_type>{};
 
-                static inline boost::posix_time::time_duration get_duration(boost::uint16_t source)
+		static inline boost::posix_time::time_duration get_duration(boost::uint16_t source)
 		{
 			return 0xEEEE == source
-				? boost::posix_time::time_duration(boost::posix_time::not_a_date_time)
-				: boost::posix_time::seconds(source);
+					? boost::posix_time::time_duration(boost::posix_time::not_a_date_time)
+					: boost::posix_time::seconds(source);
 		}
 	};
 
@@ -93,9 +93,9 @@ namespace si
 		struct record_counter: public unsigned_integral_parameter<1, record_counter>{};
 
 		typedef boost::mpl::deque<
-			don_t_care<4>, card_id, card_serie
-			, don_t_care<0x0A>, start_no, start_time, finish_time, record_counter
-			, don_t_care<1>, check_time> card_5_header_def;
+		don_t_care<4>, card_id, card_serie
+		, don_t_care<0x0A>, start_no, start_time, finish_time, record_counter
+		, don_t_care<1>, check_time> card_5_header_def;
 
 		struct card_5_header_type: public parameters_array<card_5_header_def>{};
 		struct punch_type: public punch_3bytes_type<punch_type>{};
@@ -134,7 +134,7 @@ namespace si
 			iterator current_record = punch_base;
 
 
-	        punch_type punch;
+			punch_type punch;
 			extra_punch_type extra_punch;
 
 			for(std::size_t i = 0; 0 < records_count; i++, records_count--)
@@ -145,7 +145,7 @@ namespace si
 						current_record++;
 					punch.read_data(max_size, current_record);
 					readout.get<card_record::PUNCH_RECORDS>()[i] = punch_record(punch.get<control_number>().value
-						, card_reader<>::get_duration(punch.get<time_12h>().value));
+																									, card_reader<>::get_duration(punch.get<time_12h>().value));
 				}
 				else
 				{
@@ -179,18 +179,18 @@ namespace si
 		typedef boost::mpl::deque<don_t_care<4>, card_serie::bits_range<3,0>, card_id::bits_range<23,0> > card_id_serie_def;
 		struct card_id_serie: public bit_array<card_id_serie_def, card_id_serie>{};
 		typedef boost::mpl::deque<
-			device_uid, type_identifier, check_time, start_time, finish_time, last_visited_control, record_counter
-			, don_t_care<0x01>
-			, don_t_care<0x01>, card_id> card_8_header_def;
+		device_uid, type_identifier, check_time, start_time, finish_time, last_visited_control, record_counter
+		, don_t_care<0x01>
+		, don_t_care<0x01>, card_id> card_8_header_def;
 
 		struct card_8_header_type: public parameters_array<card_8_header_def>{};
 		struct punch_type: public punch_4bytes_type<punch_type>{};
 
 		typedef boost::mpl::deque<
-			  boost::mpl::pair<byte_type<0x01>, card_9>
-			, boost::mpl::pair<byte_type<0x02>, card_8>
-			, boost::mpl::pair<byte_type<0x04>, card_p>
-			, boost::mpl::pair<byte_type<0x06>, card_t>
+		boost::mpl::pair<byte_type<0x01>, card_9>
+		, boost::mpl::pair<byte_type<0x02>, card_8>
+		, boost::mpl::pair<byte_type<0x04>, card_p>
+		, boost::mpl::pair<byte_type<0x06>, card_t>
 		> known_card_types;
 		template<typename iterator>static bool read_header(card_record &readout, iterator datablock, std::size_t &punch_count)
 		{
@@ -220,8 +220,8 @@ namespace si
 		
 		template<typename card_types = known_card_types, bool enabled = boost::mpl::empty<card_types>::value>struct card_type_getter
 		{
-         BOOST_MPL_ASSERT_MSG(!boost::mpl::empty<card_types>::value, NOT_A_SEQUENCE, (types<card_types>));
-		 static inline bool read(boost::uint8_t param, card_record &readout, blocks_read<common::read_out_data>& data)
+			BOOST_MPL_ASSERT_MSG(!boost::mpl::empty<card_types>::value, NOT_A_SEQUENCE, (types<card_types>));
+			static inline bool read(boost::uint8_t param, card_record &readout, blocks_read<common::read_out_data>& data)
 			{
 				if(param == boost::mpl::first<typename boost::mpl::front<card_types>::type>::type::value)
 				{
@@ -247,7 +247,7 @@ namespace si
 			}
 		};
 		template<typename card_types>struct card_type_getter<card_types
-			, true>
+				, true>
 		{
 			typedef card_8_family type;
 			static inline bool read(boost::uint8_t , card_record &, blocks_read<common::read_out_data>& )
@@ -272,14 +272,14 @@ namespace si
 		{
 			return card_type_getter<>::read(data.card_serie, readout, data);
 		}
-                static boost::uint32_t get_id(extended::si::value_type data)
+		static boost::uint32_t get_id(extended::si::value_type data)
 		{
-			extended::si::value_type value = 
-				data & ~(extended::si::value_type(0xFF) << (8 * ( sizeof(extended::si::value_type) - 1)));
+			extended::si::value_type value =
+					data & ~(extended::si::value_type(0xFF) << (8 * ( sizeof(extended::si::value_type) - 1)));
 
 			return value;
 		}
-                static boost::uint32_t get_id(extended::responses::si_card8_get& data)
+		static boost::uint32_t get_id(extended::responses::si_card8_get& data)
 		{
 			card_id_serie id_serie;
 
@@ -329,7 +329,7 @@ namespace si
 		static bool read(card_record &readout, blocks_read<common::read_out_data>& data)
 		{
 			typedef boost::tuples::element<extended::responses::si_card8_get::element<common::read_out_data>::type::value
-				, extended::responses::si_card8_get>::type::iterator iterator;
+					, extended::responses::si_card8_get>::type::iterator iterator;
 			iterator datablock = data[0].begin();
 
 			std::size_t max_size = 128;
@@ -355,8 +355,8 @@ namespace si
 			{
 				punch.read_data(max_size, datablock);
 				readout.get<card_record::PUNCH_RECORDS>()[i] = punch_record(punch.get<control_number>()
-					, card_reader<>::get_duration(punch.get<time_12h>()));
-			}			
+																								, card_reader<>::get_duration(punch.get<time_12h>()));
+			}
 			return true;
 		}
 		static inline bool get_blocks_needed(needed_blocks_container &blocks, extended::responses::si_card8_get& data)
@@ -389,7 +389,7 @@ namespace si
 		static bool read(card_record &readout, blocks_read<common::read_out_data>& data)
 		{
 			typedef boost::tuples::element<extended::responses::si_card8_get::element<common::read_out_data>::type::value
-				, extended::responses::si_card8_get>::type::iterator iterator;
+					, extended::responses::si_card8_get>::type::iterator iterator;
 			iterator datablock = data[0].begin();
 
 			std::size_t max_size = 128;
@@ -420,8 +420,8 @@ namespace si
 				}
 				punch.read_data(max_size, datablock);
 				readout.get<card_record::PUNCH_RECORDS>()[i] = punch_record(punch.get<control_number>()
-					, card_reader<>::get_duration(punch.get<time_12h>()));
-			}			
+																								, card_reader<>::get_duration(punch.get<time_12h>()));
+			}
 			return true;
 		}
 		static inline bool get_blocks_needed(needed_blocks_container &blocks, extended::responses::si_card8_get& data)
@@ -457,16 +457,16 @@ namespace si
 		struct punch_type: public punch_4bytes_type<punch_type>{};
 
 		typedef boost::mpl::deque<don_t_care<8>, don_t_care<2>
-			, card_id, don_t_care<2>, last_visited_control, record_counter, next_record
-			, finish_time, start_time, check_time, clear_time, start_no
-			> card_6_header_def;
+		, card_id, don_t_care<2>, last_visited_control, record_counter, next_record
+		, finish_time, start_time, check_time, clear_time, start_no
+		> card_6_header_def;
 
 		struct card_6_header_type: public parameters_array<card_6_header_def>{};
 
 		static boost::uint32_t get_id(common::read_out_data& data)
 		{
 			typedef boost::tuples::element<extended::responses::si_card6_get::element<common::read_out_data>::type::value
-				, extended::responses::si_card6_get>::type::iterator iterator;
+					, extended::responses::si_card6_get>::type::iterator iterator;
 
 			card_id id;
 
@@ -493,7 +493,7 @@ namespace si
 			static const unsigned sectors[] = {6, 7, 2, 3, 4, 5};
 
 			typedef boost::tuples::element<extended::responses::si_card6_get::element<common::read_out_data>::type::value
-				, extended::responses::si_card6_get>::type::iterator iterator;
+					, extended::responses::si_card6_get>::type::iterator iterator;
 			iterator datablock = data[0].begin();
 
 			card_6_header_type card_6_header;
@@ -537,7 +537,7 @@ namespace si
 				}
 				punch.read_data(max_size, current_record);
 				readout.get<card_record::PUNCH_RECORDS>()[i] = punch_record(punch.get<control_number>().value
-					, card_reader<>::get_duration(punch.get<time_12h>().value));
+																								, card_reader<>::get_duration(punch.get<time_12h>().value));
 
 			}
 			
@@ -561,7 +561,7 @@ namespace si
 		static bool read(card_record &readout, blocks_read<common::read_out_data>& data)
 		{
 			typedef boost::tuples::element<extended::responses::si_card8_get::element<common::read_out_data>::type::value
-				, extended::responses::si_card8_get>::type::iterator iterator;
+					, extended::responses::si_card8_get>::type::iterator iterator;
 			iterator datablock = data[0].begin();
 
 			std::size_t max_size = 128;
@@ -592,8 +592,8 @@ namespace si
 				}
 				punch.read_data(max_size, datablock);
 				readout.get<card_record::PUNCH_RECORDS>()[i] = punch_record(punch.get<control_number>()
-					, card_reader<>::get_duration(punch.get<time_12h>()));
-			}			
+																								, card_reader<>::get_duration(punch.get<time_12h>()));
+			}
 			return true;
 		}
 		static inline bool get_blocks_needed(needed_blocks_container &blocks, extended::responses::si_card8_get& data)
@@ -618,7 +618,7 @@ namespace si
 		static bool read(card_record &readout, blocks_read<common::read_out_data>& data)
 		{
 			typedef boost::tuples::element<extended::responses::si_card8_get::element<common::read_out_data>::type::value
-				, extended::responses::si_card8_get>::type::iterator iterator;
+					, extended::responses::si_card8_get>::type::iterator iterator;
 			iterator datablock = data[0].begin();
 
 			std::size_t max_size = 128;
@@ -649,8 +649,8 @@ namespace si
 				}
 				punch.read_data(max_size, datablock);
 				readout.get<card_record::PUNCH_RECORDS>()[i] = punch_record(punch.get<control_number>()
-					, card_reader<>::get_duration(punch.get<time_12h>()));
-			}			
+																								, card_reader<>::get_duration(punch.get<time_12h>()));
+			}
 			return true;
 		}
 		static inline bool get_blocks_needed(needed_blocks_container &blocks, extended::responses::si_card8_get& data)

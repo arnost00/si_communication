@@ -10,50 +10,46 @@
 #include "io_base.h"
 
 #include <boost/array.hpp>
+#include <boost/shared_ptr.hpp>
 #include <queue>
 #include <iostream>
 
 namespace si
 {
 	class channel_io_serial_port
-		: public channel_output
-		, public io_base<boost::mpl::deque<channel_input, boost::asio::serial_port> >
-   {
+			: public io_bases<boost::mpl::deque<channel_output, channel_input, boost::asio::serial_port> >
+	{
 	private:
-        typedef io_base<boost::mpl::deque<channel_input, boost::asio::serial_port> > io_base_type;
-   public:
-		channel_io_serial_port()
-			: outbytes_transfered(0)
+		typedef io_bases<boost::mpl::deque<channel_output, channel_input, boost::asio::serial_port> > io_base_type;
+	public:
+		typedef io_base::service_pointer service_pointer;
+
+		typedef boost::shared_ptr<channel_io_serial_port> pointer;
+		channel_io_serial_port(service_pointer _service = service_pointer())
+			: io_base_type(_service)
+			, outbytes_transfered(0)
 		{}
 		~channel_io_serial_port()
+		{}
+		virtual void set_protocol(channel_protocol_interface::pointer protocol_)
 		{
+			channel_output::set_protocol(protocol_);
 		}
-		typedef boost::shared_ptr<channel_io_serial_port> pointer;
-      virtual void set_protocol(channel_protocol_interface::pointer protocol_)
-      {
-         channel_output::set_protocol(protocol_);
-      }
-      virtual channel_protocol_interface::pointer get_protocol()
-      {
-         return channel_output::get_protocol();
-      }
+		virtual channel_protocol_interface::pointer get_protocol()
+		{
+			return channel_output::get_protocol();
+		}
 		bool open(std::string const& device_name)
 		{
-            io_base_type::open(device_name);
-/*			io_base_type::set_option(boost::asio::serial_port_base::baud_rate(38400));
-            io_base_type::set_option(boost::asio::serial_port_base::stop_bits(boost::asio::serial_port_base::stop_bits::one));
-            io_base_type::set_option(boost::asio::serial_port_base::parity(boost::asio::serial_port_base::parity::none));
-            io_base_type::set_option(boost::asio::serial_port_base::character_size(8));
-            io_base_type::set_option(boost::asio::serial_port_base::flow_control(boost::asio::serial_port_base::flow_control::none));
-*/
-            if(!io_base_type::is_open())
+			io_base_type::open(device_name);
+			if(!io_base_type::is_open())
 				return false;
 
-            io_base_type::async_read_some(boost::asio::buffer(read_buffer)
-				, boost::bind(&channel_io_serial_port::handle_read
-					, this
-					, boost::asio::placeholders::bytes_transferred
-					, boost::asio::placeholders::error));
+			io_base_type::async_read_some(boost::asio::buffer(read_buffer)
+													, boost::bind(&channel_io_serial_port::handle_read
+																	  , this
+																	  , boost::asio::placeholders::bytes_transferred
+																	  , boost::asio::placeholders::error));
 			return true;
 		}
 		virtual void write_raw_data(std::size_t size, channel_protocol_interface::data_type data)
@@ -63,33 +59,33 @@ namespace si
 			if(1 == output_storage.size())
 			{
 				boost::asio::async_write(*this
-					, boost::asio::buffer(data.get(), size)
-					, boost::bind(&channel_io_serial_port::handle_write
-						, this
-						, boost::asio::placeholders::bytes_transferred
-						, boost::asio::placeholders::error));
+												 , boost::asio::buffer(data.get(), size)
+												 , boost::bind(&channel_io_serial_port::handle_write
+																	, this
+																	, boost::asio::placeholders::bytes_transferred
+																	, boost::asio::placeholders::error));
 			}
 		}
 		void handle_read(std::size_t bytes_transfered, const boost::system::error_code& ec)
 		{
 			if(0 < bytes_transfered)
 			{
-            try
-            {
-				   process_input(bytes_transfered, read_buffer.data());
-            }
-            catch (std::invalid_argument &e)
-            {
-               LOG << "Input processing failed: " << e.what() << std::endl;
-            }
+				try
+				{
+					process_input(bytes_transfered, read_buffer.data());
+				}
+				catch (std::invalid_argument &e)
+				{
+					LOG << "Input processing failed: " << e.what() << std::endl;
+				}
 			}
 			if(ec)
 			{
 				if (ec.value() == boost::asio::error::eof // linux
-					|| ec.value() == boost::asio::error::operation_aborted) // win
+					 || ec.value() == boost::asio::error::operation_aborted) // win
 				{
 					LOG << "Serial port connection was closed." << std::endl;
-// 			   TODO: call close callback
+					// 			   TODO: call close callback
 				}
 				else
 				{
@@ -98,20 +94,20 @@ namespace si
 				return;
 			}
 			io_base_type::async_read_some(boost::asio::buffer(read_buffer)
-				, boost::bind(&channel_io_serial_port::handle_read
-				, this
-				, boost::asio::placeholders::bytes_transferred
-				, boost::asio::placeholders::error));
+													, boost::bind(&channel_io_serial_port::handle_read
+																	  , this
+																	  , boost::asio::placeholders::bytes_transferred
+																	  , boost::asio::placeholders::error));
 		}
 		void handle_write(std::size_t bytes_transfered, const boost::system::error_code& ec)
 		{
 			if(ec)
 			{
 				if (ec.value() == boost::asio::error::eof // linux
-					|| ec.value() == boost::asio::error::operation_aborted) // win
+					 || ec.value() == boost::asio::error::operation_aborted) // win
 				{
 					LOG << "Serial port connection was closed." << std::endl;
-// 			   TODO: call close callback
+					// 			   TODO: call close callback
 				}
 				else
 				{
@@ -122,16 +118,16 @@ namespace si
 			mutal_exclusion_type::scoped_lock sl(mtx);
 			outbytes_transfered += bytes_transfered;
 			for(;(!output_storage.empty()) && (outbytes_transfered >= output_storage.front().first)
-				; outbytes_transfered -= output_storage.front().first, output_storage.pop());
+				 ; outbytes_transfered -= output_storage.front().first, output_storage.pop());
 			if(output_storage.empty())
 				return;
 
 			boost::asio::async_write(*this
-				, boost::asio::buffer(output_storage.front().second.get(), output_storage.front().first)
-				, boost::bind(&channel_io_serial_port::handle_write
-					, this
-					, boost::asio::placeholders::bytes_transferred
-					, boost::asio::placeholders::error));
+											 , boost::asio::buffer(output_storage.front().second.get(), output_storage.front().first)
+											 , boost::bind(&channel_io_serial_port::handle_write
+																, this
+																, boost::asio::placeholders::bytes_transferred
+																, boost::asio::placeholders::error));
 
 		}
 		typedef std::queue<std::pair<std::size_t, channel_protocol_interface::data_type> > output_storage_type;
@@ -139,6 +135,6 @@ namespace si
 		output_storage_type output_storage;
 		std::size_t outbytes_transfered;
 		boost::array<boost::uint8_t, 256> read_buffer;
-   };
+	};
 
 }//namespace si

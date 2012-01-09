@@ -7,4 +7,4 @@
 
 const std::string program_name("si_read");
 const std::string program_description("SI Card Reader");
-const std::string program_version("v1.0.XXX");
+const std::string program_version("v1.1.0b");

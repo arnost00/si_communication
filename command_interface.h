@@ -14,21 +14,21 @@
 
 namespace si
 {
-   struct command_interface
-   {
-      typedef boost::shared_ptr<command_interface> pointer;
-      typedef boost::function<void(const boost::uint8_t*,const std::size_t)> writer_type;
-      typedef boost::uint8_t id_type;
-      typedef boost::shared_array<boost::uint8_t> data_type;
+	struct command_interface
+	{
+		typedef boost::shared_ptr<command_interface> pointer;
+		typedef boost::function<void(const boost::uint8_t*,const std::size_t)> writer_type;
+		typedef boost::uint8_t id_type;
+		typedef boost::shared_array<boost::uint8_t> data_type;
 
-      virtual id_type get_id(protocols::id<>::value_type protocol = protocols::id<>::value) = 0;
-      virtual void get_data(std::size_t &size, data_type& data, protocols::id<>::value_type protocol = protocols::id<>::value) = 0;
-//      virtual void write(writer_type writer, protocols::id<>::value_type protocol) = 0;
-      virtual std::size_t get_size(protocols::id<>::value_type protocol = protocols::id<>::value) = 0;
-      virtual bool is_control_sequence() = 0;
-//      virtual bool can_accept_data(std::size_t size, data_type data) = 0;
-      virtual bool accept_data(std::size_t size, data_type data) = 0;
-      virtual ~command_interface(){}
+		virtual id_type get_id(protocols::id<>::value_type protocol = protocols::id<>::value) = 0;
+		virtual void get_data(std::size_t &size, data_type& data, protocols::id<>::value_type protocol = protocols::id<>::value) = 0;
+		//      virtual void write(writer_type writer, protocols::id<>::value_type protocol) = 0;
+		virtual std::size_t get_size(protocols::id<>::value_type protocol = protocols::id<>::value) = 0;
+		virtual bool is_control_sequence() = 0;
+		//      virtual bool can_accept_data(std::size_t size, data_type data) = 0;
+		virtual bool accept_data(std::size_t size, data_type data) = 0;
+		virtual ~command_interface(){}
 
-   };
+	};
 }//namespace si
