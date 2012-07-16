@@ -19,7 +19,9 @@ namespace si
 	, boost::posix_time::time_duration
 	, boost::posix_time::time_duration
 	, boost::posix_time::time_duration
-	, std::vector<punch_record> > card_record_tuple;
+	, std::vector<punch_record>
+	, bool
+	, bool> card_record_tuple;
 	struct card_record: public card_record_tuple
 	{
 		typedef boost::shared_ptr<card_record> pointer;
@@ -31,10 +33,12 @@ namespace si
 		BOOST_STATIC_CONSTANT(unsigned, CHECK_TIME = 4);
 		BOOST_STATIC_CONSTANT(unsigned, CLEAR_TIME = 5);
 		BOOST_STATIC_CONSTANT(unsigned, PUNCH_RECORDS = 6);
+		BOOST_STATIC_CONSTANT(unsigned, START_SUBSECOND = 7);
+		BOOST_STATIC_CONSTANT(unsigned, FINISH_SUBSECOND = 8);
 		//		BOOST_MPL_ASSERT_MSG(false, nothing_special, (types<boost::tuples::element<card_record::START_TIME,card_record_tuple>::type>));
 	};
 
-	void stdout_ptime_duration(boost::posix_time::time_duration &duration)
+	void stdout_ptime_duration(boost::posix_time::time_duration &duration, bool subsecond = false)
 	{
 		if(duration.is_not_a_date_time())
 		{
@@ -45,7 +49,7 @@ namespace si
 		LOG << std::setw(2) << duration.hours();
 		LOG << ':' << std::setw(2) << duration.minutes();
 		LOG << ':' << std::setw(2) << duration.seconds();
-		//		LOG << duration.total_milliseconds() % 1000;
+		if (subsecond) LOG << '.' << duration.total_milliseconds() % 1000;
 
 	}
 	void stdout_punch_record(punch_record &punch)
@@ -60,10 +64,10 @@ namespace si
 		LOG << "Card id: \t" << card.get<card_record::CARD_ID>() << std::endl;
 		LOG << "Start no: \t" << card.get<card_record::START_NO>() << std::endl;
 		LOG << "Start time: \t";
-		stdout_ptime_duration(card.get<card_record::START_TIME>());
+		stdout_ptime_duration(card.get<card_record::START_TIME>(), card.get<card_record::START_SUBSECOND>());
 		LOG << std::endl;
 		LOG << "Finish time: \t";
-		stdout_ptime_duration(card.get<card_record::FINISH_TIME>());
+		stdout_ptime_duration(card.get<card_record::FINISH_TIME>(), card.get<card_record::FINISH_SUBSECOND>());
 		LOG << std::endl;
 		LOG << "Check time: \t";
 		stdout_ptime_duration(card.get<card_record::CHECK_TIME>());

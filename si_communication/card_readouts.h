@@ -47,6 +47,7 @@ namespace si
 		struct punch_month: public unsigned_integral_parameter<1, punch_month>{};
 		struct punch_day: public unsigned_integral_parameter<1, punch_day>{};
 		struct punch_sub_second: public unsigned_integral_parameter<1, punch_sub_second>{};
+		struct punch_sub_second_flag: public unsigned_integral_parameter<1, punch_sub_second>{};
 
 		typedef boost::mpl::deque<typename control_number::template bits_range<7,0> > punch_1byte_def;
 		typedef boost::mpl::deque<typename control_number::template bits_range<7,0>, typename time_12h::template bits_range<15,0> > punch_3bytes_def;
@@ -56,6 +57,16 @@ namespace si
 		, typename am_pm::template bits_range<0>
 		, typename control_number::template bits_range<7,0>
 		, typename time_12h::template bits_range<15,0> > punch_4bytes_def;
+
+		typedef boost::mpl::deque<typename punch_sub_second_flag::template bits_range<0>
+		, typename control_number::template bits_range<8>
+		, typename day_of_week::template bits_range<1,0>
+		, typename week_counter::template bits_range<2,0>
+		, typename am_pm::template bits_range<0>
+		, typename control_number::template bits_range<7,0>
+		, typename time_12h::template bits_range<15,0> > punch_4bytes_subsec_def;
+
+
 		typedef boost::mpl::deque<typename control_number::template bits_range<7,0>
 		, typename si_station_id::template bits_range<17,0>
 		, typename punch_year::template bits_range<3,0>
@@ -73,11 +84,11 @@ namespace si
 
 		struct card5_id_type: public bit_array<card5_id_def, card5_id_type>{};
 
-		static inline boost::posix_time::time_duration get_duration(boost::uint16_t source)
+		static inline boost::posix_time::time_duration get_duration(boost::uint16_t source, boost::uint16_t subsecond = 0)
 		{
-			return 0xEEEE == source
-					? boost::posix_time::time_duration(boost::posix_time::not_a_date_time)
-					: boost::posix_time::seconds(source);
+			if(0xEEEE == source)
+					return boost::posix_time::time_duration(boost::posix_time::not_a_date_time);
+			return boost::posix_time::milliseconds(boost::int64_t(source) * 1000 + subsecond * 1000 / 256);
 		}
 	};
 
@@ -200,8 +211,22 @@ namespace si
 			card_8_header.read_data(max_size, datablock);
 			readout.get<card_record::CARD_ID>() = card_8_header.get<card_id>();
 
-			readout.get<card_record::START_TIME>() = card_reader<>::get_duration(card_8_header.get<start_time>().get<time_12h>());
-			readout.get<card_record::FINISH_TIME>() = card_reader<>::get_duration(card_8_header.get<finish_time>().get<time_12h>());
+			if(0 == (card_8_header.get<start_time>().get<control_number>() >> 9 ))
+				readout.get<card_record::START_TIME>() = card_reader<>::get_duration(card_8_header.get<start_time>().get<time_12h>());
+			else
+			{
+				readout.get<card_record::START_SUBSECOND>() = true;
+				readout.get<card_record::START_TIME>() = card_reader<>::get_duration(card_8_header.get<start_time>().get<time_12h>(), card_8_header.get<start_time>().get<control_number>() % 256);
+			}
+
+			if(0 == (card_8_header.get<finish_time>().get<control_number>() >> 9 ))
+				readout.get<card_record::FINISH_TIME>() = card_reader<>::get_duration(card_8_header.get<finish_time>().get<time_12h>());
+			else
+			{
+				readout.get<card_record::FINISH_SUBSECOND>() = true;
+				readout.get<card_record::FINISH_TIME>() = card_reader<>::get_duration(card_8_header.get<start_time>().get<time_12h>(), card_8_header.get<finish_time>().get<control_number>() % 256);
+			}
+
 			readout.get<card_record::CHECK_TIME>() = card_reader<>::get_duration(card_8_header.get<check_time>().get<time_12h>());
 			readout.get<card_record::CLEAR_TIME>() = boost::posix_time::not_a_date_time;
 			punch_count = card_8_header.get<record_counter>();
@@ -504,7 +529,21 @@ namespace si
 			readout.get<card_record::CARD_ID>() = card_6_header.get<card_id>();
 			readout.get<card_record::START_NO>() = card_6_header.get<start_no>();
 			readout.get<card_record::START_TIME>() = card_reader<>::get_duration(card_6_header.get<start_time>().get<time_12h>());
-			readout.get<card_record::FINISH_TIME>() = card_reader<>::get_duration(card_6_header.get<finish_time>().get<time_12h>());
+			if(0 == (card_6_header.get<start_time>().get<control_number>() >> 9 ))
+				readout.get<card_record::START_TIME>() = card_reader<>::get_duration(card_6_header.get<start_time>().get<time_12h>());
+			else
+			{
+				readout.get<card_record::START_SUBSECOND>() = true;
+				readout.get<card_record::START_TIME>() = card_reader<>::get_duration(card_6_header.get<start_time>().get<time_12h>(), card_6_header.get<start_time>().get<control_number>() % 256);
+			}
+
+			if(0 == (card_6_header.get<finish_time>().get<control_number>() >> 9 ))
+				readout.get<card_record::FINISH_TIME>() = card_reader<>::get_duration(card_6_header.get<finish_time>().get<time_12h>());
+			else
+			{
+				readout.get<card_record::FINISH_SUBSECOND>() = true;
+				readout.get<card_record::FINISH_TIME>() = card_reader<>::get_duration(card_6_header.get<finish_time>().get<time_12h>(), card_6_header.get<finish_time>().get<control_number>() % 256);
+			}
 			readout.get<card_record::CHECK_TIME>() = card_reader<>::get_duration(card_6_header.get<check_time>().get<time_12h>());
 			readout.get<card_record::CLEAR_TIME>() = card_reader<>::get_duration(card_6_header.get<check_time>().get<time_12h>());
 			std::size_t records_count = card_6_header.get<record_counter>();

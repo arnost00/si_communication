@@ -13,15 +13,19 @@ namespace si
 {
 	struct punch_record
 	{
-		punch_record(boost::uint16_t control_number_, boost::posix_time::time_duration const& punch_time_)
+		punch_record(boost::uint16_t control_number_, boost::posix_time::time_duration const& punch_time_, bool _sub_second = false)
 			: control_number(control_number_)
 			, punch_time(punch_time_)
+			, sub_second(_sub_second)
 		{}
 		punch_record()
-			:control_number(0)
+			: control_number(0)
 			, punch_time(boost::posix_time::not_a_date_time)
+			, sub_second(false)
 		{}
+
 		boost::uint16_t control_number;
 		boost::posix_time::time_duration punch_time;
+		bool sub_second;
 	};
 }//namespace si

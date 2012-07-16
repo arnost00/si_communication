@@ -433,47 +433,6 @@ namespace si
 		typedef typename bit_array_internal::create_bits_sequence<description_tt>::type parametrized_bits;
       typedef typename boostext::tuple_type<bit_parameters_type>::type base_tuple_type;
 
-/*
-      template<typename parameters_tt, unsigned position> struct parameter_initializer 
-      {
-         template<typename t> struct the_type{typedef t type;};
-         typedef typename boost::mpl::if_c< (position >= boost::mpl::size<parameters_tt>::value)
-            , the_type<boost::tuples::null_type>
-            , typename boost::mpl::at_c<parameters_tt, position> >::type::type initializer_type;
-         template<typename initializer_type>struct init_param
-         {
-            inline static initializer_type get_init(typename array_type_base::value_type &value)
-            {
-               return initializer_type(value);
-            }
-         };
-
-         template<>struct init_param<boost::tuples::null_type>
-         {
-            inline static initializer_type get_init(...)
-            {
-               return initializer_type();
-            }
-         };
-         inline static initializer_type get_init(typename array_type_base::value_type &value)
-         {
-            return init_param<initializer_type>::get_init(value);
-         }
-      };
-      bit_array()
-         : base_tuple_type(
-				  parameter_initializer<parametrized_bits, 0>::get_init(array_type::value)
-            , parameter_initializer<parametrized_bits, 1>::get_init(integral_parameter_internal::value_holder<typename decide_integer_size<(boost::mpl::size<description_type>::value >> 3), unsigned_integers>::type >::value)
-            , parameter_initializer<parametrized_bits, 2>::get_init(integral_parameter_internal::value_holder<typename decide_integer_size<(boost::mpl::size<description_type>::value >> 3), unsigned_integers>::type >::value)
-            , parameter_initializer<parametrized_bits, 3>::get_init(integral_parameter_internal::value_holder<typename decide_integer_size<(boost::mpl::size<description_type>::value >> 3), unsigned_integers>::type >::value)
-            , parameter_initializer<parametrized_bits, 4>::get_init(integral_parameter_internal::value_holder<typename decide_integer_size<(boost::mpl::size<description_type>::value >> 3), unsigned_integers>::type >::value)
-            , parameter_initializer<parametrized_bits, 5>::get_init(integral_parameter_internal::value_holder<typename decide_integer_size<(boost::mpl::size<description_type>::value >> 3), unsigned_integers>::type >::value)
-            , parameter_initializer<parametrized_bits, 6>::get_init(integral_parameter_internal::value_holder<typename decide_integer_size<(boost::mpl::size<description_type>::value >> 3), unsigned_integers>::type >::value)
-            , parameter_initializer<parametrized_bits, 7>::get_init(integral_parameter_internal::value_holder<typename decide_integer_size<(boost::mpl::size<description_type>::value >> 3), unsigned_integers>::type >::value)
-            , parameter_initializer<parametrized_bits, 8>::get_init(integral_parameter_internal::value_holder<typename decide_integer_size<(boost::mpl::size<description_type>::value >> 3), unsigned_integers>::type >::value)
-            , parameter_initializer<parametrized_bits, 9>::get_init(integral_parameter_internal::value_holder<typename decide_integer_size<(boost::mpl::size<description_type>::value >> 3), unsigned_integers>::type >::value))
-      {}
-*/
       template<typename parameter_tt> typename boost::tuples::element<boostext::sequence_position<typename parameter_tt::parameter_type, bit_parameters_type>::value, base_tuple_type>::type & get()
       {
          return base_tuple_type::template get<boostext::sequence_position<typename parameter_tt::parameter_type, bit_parameters_type>::value>();

@@ -24,6 +24,7 @@ namespace si
 
 	class channel_input: public channel_input_interface, public boost::enable_shared_from_this<channel_input>
 	{
+		typedef channel_protocol_interface::data_type data_type;
 	public:
 		typedef io_base::service_pointer service_pointer;
 		typedef boost::shared_ptr<boost::asio::deadline_timer> timer_pointer;
@@ -97,7 +98,6 @@ namespace si
 			if(response_expectations.empty())
 				life_bound.reset();
 		}
-
 		void process_input(std::size_t data_size, boost::uint8_t* data)
 		{
 			mutal_exclusion_type::scoped_lock sl(mtx);
@@ -109,11 +109,25 @@ namespace si
 			data_type new_input(new data_type::element_type[input_size + data_size]);
 			memcpy(new_input.get(), input.get(), input_size);
 			memcpy(new_input.get() + input_size, data, data_size);
+
+//			LOG << "New data arrived: " << std::endl;
+//			log_data(new_input, input_size + data_size, data_size);
 			input = new_input;
 			input_size += data_size;
 			check_input();
-			//         new_input_arrived.notify_all();
 		}
+		void log_data(data_type &data, std::size_t data_size, std::size_t old_data_size = 0)
+		{
+			old_data_size --;
+			LOG << std::hex;
+			for(std::size_t i = 0; i < data_size; i++)
+			{
+				LOG << data[i];
+				LOG << (i == old_data_size ? '|' : ' ');
+			}
+			LOG << std::endl;
+		}
+
 		void check_input()
 		{
 			mutal_exclusion_type::scoped_lock sl(mtx);
@@ -121,20 +135,24 @@ namespace si
 
 			channel_protocol_interface::raw_data_type raw_input = input.get();
 
-			while((0 != size) && get_protocol()->process_input(size, raw_input, boost::bind(&channel_input::process_command_input, shared_from_this(), _1, _2, _3, _4)));
-
+			while((0 != size) && get_protocol()->process_input(size, raw_input, boost::bind(&channel_input::process_command_input, shared_from_this(), _1, _2, _3, _4)))
+			{
+				raw_input += input_size - size;
+			}
 			if(size != input_size)
 			{
+//				LOG << "Data processed: " << std::endl;
+//				log_data(input, input_size, input_size-size);
 				data_type new_input(new data_type::element_type[size]);
 				memcpy(new_input.get(), input.get() + input_size - size, size);
 				input = new_input;
+				raw_input = input.get();
 				input_size = size;
 			}
 		}
 	protected:
 		typedef std::pair<response_interface::pointer, timer_pointer> response_with_timeout_type;
 		typedef std::list<response_with_timeout_type> response_expectations_container;
-		typedef channel_protocol_interface::data_type data_type;
 		typedef boost::recursive_mutex mutal_exclusion_type;
 
 		void process_command_input(command_interface::id_type command_id ,std::size_t size, command_interface::data_type data, bool control_sequence)
@@ -166,7 +184,6 @@ namespace si
 		std::size_t input_size;
 
 		mutal_exclusion_type mtx;
-		boost::condition new_input_arrived;
 
 		service_pointer service;
 		channel_protocol_interface::pointer protocol;

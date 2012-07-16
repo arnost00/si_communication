@@ -67,16 +67,18 @@ namespace si
 			work.reset();
 			if(thread && (thread->joinable()))
 			{
-				if(serial_service)
+/*				if(serial_service)
 				{
 					serial_service_pointer::element_type::implementation_type i_t;
 					boost::system::error_code ec;
 					serial_service->cancel(i_t, ec);
 					if(ec)
 					{
-						std::cout << ec.message();
+						std::cout << ec.message() << std::endl;
 					}
+
 				}
+*/
 				service->stop();
 				service->reset();
 				thread->interrupt();

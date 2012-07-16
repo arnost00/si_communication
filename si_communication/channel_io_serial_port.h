@@ -52,6 +52,10 @@ namespace si
 																	  , boost::asio::placeholders::error));
 			return true;
 		}
+		void cancel()
+		{
+			io_base_type::cancel();
+		}
 		virtual void write_raw_data(std::size_t size, channel_protocol_interface::data_type data)
 		{
 			mutal_exclusion_type::scoped_lock sl(mtx);

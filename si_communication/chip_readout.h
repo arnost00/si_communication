@@ -78,7 +78,7 @@ namespace si
 								, boost::bind(&chip_readout::nak, shared_from_this(), _1));
 			channel->register_response_expectation(
 						si::response<>::create(reaction)
-						, boost::posix_time::seconds(2)
+						, boost::posix_time::seconds(4)
 						, boost::bind(&chip_readout::si_card5_read_timeout, shared_from_this()));
 			make_pointer<extended::commands::si_card5_get> read_card5;
 			channel->write_command(read_card5);
@@ -127,7 +127,7 @@ namespace si
 								, boost::bind(&chip_readout::nak, shared_from_this(), _1));
 
 			channel->register_response_expectation(si::response<>::create(reaction)
-																, boost::posix_time::seconds(2)
+																, boost::posix_time::seconds(4)
 																, boost::bind(&chip_readout::si_card8_read_timeout, shared_from_this()));
 			make_pointer<extended::commands::si_card8_get> read_card8;
 			read_card8->get<extended::bn>().value = 0;
@@ -166,7 +166,7 @@ namespace si
 								, boost::bind(&chip_readout::nak, shared_from_this(), _1));
 
 			channel->register_response_expectation(si::response<>::create(reaction)
-																, boost::posix_time::seconds(2)
+																, boost::posix_time::seconds(4)
 																, boost::bind(&chip_readout::si_card8_read_timeout, shared_from_this()));
 			make_pointer<extended::commands::si_card8_get> read_card8;
 			read_card8->get<extended::bn>().value = *(blocks->needed_blocks.begin());
@@ -188,7 +188,7 @@ namespace si
 								, boost::bind(&chip_readout::nak, shared_from_this(), _1));
 
 			channel->register_response_expectation(si::response<>::create(reaction)
-																, boost::posix_time::seconds(2)
+																, boost::posix_time::seconds(4)
 																, boost::bind(&chip_readout::si_card6_read_timeout, shared_from_this()));
 			make_pointer<basic::commands::si_card6_get> read_card6;
 			read_card6->get<common::bn>().value = 0;
@@ -205,7 +205,7 @@ namespace si
 								, boost::bind(&chip_readout::nak, shared_from_this(), _1));
 
 			channel->register_response_expectation(si::response<>::create(reaction)
-																, boost::posix_time::seconds(2)
+																, boost::posix_time::seconds(4)
 																, boost::bind(&chip_readout::si_card6_read_timeout, shared_from_this()));
 			make_pointer<extended::commands::si_card6_get> read_card6;
 			read_card6->get<extended::bn>().value = 0;
@@ -243,7 +243,7 @@ namespace si
 								, boost::bind(&chip_readout::nak, shared_from_this(), _1));
 
 			channel->register_response_expectation(si::response<>::create(reaction)
-																, boost::posix_time::seconds(2)
+																, boost::posix_time::seconds(4)
 																, boost::bind(&chip_readout::si_card6_read_timeout, shared_from_this()));
 			make_pointer<extended::commands::si_card6_get> read_card6;
 			read_card6->get<extended::bn>().value = *(blocks->needed_blocks.begin());
@@ -281,7 +281,7 @@ namespace si
 								, boost::bind(&chip_readout::nak, shared_from_this(), _1));
 
 			channel->register_response_expectation(si::response<>::create(reaction)
-																, boost::posix_time::seconds(2)
+																, boost::posix_time::seconds(4)
 																, boost::bind(&chip_readout::si_card6_read_timeout, shared_from_this()));
 			make_pointer<basic::commands::si_card6_get> read_card6;
 			read_card6->get<basic::bn>().value = *(blocks->needed_blocks.begin());
@@ -320,7 +320,7 @@ namespace si
 								, boost::bind(&chip_readout::nak, shared_from_this(), _1));
 			channel->register_response_expectation(
 						si::response<>::create(reaction)
-						, boost::posix_time::seconds(2)
+						, boost::posix_time::seconds(4)
 						, boost::bind(&chip_readout::si_card5_read_timeout, shared_from_this()));
 			make_pointer<basic::commands::si_card5_get> read_card5;
 			channel->write_command(read_card5);
