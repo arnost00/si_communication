@@ -137,6 +137,12 @@ namespace si
 		struct config_value_size: public unsigned_integral_parameter<1, config_value_size>{};
 		struct config_value_array: public byte_array<config_value_array>{};
 
+//		struct si_id: public unsigned_integral_parameter<2, si_id>{};
+//		struct si_serie: public unsigned_integral_parameter<1, si_serie>{};
+
+//		typedef boost::mpl::deque<don_t_care<1>, si_id, si_serie> card_5_inserted_def;
+
+//		struct card_5_inserted: public parameters_array<card_5_inserted_def>{};
 
 		template<boost::uint8_t config_value_id_tt, typename specific_value_tt, bool enabled = (boost::is_base_of<parameter, specific_value_tt>::type::value) >
 		struct get_config_value_specific
@@ -166,6 +172,7 @@ namespace si
 
 			typedef boost::mpl::deque<cn, m_s> set_ms_mode_data_def;
 			typedef boost::mpl::deque<cn, si> card_move_data_def;
+//			typedef boost::mpl::deque<cn, card_5_inserted> card_5_move_data_def;
 			typedef boost::mpl::deque<cn, read_out_data> si_card5_get_data_def;
 			typedef boost::mpl::deque<cn, bn, read_out_data> si_card_multiblock_get_data_def;
 			typedef boost::mpl::deque<cn, si, td, t, tss, mem> transmit_record_data_def;

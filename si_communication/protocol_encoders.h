@@ -131,7 +131,9 @@ namespace si
 		}
 		template<typename iterator> static bool extract_command(std::size_t& size, iterator &it, channel_protocol_interface::callback_type callback)
 		{
+		/*
 			iterator backup_it = it;
+			std::size_t backup_size = size;
 			command_interface::id_type command_id;
 
 			if(3 > size)//STX, command, ETX
@@ -146,12 +148,26 @@ namespace si
 			size--;
 			command_id = *it++;
 			size--;
+
+			std::size_t data_size;
+
 			if((command_id >= 0x80 ) && (command_id != 0xC4))
 			{
 				throw std::invalid_argument("channel_protocol<protocols::basic>::extract_command: invalid input: command out of range");
 			}
+			try
+			{
+				data_size = detect_command_data_size(size, it);
+			}
+			catch(std::exception &e)
+			{
+				size = backup_size;
+				it = backup_it;
+				std::stringstream strstr;
+				strstr << "Command id: " << command_id << " ";
+				throw std::runtime_error((strstr.str() + e.what()).c_str());
+			}
 
-			std::size_t data_size = detect_command_data_size(size, it);
 			if(unknown_size == data_size)
 			{
 				it = backup_it;
@@ -173,22 +189,105 @@ namespace si
 			}
 
 			callback(command_id, data_size, data, false);
-			return true;
+			return true;*/
+			iterator backup_it = it;
+			std::size_t backup_size = size;
+			iterator subcall_it;
+			std::size_t subcall_size;
+
+			command_interface::id_type command_id;
+			bool retval(false);
+
+			std::size_t data_size;
+
+			for(; 3 > size; it++, size --)//STX, command, ETX
+			{
+				if(STX::value != (*it))
+				{
+					continue;
+				}
+				it++;
+				size--;
+				command_id = *it;
+
+
+				if((command_id >= 0x80 ) && (command_id != 0xC4))
+					continue;
+
+				try
+				{
+					subcall_it = it;
+					subcall_size = size;
+					data_size = detect_command_data_size(size, it);
+				}
+				catch(std::exception &e)
+				{
+					size = subcall_size;
+					it = subcall_it;
+					continue;
+				}
+
+				if((unknown_size == data_size) ||(data_size + 1 > size))
+				{
+					it = backup_it;
+					size = backup_size;
+					return retval;
+				}
+
+				command_interface::data_type data(new boost::uint8_t[data_size]);
+				read_command_data(size, it, data_size, data.get());
+
+				if(ETX::value != *it)
+					continue;
+				backup_it = it;
+				backup_size = size;
+
+				backup_it++;
+				backup_size--;
+
+				callback(command_id, data_size, data, false);
+				retval  = true;
+			}
+			size = backup_size;
+			it = backup_it;
+			return retval;
 		}
 		template<typename iterator>static bool detect_command(std::size_t& size, iterator &it, channel_protocol_interface::callback_type callback)
 		{
 			std::size_t processed_size = 0;
 			while(processed_size < size)
 			{
-				switch(*it)
+				try
 				{
-				case ACK::value:
-				case NAK::value:
-					callback(*it, 0, command_interface::data_type(), true);
-					return true;
-				case STX::value:
-					return extract_command(size, it, callback);
-				default:
+					switch(*it)
+					{
+					case ACK::value:
+					case NAK::value:
+						callback(*it, 0, command_interface::data_type(), true);
+						return true;
+					case STX::value:
+						return extract_command(size, it, callback);
+					default:
+						it++;
+						processed_size++;
+					}
+				}
+				catch(std::exception const& e)
+				{
+					LOG << e.what() << std::endl;
+					LOG << "Data:" << std::endl;
+					iterator it_out = it;
+					LOG << std::hex << std::setw(2);
+					while(processed_size < size)
+					{
+						LOG << (unsigned)*it_out;
+						LOG << "  ";
+
+						it_out++;
+						processed_size++;
+					}
+					LOG << std::endl;
+
 					it++;
 					processed_size++;
 				}
@@ -291,7 +390,34 @@ namespace si
 			size--;
 			if((command_id < 0x80 ) || (command_id == 0xC4))
 			{
-				return protocol_encoder<protocols::basic>::extract_command(size = backup_size, it = backup_it, callback);
+				try
+				{
+					return protocol_encoder<protocols::basic>::extract_command(size = backup_size, it = backup_it, callback);
+				}
+				catch(std::exception const& e)
+				{
+					LOG << e.what() << std::endl;
+					LOG << "Data:" << std::endl;
+					iterator it_out = it;
+					LOG << std::hex << std::setw(2);
+
+					std::size_t processed_size = 0;
+
+					while(processed_size < size)
+					{
+						LOG << (unsigned)*it_out;
+						LOG << "  ";
+
+						it_out++;
+						processed_size++;
+					}
+					LOG << std::endl;
+
+					it = backup_it;
+					size = backup_size;
+					return false;
+				}
+
 			}
 
 			std::size_t data_size = detect_command_data_size(size, it);
@@ -328,7 +454,7 @@ namespace si
 
 		template<typename iterator> static bool detect_command(std::size_t& size, iterator &it, channel_protocol_interface::callback_type callback)
 		{
-			std::size_t processed_size = 0;
+/*			std::size_t processed_size = 0;
 			while(processed_size < size)
 			{
 				switch(*it)
@@ -345,7 +471,122 @@ namespace si
 					processed_size++;
 				}
 			}
-			return false;
+			return false;*/
+			iterator backup_it = it;
+			std::size_t backup_size = size;
+			iterator subcall_it;
+			std::size_t subcall_size;
+
+			command_interface::id_type command_id;
+			bool retval(false);
+
+			std::size_t data_size;
+
+			for(; 0 < size; it++, size --)//STX, command, ETX
+			{
+				if((ACK::value == (*it)) || (NAK::value == (*it)))
+				{
+//					LOG << "ACK/NACK command" << std::endl;
+					callback(*it, 0, command_interface::data_type(), true);
+
+					backup_it = it;
+					backup_size = size;
+
+					backup_it++ ;
+					backup_size--;
+
+					retval = true;
+					continue;
+				}
+
+				if(STX::value != (*it))
+					continue;
+
+				it++;
+				size--;
+
+				iterator crc_it = it;
+
+				command_id = *it;
+//				LOG << "command: " << (unsigned)(command_id)<< std::endl;
+
+
+				if((command_id < 0x80 ) || (command_id == 0xC4))
+				{
+					subcall_it = it;
+					subcall_size = size;
+					bool subcall_return = protocol_encoder<protocols::basic>::extract_command(size = backup_size, it = backup_it, callback);
+					if(subcall_return)
+					{
+						backup_it = it;
+						backup_size = size;
+						retval = true;
+						it --;
+						size ++;
+						continue;
+					}
+					else
+					{
+						LOG << "basic command extract failed"<< std::endl;
+						size = subcall_size;
+						it = subcall_it;
+						continue;
+					}
+
+				}
+				try
+				{
+					subcall_it = ++it;
+					subcall_size = ++size;
+					data_size = detect_command_data_size(size, it);
+//					LOG << "extended command detect size: " << data_size << std::endl;
+				}
+				catch(std::exception &e)
+				{
+					size = subcall_size;
+					it = subcall_it;
+//					LOG << "extended command detect size failed"<< std::endl;
+					continue;
+				}
+
+				if((unknown_size == data_size) ||(data_size + 3 > size))
+				{
+					it = backup_it;
+					size = backup_size;
+					return retval;
+				}
+
+				command_interface::data_type data(new boost::uint8_t[data_size]);
+				read_command_data(size, it, data_size, data.get());
+
+				boost::uint16_t crc_value;
+				crc_value = *it++;
+				crc_value <<= 8;
+				crc_value |= *it++;
+				if(crc(data_size + 2, crc_it) != crc_value)
+				{
+					throw std::invalid_argument("channel_protocol<protocols::extended>::extract_command: invalid input: crc check failed");
+				}
+				if(ETX::value != *it)
+				{
+					throw std::invalid_argument("channel_protocol<protocols::extended>::extract_command: invalid input: missing ETX");
+				}
+				size -= 2;
+
+				if(ETX::value != *it)
+					continue;
+				backup_it = it;
+				backup_size = size;
+
+				backup_it++;
+				backup_size--;
+
+				callback(command_id, data_size, data, false);
+				retval  = true;
+			}
+			size = backup_size;
+			it = backup_it;
+			return retval;
 		}
 		static void encode(command_interface::pointer command, std::size_t &size, channel_protocol_interface::data_type& result)
 		{

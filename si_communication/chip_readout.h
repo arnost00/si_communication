@@ -39,14 +39,14 @@ namespace si
 					boost::mpl::deque<extended::responses::si_card5_inserted
 					, extended::responses::si_card6_inserted
 					, extended::responses::si_card8_inserted
-					, extended::responses::si_card_removed
+//					, extended::responses::si_card_removed
 					, basic::responses::si_card_moved
 					, basic::responses::si_card6_inserted>
 					, response_live_control::permanent>::reactions_type
 					reaction(boost::bind(&chip_readout::si_card5_inserted, shared_from_this(), _1)
 								, boost::bind(&chip_readout::si_card6_inserted, shared_from_this(), _1)
 								, boost::bind(&chip_readout::si_card8_inserted, shared_from_this(), _1)
-								, boost::bind(&chip_readout::si_card_removed, shared_from_this(), _1)
+//								, boost::bind(&chip_readout::si_card_removed, shared_from_this(), _1)
 								, boost::bind(&chip_readout::si_card_moved, shared_from_this(), _1)
 								, boost::bind(&chip_readout::si_card6_inserted_basic, shared_from_this(), _1)
 								);
@@ -66,15 +66,27 @@ namespace si
 				channel->unregister_response_expectation(read_responses);
 		}
 
+		void log_card_5_confuscated_number(boost::uint32_t value)
+		{
+			for(unsigned j = 0; j < 4; j++, value >>= 8)
+			{
+				LOG << (0xFF & value) << " ";
+			}
+		}
+
 		void si_card5_inserted(extended::responses::si_card5_inserted::pointer response)
 		{
-			LOG << "card 5 inserted, no: " << response->get<extended::si>().value << std::endl;
+			LOG << "card 5 inserted, no: ";
+			log_card_5_confuscated_number((response->get<extended::si>().value));
+			LOG << std::endl;
+
+			//LOG << "card 5 inserted, no: " << ((response->get<extended::si>().value)  << std::endl;
 
 			si::response<boost::mpl::deque<extended::responses::si_card5_get
 					, extended::responses::si_card_removed
 					, common::nak> >::reactions_type
 					reaction(boost::bind(&chip_readout::si_card5_read, shared_from_this(), _1)
-								, boost::bind(&chip_readout::si_card_removed_during_readout, shared_from_this(), _1)
+								, boost::bind(&chip_readout::si_card5_removed_during_readout, shared_from_this(), _1)
 								, boost::bind(&chip_readout::nak, shared_from_this(), _1));
 			channel->register_response_expectation(
 						si::response<>::create(reaction)
@@ -91,6 +103,11 @@ namespace si
 			make_pointer<common::ack> ack;
 			channel->write_command(ack);
 
+			si::response<extended::responses::si_card_removed>::reactions_type
+					reaction( boost::bind(&chip_readout::si_card5_removed, shared_from_this(), _1));
+
+			channel->register_response_expectation(si::response<>::create(reaction));
+
 			card_reader<card_5>::read(*readout.get(), *response.get());
 			if(chip_read_cb)
 				chip_read_cb(readout);
@@ -105,11 +122,12 @@ namespace si
 			make_pointer<common::ack> ack;
 			channel->write_command(ack);
 
+			stdout_card_record(*readout.get());
+
 			card_reader<card_5>::read(*readout.get(), *response.get());
 			if(chip_read_cb)
 				chip_read_cb(readout);
 
-			stdout_card_record(*readout.get());
 		}
 		void si_card5_read_timeout()
 		{
@@ -345,6 +363,20 @@ namespace si
 		{
 			LOG << "card removed during readout, no: " << response->get<extended::si>().value << std::endl;
 		}
+
+		void si_card5_removed(extended::responses::si_card_removed::pointer response)
+		{
+			LOG << "card removed, no: ";
+			log_card_5_confuscated_number(response->get<extended::si>().value);
+			LOG << std::endl;
+		}
+		void si_card5_removed_during_readout(extended::responses::si_card_removed::pointer response)
+		{
+			LOG << "card removed during readout, no: ";
+			log_card_5_confuscated_number(response->get<extended::si>().value);
+			LOG << std::endl;
+		}
+
 		void nak(common::nak::pointer )
 		{
 			LOG << "nak arrived" << std::endl;
