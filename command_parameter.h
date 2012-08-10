@@ -212,12 +212,10 @@ namespace si
 			{
 				int step = ordinal_begin <= ordinal_end? +1: -1;
 				unsigned i = ordinal_begin;
-				typename this_type::value_type mask;
 				bool bit_value;
 
 				while(true)
 				{
-                    mask = typename this_type::value_type(0x01) << i;
 					bit_value = 0 != (bit_offset & *it);
 
 

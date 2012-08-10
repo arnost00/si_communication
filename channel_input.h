@@ -83,6 +83,7 @@ namespace si
 				timeout_timer->async_wait(boost::bind(&channel_input::timeout_expired, shared_from_this(), timeout_timer, timeout_call));
 			}
 			response_expectations.push_front(response_expectations_container::value_type(expectation, timeout_timer));
+//			LOG << "New expectation registered: " << response_expectations.size() << std::endl;
 			life_bound = shared_from_this();
 		}
 
@@ -94,6 +95,8 @@ namespace si
 			if(response_expectations.end() != it)
 			{
 				response_expectations.erase(it);
+//				LOG << "Expectation unregistered: " << response_expectations.size() << std::endl;
+
 			}
 			if(response_expectations.empty())
 				life_bound.reset();
