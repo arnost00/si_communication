@@ -1,6 +1,9 @@
-si_read.exe
+si_read.exe v1.2.0
 
-(C) Copyright 2009-2011 Vit Kasal,
+v 1.2 - dynamicaly & monolitic linked build (GCC 4.6.0, MinGW)
+v 1.0 - dynamicaly linked build (MSVS10)
+
+(C) Copyright 2009-2012 Vit Kasal,
 (C) Copyright 2011 Richard Patek
 
 Distributed under the Boost Software License, Version 1.0.
@@ -12,3 +15,16 @@ http://sourceforge.net/projects/eobsystem/
 
 source:
 http://eobsystem.svn.sourceforge.net/
+
+
+change log:
+
+1.2	- multiple device support
+	- improved memory management
+	- minor bugfixes
+1.1	- basic protocol support
+	- minor bugfixes
+1.0	- SI card read out mode (extended protocol only)
+	- SI punch mode (extended protocol only)
+
+version 1.2 and earlier doesn't support SI card v10 and v11
