@@ -33,7 +33,7 @@ namespace si
 			}
 			needed_blocks.erase(it);
 			base_value_type insertion_value(block->template get<common::bn>().value, block->template get<common::read_out_data>());
-			insert(insertion_value);
+			base_container::insert(insertion_value);
 		}
 		bool ready()
 		{
