@@ -68,10 +68,7 @@ namespace si
 
 		void log_card_5_confuscated_number(boost::uint32_t value)
 		{
-			for(unsigned j = 0; j < 4; j++, value >>= 8)
-			{
-				LOG << (0xFF & value) << " ";
-			}
+			LOG << ((boost::uint16_t) value + 100000 * (value >> 16)) << " ";
 		}
 
 		void si_card5_inserted(extended::responses::si_card5_inserted::pointer response)
