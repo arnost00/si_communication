@@ -194,7 +194,7 @@ namespace si
 		}
 		void si_card6_inserted_basic(basic::responses::si_card6_inserted::pointer response)
 		{
-			LOG << "card 6 inserted, no: " << response->get<extended::si>().value << std::endl;
+			LOG << "card 6 inserted, no: " << response->get<basic::si>().value << std::endl;
 			si::response<boost::mpl::deque<basic::responses::si_card6_get
 					, basic::responses::si_card_moved
 					, common::nak> >::reactions_type
