@@ -1,4 +1,4 @@
-//  (C) Copyright 2009-2011 Vit Kasal,
+//  (C) Copyright 2009-2012 Vit Kasal,
 //  (C) Copyright 2011 Richard Patek
 //
 //  Distributed under the Boost Software License, Version 1.0.
@@ -293,7 +293,7 @@ int main(int argc, char* argv[])
 //#endif
 {
 	std::cout << program_name << " " << program_version << " - " << program_description << std::endl;
-	std::cout << "Copyright (C) 2009-2011 Vit Kasal, Richard Patek" << std::endl;
+	std::cout << "Copyright (C) 2009-2012 Vit Kasal, Richard Patek" << std::endl;
 	std::cout << "EOBSystem - system.eob.cz" << std::endl;
 	boost::program_options::options_description desc("Allowed options");
 	int prog_type;
