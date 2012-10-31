@@ -1,5 +1,6 @@
-si_read.exe v1.2.0
+si_read.exe v1.3.0
 
+v 1.3 - dynamicaly & monolitic linked build (GCC 4.7.0, MinGW)
 v 1.2 - dynamicaly & monolitic linked build (GCC 4.6.0, MinGW)
 v 1.0 - dynamicaly linked build (MSVS10)
 
@@ -19,6 +20,9 @@ http://eobsystem.svn.sourceforge.net/
 
 change log:
 
+1.3	- support for SI card v10 and v11 (tested in extended protocol only)
+	- recovery from com port errors improved
+	- minor bugfixes
 1.2	- multiple device support
 	- improved memory management
 	- minor bugfixes

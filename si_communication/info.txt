@@ -1,10 +1,10 @@
 Tested with:
 
-MS Visual Studio:
-VS2008
+Compilers:
 VS2010
-in VS2005 cannot be compiled, too old
+GCC 4.6.0, MinGW
+GCC 4.7.0, MinGW
 
 Boost:
-1.37.O
-1.45.0
+1.50.0
+1.51.0
