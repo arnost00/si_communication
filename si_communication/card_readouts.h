@@ -89,7 +89,7 @@ namespace si
 		{
 			if(0xEEEE == source)
 					return boost::posix_time::time_duration(boost::posix_time::not_a_date_time);
-			return boost::posix_time::milliseconds(boost::int64_t(source + (pm? 12*60*60: 0)) * 1000 + subsecond * 1000 / 256);
+			return boost::posix_time::milliseconds(boost::int64_t(source) * 1000 + subsecond * 1000 / 256);
 		}
 	};
 
@@ -612,7 +612,7 @@ namespace si
 			readout.get<card_record::CARD_ID>() = card_6_header.get<card_id>();
 			readout.get<card_record::START_NO>() = card_6_header.get<start_no>();
 			if(0 == (card_6_header.get<start_time>().get<control_number>() >> 9 ))
-				readout.get<card_record::START_TIME>() = card_reader<>::get_duration(card_6_header.get<start_time>().get<time_12h>()), 0, card_6_header.get<start_time>().get<am_pm>();
+				readout.get<card_record::START_TIME>() = card_reader<>::get_duration(card_6_header.get<start_time>().get<time_12h>(), 0, card_6_header.get<start_time>().get<am_pm>());
 			else
 			{
 				readout.get<card_record::START_SUBSECOND>() = true;
