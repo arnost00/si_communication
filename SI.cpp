@@ -33,7 +33,6 @@
 
 #ifdef _WIN32
 #include <tchar.h>
-#pragma warning(disable:4503)
 #endif
 
 
