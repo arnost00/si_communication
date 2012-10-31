@@ -39,14 +39,14 @@ namespace si
 					boost::mpl::deque<extended::responses::si_card5_inserted
 					, extended::responses::si_card6_inserted
 					, extended::responses::si_card8_inserted
-//					, extended::responses::si_card_removed
+					, extended::responses::si_card_removed
 					, basic::responses::si_card_moved
 					, basic::responses::si_card6_inserted>
 					, response_live_control::permanent>::reactions_type
 					reaction(boost::bind(&chip_readout::si_card5_inserted, shared_from_this(), _1)
 								, boost::bind(&chip_readout::si_card6_inserted, shared_from_this(), _1)
 								, boost::bind(&chip_readout::si_card8_inserted, shared_from_this(), _1)
-//								, boost::bind(&chip_readout::si_card_removed, shared_from_this(), _1)
+								, boost::bind(&chip_readout::si_card_removed, shared_from_this(), _1)
 								, boost::bind(&chip_readout::si_card_moved, shared_from_this(), _1)
 								, boost::bind(&chip_readout::si_card6_inserted_basic, shared_from_this(), _1)
 								);
