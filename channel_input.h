@@ -21,6 +21,16 @@
 
 namespace si
 {
+	template <typename iterator_tt>void log_data(iterator_tt data, std::size_t data_size)
+	{
+		LOG << std::hex << std::setw(2) << std::setfill('0');
+		for(; 0 != data_size; --data_size)
+		{
+			LOG << (unsigned)*data++ << (' ');
+		}
+		LOG << std::endl;
+		LOG << std::dec << std::setw(0) << std::setfill(' ');
+	}
 
 	class channel_input: public channel_input_interface, public boost::enable_shared_from_this<channel_input>
 	{
@@ -113,22 +123,9 @@ namespace si
 			memcpy(new_input.get(), input.get(), input_size);
 			memcpy(new_input.get() + input_size, data, data_size);
 
-//			LOG << "New data arrived: " << std::endl;
-//			log_data(new_input, input_size + data_size, data_size);
 			input = new_input;
 			input_size += data_size;
 			check_input();
-		}
-		void log_data(data_type &data, std::size_t data_size, std::size_t old_data_size = 0)
-		{
-			old_data_size --;
-			LOG << std::hex;
-			for(std::size_t i = 0; i < data_size; i++)
-			{
-				LOG << data[i];
-				LOG << (i == old_data_size ? '|' : ' ');
-			}
-			LOG << std::endl;
 		}
 
 		void check_input()
@@ -138,14 +135,15 @@ namespace si
 
 			channel_protocol_interface::raw_data_type raw_input = input.get();
 
+			LOG << "Input size " << input_size << std::endl;
+
 			while((0 != size) && get_protocol()->process_input(size, raw_input, boost::bind(&channel_input::process_command_input, shared_from_this(), _1, _2, _3, _4)))
 			{
+				LOG << "Remaining size " << size << std::endl;
 				raw_input += input_size - size;
 			}
 			if(size != input_size)
 			{
-//				LOG << "Data processed: " << std::endl;
-//				log_data(input, input_size, input_size-size);
 				data_type new_input(new data_type::element_type[size]);
 				memcpy(new_input.get(), input.get() + input_size - size, size);
 				input = new_input;
