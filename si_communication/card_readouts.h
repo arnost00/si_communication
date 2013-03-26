@@ -10,6 +10,7 @@
 #include "blocks_read.h"
 
 #include <boost/cstdint.hpp>
+#include <boost/mpl/string.hpp>
 #include <set>
 
 namespace si
@@ -205,6 +206,13 @@ namespace si
 		, boost::mpl::pair<byte_type<0x06>, card_t>
 		, boost::mpl::pair<byte_type<0x0F>, card_15>
 		> known_card_types;
+
+		typedef boost::mpl::string<'card', ' 8/9', '/t/p'> description_t;
+
+		inline static const char* get_description()
+		{
+			return boost::mpl::c_str<description_t>::value;
+		}
 		template<typename iterator>static bool read_header(card_record &readout, iterator datablock, std::size_t &punch_count)
 		{
 			card_8_header_type card_8_header;
@@ -256,7 +264,7 @@ namespace si
 				}
 				return card_type_getter<typename boost::mpl::pop_front<card_types>::type>::read(param, readout,data);
 			}
-			static inline bool get_blocks_needed(boost::uint8_t param, needed_blocks_container &blocks, extended::responses::si_card8_get& data)
+			static inline bool get_blocks_needed(boost::uint8_t param, needed_blocks_container &blocks, common::read_out_data& data)
 			{
 				if(param == boost::mpl::first<typename boost::mpl::front<card_types>::type>::type::value)
 				{
@@ -281,7 +289,7 @@ namespace si
 			{
 				return false;
 			}
-			static inline bool get_blocks_needed(boost::uint8_t , needed_blocks_container &, extended::responses::si_card8_get& )
+			static inline bool get_blocks_needed(boost::uint8_t , needed_blocks_container &, common::read_out_data&)
 			{
 				return false;
 			}
@@ -299,33 +307,33 @@ namespace si
 		{
 			return card_type_getter<>::read(data.card_serie, readout, data);
 		}
-		static boost::uint32_t get_id(extended::si::value_type data)
+		inline static boost::uint32_t get_id(extended::si::value_type data)
 		{
 			extended::si::value_type value =
 					data & ~(extended::si::value_type(0xFF) << (8 * ( sizeof(extended::si::value_type) - 1)));
 
 			return value;
 		}
-		static boost::uint32_t get_id(extended::responses::si_card8_get& data)
+		static boost::uint32_t get_id(common::read_out_data& data)
 		{
 			card_id_serie id_serie;
 
 			std::size_t max_size = 128;
 
 			boost::tuples::element<extended::responses::si_card8_get::element<common::read_out_data>::type::value
-					, extended::responses::si_card8_get>::type::iterator item(data.get<common::read_out_data>().begin() + 0x18);
+					, extended::responses::si_card8_get>::type::iterator item(data.begin() + 0x18);
 			id_serie.read_data(max_size, item);
 
 			return id_serie.get<card_id>();
 		}
-		static boost::uint8_t get_serie(extended::responses::si_card8_get data)
+		static boost::uint8_t get_serie(common::read_out_data& data)
 		{
 			card_id_serie id_serie;
 
 			std::size_t max_size = 128;
 
 			boost::tuples::element<extended::responses::si_card8_get::element<common::read_out_data>::type::value
-					, extended::responses::si_card8_get>::type::iterator item(data.get<common::read_out_data>().begin() + 0x18);
+					, extended::responses::si_card8_get>::type::iterator item(data.begin() + 0x18);
 			id_serie.read_data(max_size, item);
 			return id_serie.get<card_serie>();
 		}
@@ -346,7 +354,7 @@ namespace si
 			id_serie.read_data(max_size, item);
 			return card_type_getter<>::get_type_description(id_serie.get<card_serie>());
 		}
-		static bool get_blocks_needed(boost::uint8_t card_serie, needed_blocks_container &blocks, extended::responses::si_card8_get& data)
+		static bool get_blocks_needed(boost::uint8_t card_serie, needed_blocks_container &blocks, common::read_out_data& data)
 		{
 			return card_type_getter<>::get_blocks_needed(card_serie, blocks, data);
 		}
@@ -386,9 +394,9 @@ namespace si
 			}
 			return true;
 		}
-		static inline bool get_blocks_needed(needed_blocks_container &blocks, extended::responses::si_card8_get& data)
+		static inline bool get_blocks_needed(needed_blocks_container &blocks, common::read_out_data& data)
 		{
-			boost::uint8_t punches_count(get_punches_count(data.get<common::read_out_data>().begin()));
+			boost::uint8_t punches_count(get_punches_count(data.begin()));
 			blocks.insert(0);
 			if(0 < punches_count)
 			{
@@ -451,9 +459,9 @@ namespace si
 			}
 			return true;
 		}
-		static inline bool get_blocks_needed(needed_blocks_container &blocks, extended::responses::si_card8_get& data)
+		static inline bool get_blocks_needed(needed_blocks_container &blocks,common::read_out_data& data)
 		{
-			boost::uint8_t punches_count(get_punches_count(data.get<common::read_out_data>().begin()));
+			boost::uint8_t punches_count(get_punches_count(data.begin()));
 			blocks.insert(0);
 			if(18 < punches_count)
 			{
@@ -527,9 +535,9 @@ namespace si
 			}
 			return true;
 		}
-		static inline bool get_blocks_needed(needed_blocks_container &blocks, extended::responses::si_card8_get& data)
+		static inline bool get_blocks_needed(needed_blocks_container &blocks, common::read_out_data& data)
 		{
-			boost::uint8_t punches_count(get_punches_count(data.get<common::read_out_data>().begin()));
+			boost::uint8_t punches_count(get_punches_count(data.begin()));
 			blocks.insert(0);
 			unsigned sectors_needed = punches_count >> 5;
 			if(0 != (punches_count % 32))
@@ -567,10 +575,25 @@ namespace si
 
 		struct card_6_header_type: public parameters_array<card_6_header_def>{};
 
+		typedef boost::mpl::string<'card', ' 6'> description_t;
+
+		inline static const char* get_description()
+		{
+			return boost::mpl::c_str<description_t>::value;
+		}
+		inline static boost::uint8_t get_serie(common::read_out_data& data)
+		{
+			return 6;
+		}
+
 		inline static unsigned get_sector_from_index(unsigned pos)
 		{
 			static const unsigned sectors[] = {6, 7, 2, 3, 4, 5};
 			return sectors[pos];
+		}
+		inline static boost::uint32_t get_id(extended::si::value_type data)
+		{
+			return data;
 		}
 
 		static boost::uint32_t get_id(common::read_out_data& data)
@@ -674,6 +697,19 @@ namespace si
 			for(; sectors_needed > 0; blocks.insert(get_sector_from_index(--sectors_needed)));
 			return true;
 		}
+
+		static inline bool get_blocks_needed(boost::uint8_t card_serie, needed_blocks_container &blocks, common::read_out_data& data)
+		{
+			return get_blocks_needed(blocks, data);
+		}
+
+		static std::string& get_type_description(extended::si::value_type )
+		{
+			static std::string card_type("card 6");
+			return card_type;
+		}
+
+
 	};
 	template<> struct card_reader<card_p>: public card_reader<card_8_family>
 	{
@@ -714,9 +750,9 @@ namespace si
 			}
 			return true;
 		}
-		static inline bool get_blocks_needed(needed_blocks_container &blocks, extended::responses::si_card8_get& data)
+		static inline bool get_blocks_needed(needed_blocks_container &blocks, common::read_out_data& data)
 		{
-			boost::uint8_t punches_count(get_punches_count(data.get<common::read_out_data>().begin()));
+			boost::uint8_t punches_count(get_punches_count(data.begin()));
 			blocks.insert(0);
 			if(0 < punches_count)
 			{
@@ -771,9 +807,9 @@ namespace si
 			}
 			return true;
 		}
-		static inline bool get_blocks_needed(needed_blocks_container &blocks, extended::responses::si_card8_get& data)
+		static inline bool get_blocks_needed(needed_blocks_container &blocks, common::read_out_data& data)
 		{
-			boost::uint8_t punches_count(get_punches_count(data.get<common::read_out_data>().begin()));
+			boost::uint8_t punches_count(get_punches_count(data.begin()));
 			blocks.insert(0);
 			if(9 < punches_count)
 			{
