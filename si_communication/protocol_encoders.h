@@ -136,7 +136,9 @@ namespace si
 			iterator subcall_it;
 			std::size_t subcall_size;
 
-			LOG << "Basic extract size: " << size << std::endl;
+			bool control_commands_allowed(true);
+
+//			LOG << "Basic extract size: " << size << std::endl;
 			command_interface::id_type command_id;
 			bool retval(false);
 
@@ -149,6 +151,8 @@ namespace si
 				{
 					continue;
 				}
+				control_commands_allowed = false;
+
 				it++;
 				size--;
 				command_id = *it;
@@ -178,7 +182,7 @@ namespace si
 				{
 					it = backup_it;
 					size = backup_size;
-					LOG << "Basic extract size on unkown data size: " << size << std::endl;
+//					LOG << "Basic extract size on unkown data size: " << size << std::endl;
 					return retval;
 				}
 
@@ -194,11 +198,13 @@ namespace si
 				backup_size--;
 
 				callback(command_id, data_size, data, false);
+
+				control_commands_allowed = true;
 				retval  = true;
 			}
 			size = backup_size;
 			it = backup_it;
-			LOG << "Basic extract size on return: " << size << std::endl;
+//			LOG << "Basic extract size on return: " << size << std::endl;
 			return retval;
 		}
 		template<typename iterator>static bool detect_command(std::size_t& size, iterator &it, channel_protocol_interface::callback_type callback)
@@ -222,7 +228,7 @@ namespace si
 						else
 						{
 							LOG << "Extract command failed" << std::endl;
-							log_data(it, size);
+//							log_data(it, size);
 							return false;
 						}
 					default:
@@ -233,8 +239,8 @@ namespace si
 				catch(std::exception const& e)
 				{
 					LOG << e.what() << std::endl;
-					LOG << "Data:" << std::endl;
-					log_data(it, size);
+//					LOG << "Data:" << std::endl;
+//					log_data(it, size);
 
 					it++;
 					processed_size++;
@@ -321,7 +327,7 @@ namespace si
 			std::size_t backup_size = size;
 			command_interface::id_type command_id;
 
-			LOG << "Extended extract size: " << size << std::endl;
+//			LOG << "Extended extract size: " << size << std::endl;
 
 			if(3 >= size)//STX, command, ETX
 			{
@@ -347,13 +353,13 @@ namespace si
 				catch(std::exception const& e)
 				{
 					LOG << e.what() << std::endl;
-					LOG << "Data:" << std::endl;
-					log_data(it, size);
+//					LOG << "Data:" << std::endl;
+//					log_data(it, size);
 
 					it = backup_it;
 					size = backup_size;
 					return false;
-					LOG << "Extended extract size catch exit: " << size << std::endl;
+//					LOG << "Extended extract size catch exit: " << size << std::endl;
 				}
 
 			}
@@ -363,7 +369,7 @@ namespace si
 			{
 				it = backup_it;
 				size = backup_size;
-				LOG << "Extended extract size unknown data size exit: " << size << std::endl;
+//				LOG << "Extended extract size unknown data size exit: " << size << std::endl;
 				return false;
 			}
 
@@ -371,7 +377,7 @@ namespace si
 			{
 				it = backup_it;
 				size = backup_size;
-				LOG << "Extended extract size short data exit: " << size << std::endl;
+//				LOG << "Extended extract size short data exit: " << size << std::endl;
 				return false;
 			}
 			command_interface::data_type data(new boost::uint8_t[data_size]);
@@ -437,7 +443,7 @@ namespace si
 				iterator crc_it = it;
 
 				command_id = *it;
-				LOG << "command: " << (unsigned)(command_id)<< std::endl;
+//				LOG << "command: " << (unsigned)(command_id)<< std::endl;
 
 				if((command_id < 0x80 ) || (command_id == 0xC4))
 				{
@@ -457,7 +463,7 @@ namespace si
 					else
 					{
 						LOG << "basic command extract failed"<< std::endl;
-						log_data(backup_it, backup_size);
+//						log_data(backup_it, backup_size);
 						size = subcall_size;
 						it = subcall_it;
 						continue;
@@ -474,7 +480,7 @@ namespace si
 				{
 					size = subcall_size;
 					it = subcall_it;
-					LOG << "extended command detect size failed: " << e.what() << std::endl;
+//					LOG << "extended command detect size failed: " << e.what() << std::endl;
 					continue;
 				}
 
