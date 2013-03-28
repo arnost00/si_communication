@@ -15,12 +15,6 @@
 
 namespace si
 {
-	/*
-	struct one_boost::uint8_t_type: public unsigned_integral_parameter<1, one_boost::uint8_t_type>{};
-	struct two_boost::uint8_ts_type: public unsigned_integral_parameter<2, two_boost::uint8_ts_type>{};
-	struct three_boost::uint8_ts_type: public unsigned_integral_parameter<3, three_boost::uint8_ts_type>{};
-	struct four_boost::uint8_ts_type: public unsigned_integral_parameter<4, four_boost::uint8_ts_type>{};
-	*/
 
 	struct card_type{};
 	struct card_5: public card_type{};
@@ -114,6 +108,22 @@ namespace si
 		struct punch_type: public punch_3bytes_type<punch_type>{};
 		struct extra_punch_type: public punch_1byte_type<extra_punch_type>{};
 
+		typedef boost::mpl::string<'card', ' 5'> description_t;
+
+		inline static const char* get_description()
+		{
+			return boost::mpl::c_str<description_t>::value;
+		}
+
+		static std::string& get_type_description(extended::si::value_type )
+		{
+			static std::string card_type("card 5");
+			return card_type;
+		}
+		inline static boost::uint32_t get_id(extended::si::value_type data)
+		{
+			return ( (data & 0xFFFF) + 100000 * (data >> 16));
+		}
 
 		template <typename iterator> static bool internal_read(card_record &readout, iterator datablock)
 		{
@@ -213,6 +223,7 @@ namespace si
 		{
 			return boost::mpl::c_str<description_t>::value;
 		}
+
 		template<typename iterator>static bool read_header(card_record &readout, iterator datablock, std::size_t &punch_count)
 		{
 			card_8_header_type card_8_header;
@@ -220,6 +231,7 @@ namespace si
 			
 			card_8_header.read_data(max_size, datablock);
 			readout.get<card_record::CARD_ID>() = card_8_header.get<card_id>();
+			readout.get<card_record::START_NO>() = 0;
 
 			if(0 == (card_8_header.get<start_time>().get<control_number>() >> 9 ))
 				readout.get<card_record::START_TIME>() = card_reader<>::get_duration(card_8_header.get<start_time>().get<time_12h>(), 0, card_8_header.get<start_time>().get<am_pm>());
@@ -568,9 +580,10 @@ namespace si
 		struct last_punch: public punch_4bytes_type<last_punch>{};
 		struct punch_type: public punch_4bytes_type<punch_type>{};
 
+
 		typedef boost::mpl::deque<don_t_care<8>, don_t_care<2>
 		, card_id, don_t_care<2>, last_visited_control, record_counter, next_record
-		, finish_time, start_time, check_time, clear_time, start_no
+		, finish_time, start_time, check_time, clear_time, don_t_care<4>, start_no
 		> card_6_header_def;
 
 		struct card_6_header_type: public parameters_array<card_6_header_def>{};

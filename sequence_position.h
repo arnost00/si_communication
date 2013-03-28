@@ -18,7 +18,8 @@ namespace boostext
 		typedef type_not_found_assert type;
 		BOOST_MPL_ASSERT_MSG(false, SEQUENCE_DOESN_T_CONTAIN_TYPE, (types<searched_sequence, searched_type>));
 	};
-	template<typename searched_type, typename searched_sequence, typename not_found_type = type_not_found_assert<searched_type, searched_sequence> > struct sequence_position
+	template<typename searched_type, typename searched_sequence
+		, typename not_found_type = type_not_found_assert<searched_type, searched_sequence> > struct sequence_position
 			: public boost::mpl::if_<
 			typename boost::is_same<
 			typename boost::mpl::find<searched_sequence, searched_type>::type

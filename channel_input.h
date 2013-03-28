@@ -135,11 +135,11 @@ namespace si
 
 			channel_protocol_interface::raw_data_type raw_input = input.get();
 
-			LOG << "Input size " << input_size << std::endl;
+//			LOG << "Input size " << input_size << std::endl;
 
 			while((0 != size) && get_protocol()->process_input(size, raw_input, boost::bind(&channel_input::process_command_input, shared_from_this(), _1, _2, _3, _4)))
 			{
-				LOG << "Remaining size " << size << std::endl;
+//				LOG << "Remaining size " << size << std::endl;
 				raw_input += input_size - size;
 			}
 			if(size != input_size)
