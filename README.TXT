@@ -1,10 +1,11 @@
-si_read.exe v1.3.0
+si_read.exe v1.4.371
 
+v 1.4 - dynamicaly & monolitic linked build (GCC 4.7.2, MinGW)
 v 1.3 - dynamicaly & monolitic linked build (GCC 4.7.0, MinGW)
 v 1.2 - dynamicaly & monolitic linked build (GCC 4.6.0, MinGW)
 v 1.0 - dynamicaly linked build (MSVS10)
 
-(C) Copyright 2009-2012 Vit Kasal,
+(C) Copyright 2009-2013 Vit Kasal,
 (C) Copyright 2011 Richard Patek
 
 Distributed under the Boost Software License, Version 1.0.
@@ -20,6 +21,9 @@ http://eobsystem.svn.sourceforge.net/
 
 change log:
 
+1.4	- improved failed communication recovery algorithm
+	- fixed basic protocol
+	- minor bugfixes
 1.3	- support for SI card v10 and v11 (tested in extended protocol only)
 	- recovery from com port errors improved
 	- minor bugfixes
