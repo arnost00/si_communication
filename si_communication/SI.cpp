@@ -418,7 +418,10 @@ int main(int argc, char* argv[])
 #endif
 	signal(SIGABRT, &notify_exit_condition);
 
-	exit_cond.wait(exit_mtx, boost::bind(&should_exit));
+	{
+		boost::recursive_mutex::scoped_lock sl(exit_mtx);
+		exit_cond.wait(exit_mtx, boost::bind(&should_exit));
+	}
 
 	LOG << "exitting" << std::endl;
 	//   siport->close();
