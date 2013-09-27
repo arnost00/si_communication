@@ -5,6 +5,6 @@
 
 #pragma once
 
-const std::string program_name("si_829");
+const std::string program_name("si_com");
 const std::string program_description("SI Card Reader");
 const std::string program_version("0.1.371");
