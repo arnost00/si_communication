@@ -36,18 +36,13 @@ namespace si
 	{
 		typedef channel_protocol_interface::data_type data_type;
 	public:
-		typedef io_base::service_pointer service_pointer;
 		typedef boost::shared_ptr<boost::asio::deadline_timer> timer_pointer;
 		typedef boost::shared_ptr<channel_input> pointer;
 
-		channel_input(service_pointer service_)
-			: input_size(0)
-			, service(service_)
+		channel_input(io_base::pointer const& _service = io_base::pointer())
+            : service(_service)
+            , input_size(0)
 		{
-			if(!service)
-			{
-				throw std::invalid_argument("channel_input::channel_iput: valid service required");
-			}
 		}
 		~channel_input()
 		{
@@ -56,7 +51,7 @@ namespace si
 							  , response_expectations.end()
 							  , boost::bind(&channel_input::cancel_timer, _1));
 		}
-		virtual void set_protocol(channel_protocol_interface::pointer protocol_)
+		virtual void set_protocol(channel_protocol_interface::pointer const& protocol_)
 		{
 			protocol = protocol_;
 		}
@@ -86,12 +81,13 @@ namespace si
 			timer_pointer timeout_timer;
 
 			mutal_exclusion_type::scoped_lock sl(mtx);
-			if(!(timeout.is_not_a_date_time()))
+/*			if(!(timeout.is_not_a_date_time()))
 			{
-				timeout_timer.reset(new timer_pointer::element_type(*service.get()));
+				timeout_timer.reset(new timer_pointer::element_type(*service->service.get()));
 				timeout_timer->expires_from_now(timeout);
 				timeout_timer->async_wait(boost::bind(&channel_input::timeout_expired, shared_from_this(), timeout_timer, timeout_call));
 			}
+*/
 			response_expectations.push_front(response_expectations_container::value_type(expectation, timeout_timer));
 //			LOG << "New expectation registered: " << response_expectations.size() << std::endl;
 			life_bound = shared_from_this();
@@ -180,14 +176,15 @@ namespace si
 			}
 		}
 
+		io_base::pointer service;
+        channel_protocol_interface::pointer protocol;
+
 		response_expectations_container response_expectations;
 		data_type input;
 		std::size_t input_size;
 
 		mutal_exclusion_type mtx;
 
-		service_pointer service;
-		channel_protocol_interface::pointer protocol;
 
 		pointer life_bound;
 

@@ -23,7 +23,9 @@ namespace si
 
 	struct io_base
 	{
-		struct extended_service_ptr: public boost::shared_ptr<boost::asio::io_service>
+//        typedef std::shared_ptr<boost::asio::io_service> service_pointer;
+
+        struct extended_service_ptr: public boost::shared_ptr<boost::asio::io_service>
 		{
 			typedef boost::shared_ptr<boost::asio::io_service> base_type;
 			extended_service_ptr()
@@ -45,7 +47,7 @@ namespace si
 		};
 		//typedef boost::shared_ptr<boost::asio::io_service> service_pointer;
 		typedef boost::shared_ptr<io_base> pointer;
-		typedef extended_service_ptr service_pointer;
+		typedef boost::shared_ptr<boost::asio::io_service> service_pointer;
 		typedef boost::shared_ptr<boost::asio::serial_port_service> serial_service_pointer;
 		typedef boost::shared_ptr<boost::asio::io_service::work> work_pointer;
 		typedef boost::shared_ptr<boost::thread> thread_pointer;
@@ -67,18 +69,6 @@ namespace si
 			work.reset();
 			if(thread && (thread->joinable()))
 			{
-/*				if(serial_service)
-				{
-					serial_service_pointer::element_type::implementation_type i_t;
-					boost::system::error_code ec;
-					serial_service->cancel(i_t, ec);
-					if(ec)
-					{
-						std::cout << ec.message() << std::endl;
-					}
-
-				}
-*/
 				service->stop();
 				service->reset();
 				thread->interrupt();
@@ -88,13 +78,14 @@ namespace si
 			}
 		}
 
+
 		service_pointer service;
 		serial_service_pointer serial_service;
 		work_pointer work;
 		thread_pointer thread;
-
+//*/
 	};
-
+/*
 	template<typename bases_tt, typename enabled = void> struct bases
 			: public boost::mpl::front<bases_tt>::type
 			, public bases<typename boost::mpl::pop_front<bases_tt>::type>
@@ -109,7 +100,7 @@ namespace si
 	template<typename bases_tt> struct bases
 			<bases_tt, typename boost::enable_if<typename boost::mpl::empty<bases_tt>::type>::type>
 	{
-		bases(io_base::service_pointer service)
+        bases(io_base::service_pointer)
 		{}
 	};
 
@@ -123,5 +114,5 @@ namespace si
 		{
 		}
 	};
-
+*/
 }//namespace si

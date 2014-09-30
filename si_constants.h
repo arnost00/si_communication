@@ -84,7 +84,7 @@ namespace si
 			};
 			template<typename tested_set>struct check_protocol<tested_set, boost::mpl::true_>
 			{
-				static inline bool check(typename protocols::id<>::value_type protocol_id)
+                static inline bool check(typename protocols::id<>::value_type )
 				{
 					return false;
 				}

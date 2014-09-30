@@ -11,12 +11,12 @@
 
 namespace si
 {
-	class channel_loopback: public io_bases<boost::mpl::deque<channel_input, channel_output> >//, public channel_input
+    class channel_loopback: public channel_input, public channel_output
 	{
 	public:
-		channel_loopback(io_base::service_pointer service_ = io_base::service_pointer())
+        channel_loopback(io_base::service_pointer )
 		{}
-		virtual void set_protocol(channel_protocol_interface::pointer protocol_)
+		virtual void set_protocol(channel_protocol_interface::pointer const& protocol_)
 		{
 			channel_output::set_protocol(protocol_);
 		}

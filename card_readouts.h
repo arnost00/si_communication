@@ -80,7 +80,7 @@ namespace si
 
 		struct card5_id_type: public bit_array<card5_id_def, card5_id_type>{};
 
-		static inline boost::posix_time::time_duration get_duration(boost::uint16_t source, boost::uint16_t subsecond = 0, bool pm = false)
+        static inline boost::posix_time::time_duration get_duration(boost::uint16_t source, boost::uint16_t subsecond = 0, bool = false)
 		{
 			if(0xEEEE == source)
 					return boost::posix_time::time_duration(boost::posix_time::not_a_date_time);
@@ -311,7 +311,7 @@ namespace si
 				return unsupported_card_type;
 			}
 		};
-		template <typename iterator> static bool internal_read(card_record &readout, iterator datablock)
+        template <typename iterator> static bool internal_read(card_record &, iterator )
 		{
 			return false;
 		}
@@ -594,7 +594,7 @@ namespace si
 		{
 			return boost::mpl::c_str<description_t>::value;
 		}
-		inline static boost::uint8_t get_serie(common::read_out_data& data)
+        inline static boost::uint8_t get_serie(common::read_out_data&)
 		{
 			return 6;
 		}
@@ -711,7 +711,7 @@ namespace si
 			return true;
 		}
 
-		static inline bool get_blocks_needed(boost::uint8_t card_serie, needed_blocks_container &blocks, common::read_out_data& data)
+        static inline bool get_blocks_needed(boost::uint8_t , needed_blocks_container &blocks, common::read_out_data& data)
 		{
 			return get_blocks_needed(blocks, data);
 		}
