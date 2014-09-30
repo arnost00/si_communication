@@ -37,7 +37,7 @@ namespace si
 		};
 		template<typename sequence, std::size_t position> struct copy_sequence_to_base<sequence, position, true>
 		{
-			static inline  void run(command_binary_type *that){}
+            static inline  void run(command_binary_type *){}
 		};
 
 		command_binary_type()
@@ -90,7 +90,7 @@ namespace si
 		~no_deleter(){}
 		no_deleter(no_deleter const&){}
 		no_deleter& operator = (no_deleter const&){return *this;}
-		void operator()(typename shared_ptr_type::element_type* p){}
+        void operator()(typename shared_ptr_type::element_type* ){}
 	};
 
 	template<boost::uint8_t command_tt

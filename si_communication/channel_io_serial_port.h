@@ -13,48 +13,95 @@
 #include <boost/shared_ptr.hpp>
 #include <queue>
 #include <iostream>
+#include <memory>
 
 namespace si
 {
-	class channel_io_serial_port
-			: public io_bases<boost::mpl::deque<channel_output, channel_input, boost::asio::serial_port> >
+	class channel_io_serial_port: public io_base::pointer, public channel_input, public channel_output
 	{
 	private:
-		typedef io_bases<boost::mpl::deque<channel_output, channel_input, boost::asio::serial_port> > io_base_type;
+        static const char DELIMITER = ',';
 	public:
-		typedef io_base::service_pointer service_pointer;
 
+		typedef boost::asio::serial_port port_type;
 		typedef boost::shared_ptr<channel_io_serial_port> pointer;
-		channel_io_serial_port(service_pointer _service = service_pointer())
-			: io_base_type(_service)
+		typedef boost::shared_ptr<port_type> port_type_ptr;
+		typedef io_base::pointer ptr_io_base;
+
+		channel_io_serial_port(io_base::pointer const& _service = io_base::pointer())
+			: ptr_io_base(_service? _service: io_base::pointer(new io_base::pointer::element_type) )
+			, channel_input(*(io_base::pointer*)this)
+			, channel_output(*(io_base::pointer*)this)
+			, out_port()
+			, in_port()
 			, outbytes_transfered(0)
-		{}
+        {
+        }
 		~channel_io_serial_port()
 		{}
-		virtual void set_protocol(channel_protocol_interface::pointer protocol_)
+        virtual void set_protocol(channel_protocol_interface::pointer const& protocol_)
 		{
+            protocol = protocol_;
+			channel_input::set_protocol(protocol_);
 			channel_output::set_protocol(protocol_);
-		}
+        }
 		virtual channel_protocol_interface::pointer get_protocol()
 		{
-			return channel_output::get_protocol();
+            return protocol;
 		}
+        bool open_ports(std::string const& device_name)
+        {
+            auto delimiter_position = device_name.find(DELIMITER);
+
+			auto current_device = device_name.substr(0, delimiter_position);
+
+			in_port.reset(new decltype(in_port)::element_type(*(get()->service)));
+			out_port.reset();
+
+			in_port->open(current_device);
+			if(! in_port->is_open())
+                return false;
+
+            if(std::string::npos != delimiter_position)
+            {
+                current_device = device_name.substr(++delimiter_position);
+
+				out_port.reset(new decltype(out_port)::element_type(*(get()->service)));
+                out_port->open(current_device);
+
+                if(! out_port->is_open())
+                {
+                    in_port->close();
+					return false;
+                }
+            }
+            else
+            {
+				out_port = in_port;
+			}
+
+            return true;
+        }
 		bool open(std::string const& device_name)
 		{
-			io_base_type::open(device_name);
-			if(!io_base_type::is_open())
-				return false;
+			if(!open_ports(device_name))
+                return false;
 
-			io_base_type::async_read_some(boost::asio::buffer(read_buffer)
+			in_port->async_read_some(boost::asio::buffer(read_buffer)
 													, boost::bind(&channel_io_serial_port::handle_read
 																	  , this
 																	  , boost::asio::placeholders::bytes_transferred
 																	  , boost::asio::placeholders::error));
 			return true;
 		}
+
 		void cancel()
 		{
-			io_base_type::cancel();
+			in_port->cancel();
+
+            if(out_port != in_port)
+                out_port->cancel();
+
 		}
 		virtual void write_raw_data(std::size_t size, channel_protocol_interface::data_type data)
 		{
@@ -62,8 +109,7 @@ namespace si
 			output_storage.push(output_storage_type::value_type(size, data));
 			if(1 == output_storage.size())
 			{
-				boost::asio::async_write(*this
-												 , boost::asio::buffer(data.get(), size)
+				in_port->async_write_some(boost::asio::buffer(data.get(), size)
 												 , boost::bind(&channel_io_serial_port::handle_write
 																	, this
 																	, boost::asio::placeholders::bytes_transferred
@@ -97,7 +143,7 @@ namespace si
 				}
 				return;
 			}
-			io_base_type::async_read_some(boost::asio::buffer(read_buffer)
+			in_port->async_read_some(boost::asio::buffer(read_buffer)
 													, boost::bind(&channel_io_serial_port::handle_read
 																	  , this
 																	  , boost::asio::placeholders::bytes_transferred
@@ -126,18 +172,37 @@ namespace si
 			if(output_storage.empty())
 				return;
 
-			boost::asio::async_write(*this
-											 , boost::asio::buffer(output_storage.front().second.get(), output_storage.front().first)
+			in_port->async_write_some(boost::asio::buffer(output_storage.front().second.get(), output_storage.front().first)
 											 , boost::bind(&channel_io_serial_port::handle_write
 																, this
 																, boost::asio::placeholders::bytes_transferred
 																, boost::asio::placeholders::error));
 
 		}
+
+        template<typename option_tt> void set_option(option_tt option)
+        {
+			in_port->set_option(option);
+			if(in_port != out_port)
+            {
+                out_port->set_option(option);
+            }
+
+        }
+
+
 		typedef std::queue<std::pair<std::size_t, channel_protocol_interface::data_type> > output_storage_type;
 		typedef boost::recursive_mutex mutal_exclusion_type;
-		output_storage_type output_storage;
+
+
+        channel_protocol_interface::pointer protocol;
+
+		port_type_ptr out_port;
+		port_type_ptr in_port;
+
+        output_storage_type output_storage;
 		std::size_t outbytes_transfered;
+
 		boost::array<boost::uint8_t, 256> read_buffer;
 	};
 

@@ -13,7 +13,7 @@ namespace si
 {
 	struct channel_output: public channel_output_interface
 	{
-		channel_output(io_base::service_pointer service_ = io_base::service_pointer())
+		channel_output(io_base::pointer const &service_ = io_base::pointer())
 			: service(service_)
 		{}
 		typedef boost::function<void(const boost::uint8_t* data, const std::size_t size)> writer_type;
@@ -34,7 +34,7 @@ namespace si
 		virtual void write_raw_data(std::size_t, channel_protocol_interface::data_type )
 		{
 		}
-		virtual void set_protocol(channel_protocol_interface::pointer protocol_)
+		virtual void set_protocol(channel_protocol_interface::pointer const& protocol_)
 		{
 			protocol = protocol_;
 		}
@@ -46,6 +46,6 @@ namespace si
 		virtual ~channel_output(){}
 	protected:
 		channel_protocol_interface::pointer protocol;
-		io_base::service_pointer service;
+		io_base::pointer service;
 	};
 }//namespace si

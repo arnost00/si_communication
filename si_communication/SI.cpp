@@ -184,11 +184,11 @@ void log_device_param(std::string const & devname)
 }
 
 si::channel_io_serial_port::pointer open_device(std::string const& device_name
-															, si::io_base::pointer& io_base
+															, si::io_base::pointer const& service
 															, ports_container_type *io_ports = NULL)
 {
 
-	si::channel_io_serial_port::pointer si_port(new si::channel_io_serial_port::pointer::element_type(io_base->service));
+    si::channel_io_serial_port::pointer si_port(new si::channel_io_serial_port::pointer::element_type(service));
 	try
 	{
 		si_port->open(device_name);
@@ -224,13 +224,13 @@ si::channel_io_serial_port::pointer open_device(std::string const& device_name
 	return si_port;
 }
 void start_startup_sequence(std::string const& device_name
-									 , si::io_base::pointer &io_base
+									 , si::io_base::pointer const& service
 									 , si::chip_readout::callback_chip_read &chip_read_cb
 									 , ports_container_type *io_ports)
 {
-	LOG << "Opening device: " << (io_base->service? "service provided " : "no service ") << device_name << std::endl;
+    LOG << "Opening device: " << (service? "service provided " : "no service ") << device_name << std::endl;
 
-	si::channel_io_serial_port::pointer si_port = open_device(device_name, io_base, io_ports);
+    si::channel_io_serial_port::pointer si_port = open_device(device_name, service, io_ports);
 	if(!si_port)
 	{
 		//ToDo: Handle device open failure
@@ -251,18 +251,18 @@ void start_startup_sequence(std::string const& device_name
 }
 
 void start_punch_wait(std::string const& device_name
-							 , si::io_base::pointer &io_base
+							 , si::io_base::pointer &service
 							 , ofstream_pointer &output_file
 							 , ports_container_type *io_ports)
 {
-	LOG << "Opening device: " << (io_base->service? "service provided " : "no service ") << device_name << std::endl;
-	si::channel_io_serial_port::pointer si_port = open_device(device_name, io_base, io_ports);
+    LOG << "Opening device: " << (service? "service provided " : "no service ") << device_name << std::endl;
+    si::channel_io_serial_port::pointer si_port = open_device(device_name, service, io_ports);
 	if(!si_port)
 	{
 		//ToDo: Handle device open failure
 		return;
 	}
-	std::cout << "Opening device: done" << (io_base->service? "service provided " : "no service ") << std::endl;
+    std::cout << "Opening device: done" << (service? "service provided " : "no service ") << std::endl;
 
 
 	si_port->set_protocol(si::channel_protocol_interface::pointer(new si::channel_protocol<si::protocols::extended>()));
@@ -298,7 +298,7 @@ int main(int argc, char* argv[])
 	int prog_type;
 	desc.add_options()
 			("help,h", "produce help message with allowed options and return values")
-			("device,d", boost::program_options::value<std::vector<std::string> >(), "set communication device (ex. com2 or /dev/sportident/reader0)")
+            ("device,d", boost::program_options::value<std::vector<std::string> >(), "set communication device (ex. com2 or /dev/sportident/reader0). Two devices may be used, separated by ',' character (ex. /dev/usb0,/dev/usb1). In that case, first device is used as input, the second as output")
 			("output,o", boost::program_options::value<std::string>(), "set output file (ex. card.txt)")
 			("type,t", boost::program_options::value<int>(&prog_type)->default_value(0), "set program mode (0 - card readout, 1 - station punch)")
 			("logfile,l", boost::program_options::value<std::string>(), "set log file (ex. logfile.txt)");
@@ -370,7 +370,7 @@ int main(int argc, char* argv[])
 
 	try
 	{
-		io_base_instance.reset(new si::io_base);
+        io_base_instance.reset(new decltype(io_base_instance)::element_type);
 		if(output_file)
 			chip_read_cb = boost::bind(&chip_read, output_file, _1);
 
@@ -380,7 +380,7 @@ int main(int argc, char* argv[])
 			LOG << "card readout mode." << std::endl;
 			std::for_each(vm[_CMD_ARG("device")].as<std::vector<std::string> >().begin()
 							  , vm[_CMD_ARG("device")].as<std::vector<std::string> >().end()
-							  , boost::bind(&start_startup_sequence, _1, boost::ref(io_base_instance)
+							  , boost::bind(&start_startup_sequence, _1, boost::cref(io_base_instance)
 												 , boost::ref(chip_read_cb), &io_ports));
 		}
 		else
@@ -388,9 +388,7 @@ int main(int argc, char* argv[])
 			LOG << "station punch mode." << std::endl;
 			std::for_each(vm[_CMD_ARG("device")].as<std::vector<std::string> >().begin()
 							  , vm[_CMD_ARG("device")].as<std::vector<std::string> >().end()
-							  , boost::bind(&start_punch_wait
-													, _1, boost::ref(io_base_instance)
-													, output_file, &io_ports));
+							  , [&](std::string const& device_name){start_punch_wait(device_name, io_base_instance, output_file, &io_ports);});
 		}
 	}
 	catch(boost::system::system_error &e)

@@ -26,7 +26,7 @@ namespace si
 			result.reset(new boost::uint8_t[size]);
 			protocol_encoder<encoder_type>::write_data(command_id, data_size, data.get(), size, result.get());
 		}
-		template<typename iterator> static void detect_command(std::size_t& size, iterator &it)
+        template<typename iterator> static void detect_command(std::size_t&, iterator &)
 		{
 			BOOST_MPL_ASSERT_MSG(false, PROTOCOL_HAS_TO_BE_SPECIFIED, (types<protocol>));
 		}
@@ -588,7 +588,7 @@ namespace si
 	};
 	template<typename protocols_tt> struct by_protocol<protocols_tt, typename boost::enable_if<typename boost::mpl::empty<protocols_tt>::type>::type>
 	{
-		template <typename iterator> static void inline encode(protocols::id<>::value_type protocol_id, boost::uint8_t command, std::size_t size, iterator it)
+        template <typename iterator> static void inline encode(protocols::id<>::value_type, boost::uint8_t , std::size_t , iterator )
 		{
 			throw std::invalid_argument("invalid protocol id passed");
 		}

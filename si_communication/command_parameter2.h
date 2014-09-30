@@ -61,20 +61,20 @@ namespace si
 		{
 			template<typename that_type, typename iterator_t>static inline void write_data(that_type *that, std::size_t &size, iterator_t &it)
 			{
-				that->get<typename description_part::parameter_type>().write_data(size, it);
+                that->template get<typename description_part::parameter_type>().write_data(size, it);
 			}
 			template<typename that_type, typename iterator_t>static inline void read_data(that_type *that, std::size_t &size, iterator_t &it)
 			{
-				that->get<typename description_part::parameter_type>().read_data(size, it);
+                that->template get<typename description_part::parameter_type>().read_data(size, it);
 			}
 		};
 		template<typename description_part> struct item_data_writer<description_part, false>
 		{
-			template<typename that_type, typename iterator_t>static inline void write_data(that_type *that, std::size_t &size, iterator_t &it)
+            template<typename that_type, typename iterator_t>static inline void write_data(that_type *, std::size_t &, iterator_t &it)
 			{
 				it += description_part::size::value;
 			}
-			template<typename that_type, typename iterator_t>static inline void read_data(that_type *that, std::size_t &size, iterator_t &it)
+            template<typename that_type, typename iterator_t>static inline void read_data(that_type *, std::size_t &, iterator_t &it)
 			{
 				it += description_part::size::value;
 			}
@@ -99,11 +99,11 @@ namespace si
 		template<typename description> struct data_writer<description
 				, true >
 		{
-			template<typename that_type, typename iterator_t>static inline void write_data(that_type *that, std::size_t &size, iterator_t &it)
+            template<typename that_type, typename iterator_t>static inline void write_data(that_type *, std::size_t &, iterator_t &)
 			{
 				return;
 			}
-			template<typename that_type, typename iterator_t>static inline bool read_data(that_type *that, std::size_t &size, iterator_t &it)
+            template<typename that_type, typename iterator_t>static inline bool read_data(that_type *, std::size_t &, iterator_t &)
 			{
 				return true;
 			}
@@ -113,11 +113,11 @@ namespace si
 		{
 			return description_size_type::value;
 		}
-		template<typename iterator_t> static inline bool can_read_data(std::size_t &size, iterator_t &it)
+        template<typename iterator_t> static inline bool can_read_data(std::size_t &, iterator_t &)
 		{
 			return true;
 		}
-		template<typename iterator_t>static inline std::size_t get_read_data_size(std::size_t size, iterator_t & it)
+        template<typename iterator_t>static inline std::size_t get_read_data_size(std::size_t , iterator_t & )
 		{
 			return get_size();
 		}

@@ -49,7 +49,7 @@ namespace si
 		}
 		template<typename protocol_tt> void si_card_5_read
 				(typename comm_switch<protocol_tt, card_5>::block_read_response::pointer response
-								 , blocks_read<common::read_out_data>::pointer blocks)
+                                 , blocks_read<common::read_out_data>::pointer )
 		{
 			typedef card_reader<card_5> card_reader_t;
 
@@ -292,11 +292,11 @@ namespace si
 
 	template<>
 		inline void chip_readout::fill_block<typename chip_readout::comm_switch<extended, card_5>::block_read_command::pointer, extended, card_5>
-			(typename comm_switch<extended, card_5>::block_read_command::pointer &command, blocks_read<common::read_out_data>::pointer &blocks)
+            (typename comm_switch<extended, card_5>::block_read_command::pointer &, blocks_read<common::read_out_data>::pointer &)
 	{}
 	template<>
 		inline void chip_readout::fill_block<typename chip_readout::comm_switch<basic, card_5>::block_read_command::pointer, basic, card_5>
-			(typename comm_switch<basic, card_5>::block_read_command::pointer &command, blocks_read<common::read_out_data>::pointer &blocks)
+            (typename comm_switch<basic, card_5>::block_read_command::pointer &, blocks_read<common::read_out_data>::pointer &)
 	{}
 
 	template<typename command_ptr_tt, typename protocol_tt, typename card_tt>
