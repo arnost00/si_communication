@@ -136,7 +136,7 @@ namespace si
 			iterator subcall_it;
 			std::size_t subcall_size;
 
-			bool control_commands_allowed(true);
+//			bool control_commands_allowed(true);
 
 //			LOG << "Basic extract size: " << size << std::endl;
 			command_interface::id_type command_id;
@@ -151,7 +151,7 @@ namespace si
 				{
 					continue;
 				}
-				control_commands_allowed = false;
+//				control_commands_allowed = false;
 
 				it++;
 				size--;
@@ -199,7 +199,7 @@ namespace si
 
 				callback(command_id, data_size, data, false);
 
-				control_commands_allowed = true;
+//				control_commands_allowed = true;
 				retval  = true;
 			}
 			size = backup_size;
