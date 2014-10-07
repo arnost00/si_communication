@@ -1,5 +1,6 @@
-si_read.exe v1.4.371
+si_read.exe v1.5.XXX
 
+v 1.5 - dynamicaly & monolitic linked build (GCC 4.8.2, MinGW)
 v 1.4 - dynamicaly & monolitic linked build (GCC 4.7.2, MinGW)
 v 1.3 - dynamicaly & monolitic linked build (GCC 4.7.0, MinGW)
 v 1.2 - dynamicaly & monolitic linked build (GCC 4.6.0, MinGW)
@@ -21,6 +22,8 @@ http://eobsystem.svn.sourceforge.net/
 
 change log:
 
+1.5	- p-card readout fixed
+	- separate input and output ports possible for readout (experimental)
 1.4	- improved failed communication recovery algorithm
 	- fixed basic protocol
 	- minor bugfixes

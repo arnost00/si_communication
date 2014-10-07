@@ -292,8 +292,8 @@ int main(int argc, char* argv[])
 //#endif
 {
 	std::cout << program_name << " " << program_version << " - " << program_description << std::endl;
-	std::cout << "Copyright (C) 2009-2013 Vit Kasal, Richard Patek" << std::endl;
-	std::cout << "EOBSystem - system.eob.cz" << std::endl;
+    std::cout << program_copyright << std::endl;
+	std::cout << program_project << std::endl;
 	boost::program_options::options_description desc("Allowed options");
 	int prog_type;
 	desc.add_options()

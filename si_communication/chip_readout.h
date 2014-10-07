@@ -244,7 +244,7 @@ namespace si
 	template<typename protocol_tt, typename card_tt>
 	void chip_readout::si_card_inserted(typename comm_switch<protocol_tt, card_tt>::card_inserted_response::pointer response)
 	{
-		typedef typename comm_switch<protocol_tt, card_tt>::card_inserted_response response_t;
+//		typedef typename comm_switch<protocol_tt, card_tt>::card_inserted_response response_t;
 
 		typedef card_reader<card_tt> card_reader_t;
 		LOG << card_reader_t::get_type_description(response->template get<typename extended::si>()) << " inserted, no: "
@@ -258,7 +258,7 @@ namespace si
 	template<>
 	void chip_readout::si_card_inserted<basic, card_5>(typename comm_switch<basic, card_5>::card_inserted_response::pointer response)
 	{
-		typedef typename comm_switch<basic, card_5>::card_inserted_response response_t;
+//		typedef typename comm_switch<basic, card_5>::card_inserted_response response_t;
 		switch(response->get<basic::cmd>().value)
 		{
 		case 'I':

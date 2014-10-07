@@ -81,13 +81,13 @@ namespace si
 			timer_pointer timeout_timer;
 
 			mutal_exclusion_type::scoped_lock sl(mtx);
-/*			if(!(timeout.is_not_a_date_time()))
+            if(!(timeout.is_not_a_date_time()))
 			{
 				timeout_timer.reset(new timer_pointer::element_type(*service->service.get()));
 				timeout_timer->expires_from_now(timeout);
 				timeout_timer->async_wait(boost::bind(&channel_input::timeout_expired, shared_from_this(), timeout_timer, timeout_call));
 			}
-*/
+
 			response_expectations.push_front(response_expectations_container::value_type(expectation, timeout_timer));
 //			LOG << "New expectation registered: " << response_expectations.size() << std::endl;
 			life_bound = shared_from_this();
