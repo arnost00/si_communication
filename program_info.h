@@ -7,6 +7,6 @@
 
 const std::string program_name("si_read");
 const std::string program_description("SI Card Reader");
-const std::string program_version("1.5.XXX");
+const std::string program_version("1.6.XXX");
 const std::string program_copyright("Copyright (C) 2009-2014 Vit Kasal, Richard Patek");
 const std::string program_project("EOBSystem - system.eob.cz");
