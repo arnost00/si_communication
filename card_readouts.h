@@ -744,7 +744,7 @@ namespace si
 
 			readout.get<card_record::PUNCH_RECORDS>().resize(records_count);
 
-			datablock = data[1].begin();
+			datablock = data[1].begin() + 0x30;
 
 			max_size = 0x80 - 0x30;
 
@@ -752,11 +752,6 @@ namespace si
 
 			for(std::size_t i = 0; 0 < records_count; i++, records_count--)
 			{
-				if(18 == i)
-				{
-					datablock = data[1].begin();
-					max_size = 128;
-				}
 				punch.read_data(max_size, datablock);
 				readout.get<card_record::PUNCH_RECORDS>()[i] = punch_record(punch.get<control_number>()
 																								, card_reader<>::get_duration(punch.get<time_12h>(), 0, punch.get<am_pm>()));
