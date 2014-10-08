@@ -5,8 +5,7 @@ CONFIG -= qt
 CONFIG += C++11
 TARGET = si_read
 
-win32
-{
+win32 {
     message(SI Read project win32 settings)
     message(Qt version: $$[QT_VERSION])
 
@@ -35,6 +34,16 @@ win32
             -lboost_date_time-$$BOOST_SUFFIX \
 
     message(The project will use boost suffix: $$BOOST_SUFFIX)
+}
+
+unix {
+	QMAKE_CXXFLAGS += -std=c++11
+
+	LIBS +=-lboost_thread\
+		-lboost_system\
+		-lpthread\
+		-lboost_program_options\
+		-lboost_date_time
 }
 
 SOURCES += SI.cpp
