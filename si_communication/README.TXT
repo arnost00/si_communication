@@ -1,13 +1,14 @@
-si_read.exe v1.5.445
+si_read.exe v1.6.489
 
+v 1.6 - dynamicaly & monolitic linked build (GCC 4.9.2, MinGW)
 v 1.5 - dynamicaly & monolitic linked build (GCC 4.8.2, MinGW)
 v 1.4 - dynamicaly & monolitic linked build (GCC 4.7.2, MinGW)
 v 1.3 - dynamicaly & monolitic linked build (GCC 4.7.0, MinGW)
 v 1.2 - dynamicaly & monolitic linked build (GCC 4.6.0, MinGW)
 v 1.0 - dynamicaly linked build (MSVS10)
 
-(C) Copyright 2009-2014 Vit Kasal,
-(C) Copyright 2011 Richard Patek
+(C) Copyright 2009-2016 Vit Kasal,
+(C) Copyright 2011,2016 Richard Patek
 
 Distributed under the Boost Software License, Version 1.0.
 (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -22,6 +23,7 @@ http://eobsystem.svn.sourceforge.net/
 
 change log:
 
+1.6	- modified output format (trim on whole seconds). Was wrong in SIAC (beacon mode) or sprint mode.
 1.5	- p-card readout fixed
 	- separate input and output ports possible for readout (experimental)
 	- support for SIAC in extended and basic protocol
