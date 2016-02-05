@@ -54,7 +54,7 @@ namespace si
 		template<typename target = boost::mpl::deque<>, typename source = command_type_tt, typename enabled_rtt = void> struct responses_tuple_template
 		{
 			typedef boost::shared_ptr<typename boost::mpl::front<source>::type> command_pointer;
-			typedef boost::function<void(command_pointer)> reaction_type;
+			typedef boost::function<void(command_pointer&)> reaction_type;
 			typedef typename responses_tuple_template<typename boost::mpl::push_back<target, reaction_type>::type
 			, typename boost::mpl::pop_front<source>::type
 			>::type type;
