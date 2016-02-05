@@ -141,10 +141,10 @@ void chip_read(ofstream_pointer of, si::card_record::pointer record)
 	out_time_duration(fs, record->get<si::card_record::CHECK_TIME>());
 	fs << ' ';
 	fs << "S/";
-	out_time_duration(fs, record->get<si::card_record::START_TIME>(), record->get<si::card_record::START_SUBSECOND>());
+	out_time_duration(fs, record->get<si::card_record::START_TIME>());
 	fs << ' ';
 	fs << "F/";
-	out_time_duration(fs, record->get<si::card_record::FINISH_TIME>(), record->get<si::card_record::FINISH_SUBSECOND>());
+	out_time_duration(fs, record->get<si::card_record::FINISH_TIME>());
 	fs << ' ';
 
 	punches_container &punches = record->get<si::card_record::PUNCH_RECORDS>();
